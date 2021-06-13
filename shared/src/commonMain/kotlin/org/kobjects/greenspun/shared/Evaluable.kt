@@ -1,5 +1,10 @@
 package org.kobjects.greenspun.shared
 
-interface Evaluable {
+fun interface Evaluable {
     fun eval(environment: Environment): Any?
+
+    companion object {
+        val NOOP = Evaluable { null }
+    }
+
 }
