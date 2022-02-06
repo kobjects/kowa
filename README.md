@@ -1,4 +1,4 @@
-# greenspun
+# Greenspun
 
 Greenspun's tenth rule of programming is an aphorism in computer programming and especially programming language circles that states:
 
