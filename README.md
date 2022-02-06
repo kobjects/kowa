@@ -1,6 +1,6 @@
 # Greenspun
 
-Greenspun's tenth rule of programming is an aphorism in computer programming and especially programming language circles that states:
+[Greenspun's tenth rule of programming](https://en.wikipedia.org/wiki/Greenspun%27s_tenth_rule) is an aphorism in computer programming and especially programming language circles that states:
 
 > Any sufficiently complicated C or Fortran program contains an ad hoc, informally-specified, bug-ridden, slow implementation of half of Common Lisp.
 
