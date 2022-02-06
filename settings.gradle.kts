@@ -10,6 +10,5 @@ pluginManagement {
 rootProject.name = "Greenspun"
 
 
-include(":androidApp")
 include(":shared")
 
