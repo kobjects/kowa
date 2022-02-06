@@ -7,7 +7,7 @@ import org.kobjects.greenspun.Env.*
 import org.kobjects.greenspun.Rel.*
 import org.kobjects.greenspun.Op.*
 
-class GreenspunTests {
+class ExecutionTests {
 
     @Test
     fun fizzBuzz() {
