@@ -2,40 +2,51 @@ package org.kobjects.greenspun
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.kobjects.greenspun.Ctrl.*
-import org.kobjects.greenspun.Env.*
-import org.kobjects.greenspun.Rel.*
-import org.kobjects.greenspun.Op.*
+import org.kobjects.greenspun.core.Control.*
+import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.greenspun.core.Literal
+import org.kobjects.greenspun.core.MathOp.Add
+import org.kobjects.greenspun.core.RelationalOp.Le
+import org.kobjects.greenspun.core.RelationalOp.Eq
+import org.kobjects.greenspun.core.MathOp.Mod
+import org.kobjects.greenspun.core.Node
 
 class ExecutionTests {
 
     @Test
     fun fizzBuzz() {
         var result = mutableListOf<Any?>()
+        var counter = 1.0
 
-        class Emit(val expr: Evaluable) : Evaluable {
-            override fun eval(env: Env): Any? {
-                result.add(expr.eval(env))
-                return null
-            }
+        fun Emit(expr: Evaluable<Unit>) = Node("emit", expr) { children, env ->
+            result.add(children[0].eval(env))
+        }
+
+        fun GetCounter() = Node<Unit>("counter") { _, env ->
+            counter
+        }
+
+        fun SetCounter(expr: Evaluable<Unit>) = Node("set_counter", expr) { _, env ->
+            counter = expr.evalNumber(env)
+            null
         }
 
         val fizBuzz = While(
-            condition = Le(GetNumber(0), Literal(20.0)),
+            condition = Le(GetCounter(), Literal(20.0)),
             body = Block (
                 If (
-                    condition = Eq(Mod(GetNumber(0), Literal(3.0)), Literal.ZERO),
+                    condition = Eq(Mod(GetCounter(), Literal(3.0)), Literal(0.0)),
                     then = If (
-                        condition = Eq(Mod(GetNumber(0), Literal(5.0)), Literal.ZERO),
+                        condition = Eq(Mod(GetCounter(), Literal(5.0)), Literal(0.0)),
                         then = Emit(Literal("Fizz Buzz")),
                         otherwise = Emit(Literal("Fizz"))),
                     otherwise = If(
-                        condition = Eq(Mod(GetNumber(0), Literal(5.0)), Literal.ZERO),
+                        condition = Eq(Mod(GetCounter(), Literal(5.0)), Literal(0.0)),
                         then = Emit(Literal("Buzz")),
-                        otherwise = Emit(GetNumber(0)))),
-                SetNumber(0, Plus(GetNumber(0), Literal.ONE))))
+                        otherwise = Emit(GetCounter()))),
+                SetCounter(Add(GetCounter(), Literal(1.0)))))
 
-        fizBuzz.eval(Env(mutableListOf(1.0)))
+        fizBuzz.eval(Unit)
 
         assertEquals(20, result.size)
 
