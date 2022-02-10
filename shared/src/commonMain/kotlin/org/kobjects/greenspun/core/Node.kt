@@ -1,9 +1,12 @@
 package org.kobjects.greenspun.core
 
+import kotlin.reflect.KClass
+
 class Node<E>(
-    val name: String,
+    private val name: String,
+    private val type: KClass<*>,
     vararg children: Evaluable<E>,
-    val op: (List<Evaluable<E>>, E) -> Any?
+    private val op: (List<Evaluable<E>>, E) -> Any?
 ) : Evaluable<E> {
     val children = children.toList()
 
@@ -14,4 +17,9 @@ class Node<E>(
     override fun name() = name
 
     override fun children() = children
+
+    override fun reconstruct(newChildren: List<Evaluable<E>>) =
+        Node(name, type = type, children = newChildren.toTypedArray(), op = op)
+
+    override fun type(): KClass<*> = type
 }

@@ -17,6 +17,10 @@ class Control {
         override fun children() = listOf(condition, then, otherwise)
 
         override fun name() = "if"
+
+        override fun reconstruct(newChildren: List<Evaluable<C>>) = If(newChildren[0], newChildren[1], newChildren[2])
+
+        override fun type() = Unit::class
     }
 
 
@@ -33,6 +37,10 @@ class Control {
         }
 
         override fun children() = listOf(condition, body)
+
+        override fun reconstruct(newChildren: List<Evaluable<C>>) = While(newChildren[0], newChildren[1])
+
+        override fun type() = Unit::class
     }
 
     class Block<C>(
@@ -47,5 +55,10 @@ class Control {
         override fun children() = statements.asList()
 
         override fun name() = "block"
+
+        override fun reconstruct(newChildren: List<Evaluable<C>>) =
+            Block(statements = newChildren.toTypedArray())
+
+        override fun type() = Unit::class
     }
 }
