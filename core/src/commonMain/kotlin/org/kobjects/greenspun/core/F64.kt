@@ -14,135 +14,140 @@ object F64 {
     ): Evaluable<C> {
         override fun eval(ctx: C) = value
 
-        override fun name() = "f64.const:$value"
-
         override fun children() = listOf<Evaluable<C>>()
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
 
         override fun type() = Double::class
+
+        override fun toString(indent: String) = value.toString()
     }
 
-    class Binary<E>(
+    open class Binary<C>(
         private val name: String,
-        private val left: Evaluable<E>,
-        private val right: Evaluable<E>,
+        private val left: Evaluable<C>,
+        private val right: Evaluable<C>,
         private val op: (Double, Double) -> Double
-    ) : Evaluable<E> {
-        override fun eval(env: E): Double =
-            op(left.evalDouble(env), right.evalDouble(env))
-
-        override fun name() = name
+    ) : Evaluable<C> {
+        override fun eval(context: C): Double =
+            op(left.evalDouble(context), right.evalDouble(context))
 
         override fun children() = listOf(left, right)
 
-        override fun reconstruct(newChildren: List<Evaluable<E>>): Evaluable<E> =
+        override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Binary(name, newChildren[0], newChildren[1], op)
 
         override fun type() = Double::class
+        override fun toString(indent: String) = "(${left.toString(indent)} $name ${right.toString(indent)})"
     }
 
-    fun <E> add(left: Evaluable<E>, right: Evaluable<E>) =
-        Binary("f64.add", left, right) { l, r -> l + r }
+    class Add<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Binary<C>("+", left, right, { l, r -> l + r })
 
-    fun <E> mod(left: Evaluable<E>, right: Evaluable<E>) =
-        Binary("f64.mod", left, right) { l, r -> l % r }
+    class Mod<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Binary<C>("%", left, right, { l, r -> l % r })
 
-    fun <E> sub(left: Evaluable<E>, right: Evaluable<E>) =
-        Binary("f64.sub", left, right) { l, r -> l - r }
+    class Sub<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Binary<C>("-", left, right, { l, r -> l - r })
 
-    fun <E> mul(left: Evaluable<E>, right: Evaluable<E>) =
-        Binary("f64.mul", left, right) { l, r -> l * r }
+    class Mul<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Binary<C>("*", left, right, { l, r -> l * r })
 
-    fun <E> div(left: Evaluable<E>, right: Evaluable<E>) =
-        Binary("f64.div", left, right) { l, r -> l / r }
+    class Div<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Binary<C>("/", left, right, { l, r -> l / r })
 
-    fun <E> pow(left: Evaluable<E>, right: Evaluable<E>) =
-        Binary("f64.pow", left, right) { l, r -> l.pow(r) }
+    class Pow<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Binary<C>("^", left, right, { l, r -> l.pow(r) })
 
-    class Unary<E>(
+    open class Unary<C>(
         private val name: String,
-        private val arg: Evaluable<E>,
+        private val arg: Evaluable<C>,
         private val op: (Double) -> Double
-    ) : Evaluable<E> {
-        override fun eval(env: E): Double =
-            op(arg.evalDouble(env))
-
-        override fun name() = name
+    ) : Evaluable<C> {
+        override fun eval(ctx: C): Double =
+            op(arg.evalDouble(ctx))
 
         override fun children() = listOf(arg)
 
-        override fun reconstruct(newChildren: List<Evaluable<E>>): Evaluable<E> = Unary(name, newChildren[0], op)
+        override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> = Unary(name, newChildren[0], op)
 
         override fun type() = Double::class
+
+        override fun toString(indent: String): String = "$name(${arg.toString(indent)})"
     }
 
-    fun <C> ln(arg: Evaluable<C>) = Unary("f64.ln", arg) { ln(it) }
-    fun <C> exp(arg: Evaluable<C>) = Unary("f64.exp", arg) { exp(it) }
+    class Ln<C>(arg: Evaluable<C>) : Unary<C>("ln", arg, { ln(it) })
+    class Exp<C>(arg: Evaluable<C>) : Unary<C>("exp", arg, { exp(it) })
 
 
-    class Eq<E>(
-        val left: Evaluable<E>,
-        val right: Evaluable<E>,
-    ): Evaluable<E> {
-        override fun eval(env: E): Boolean {
-            return (left.eval(env) == right.eval(env))
+    class Eq<C>(
+        val left: Evaluable<C>,
+        val right: Evaluable<C>,
+    ): Evaluable<C> {
+        override fun eval(context: C): Boolean {
+            return (left.eval(context) == right.eval(context))
         }
 
-        override fun name() = "f64.eq"
         override fun children() = listOf(left, right)
-        override fun reconstruct(newChildren: List<Evaluable<E>>): Evaluable<E> =
+        override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Eq(newChildren[0], newChildren[1])
 
         override fun type() = Boolean::class
+
+        override fun toString(indent: String) =
+            "(${left.toString(indent)} != ${right.toString(indent)})"
     }
 
-    class Ne<E>(
-        val left: Evaluable<E>,
-        val right: Evaluable<E>,
-    ): Evaluable<E> {
-        override fun eval(env: E): Boolean {
-            return (left.evalDouble(env) == right.evalDouble(env))
+    class Ne<C>(
+        val left: Evaluable<C>,
+        val right: Evaluable<C>,
+    ): Evaluable<C> {
+        override fun eval(context: C): Boolean {
+            return (left.evalDouble(context) == right.evalDouble(context))
         }
 
-        override fun name() = "f64.ne"
         override fun children() = listOf(left, right)
 
-        override fun reconstruct(newChildren: List<Evaluable<E>>): Evaluable<E> =
+        override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Ne(newChildren[0], newChildren[1])
 
         override fun type() = Boolean::class
+
+        override fun toString(indent: String) =
+            "(${left.toString(indent)} != ${right.toString(indent)})"
     }
 
-    class Cmp<E>(
+    open class Cmp<C>(
         val name: String,
-        val left: Evaluable<E>,
-        val right: Evaluable<E>,
+        val left: Evaluable<C>,
+        val right: Evaluable<C>,
         val op: (Double, Double) -> Boolean,
-    ) : Evaluable<E> {
-        override fun eval(env: E): Boolean =
+    ) : Evaluable<C> {
+        override fun eval(env: C): Boolean =
             op(left.evalDouble(env), right.evalDouble(env))
-
-        override fun name() = name
 
         override fun children() = listOf(left, right)
 
-        override fun reconstruct(newChildren: List<Evaluable<E>>): Evaluable<E> =
+        override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Cmp(name, newChildren[0], newChildren[1], op)
 
         override fun type() = Boolean::class
+
+        override fun toString(indent: String) =
+            "(${left.toString(indent)} $name ${right.toString(indent)})"
+
     }
 
-    fun <E> ge(left: Evaluable<E>, right: Evaluable<E>) =
-        Cmp("f64.ge", left, right) {left, right -> left >= right }
+    class Ge<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Cmp<C>(">=", left, right, {left, right -> left >= right })
 
-    fun <E> gt(left: Evaluable<E>, right: Evaluable<E>) =
-        Cmp("f64.gt", left, right) {left, right -> left > right }
+    class Gt<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Cmp<C>(">", left, right, {left, right -> left > right })
 
-    fun <E> le(left: Evaluable<E>, right: Evaluable<E>) =
-        Cmp("f64.le", left, right) {left, right -> left <= right }
+    class Le<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Cmp<C>("<=", left, right, {left, right -> left <= right })
 
-    fun <E> lt(left: Evaluable<E>, right: Evaluable<E>) =
-        Cmp("f64.lt", left, right) {left, right -> left < right }
+    class Lt<C>(left: Evaluable<C>, right: Evaluable<C>) :
+        Cmp<C>("<", left, right, {left, right -> left < right })
 
 }

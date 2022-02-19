@@ -4,12 +4,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.Control.*
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.greenspun.core.Evaluable.Companion.sExpression
 import org.kobjects.greenspun.core.F64.Const
-import org.kobjects.greenspun.core.F64.add
-import org.kobjects.greenspun.core.F64.le
+import org.kobjects.greenspun.core.F64.Add
+import org.kobjects.greenspun.core.F64.Le
 import org.kobjects.greenspun.core.F64.Eq
-import org.kobjects.greenspun.core.F64.mod
+import org.kobjects.greenspun.core.F64.Mod
 import org.kobjects.greenspun.core.Node
 import org.kobjects.greenspun.core.Str
 
@@ -45,48 +44,46 @@ class ExecutionTests {
             counter
         }
 
-        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", Unit::class) { _, env ->
-            counter = expr.evalDouble(env)
+        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", Unit::class, expr) { children, context ->
+            counter = children[0].evalDouble(context)
             null
         }
 
         val fizBuzz = While(
-            condition = le(GetCounter(), Const(20.0)),
+            condition = Le(GetCounter(), Const(20.0)),
             body = Block (
                 If (
-                    condition = Eq(mod(GetCounter(), Const(3.0)), Const(0.0)),
+                    condition = Eq(Mod(GetCounter(), Const(3.0)), Const(0.0)),
                     then = If (
-                        condition = Eq(mod(GetCounter(), Const(5.0)), Const(0.0)),
+                        condition = Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
                         then = Emit(Str.Const("Fizz Buzz")),
                         otherwise = Emit(Str.Const("Fizz"))),
                     otherwise = If(
-                        condition = Eq(mod(GetCounter(), Const(5.0)), Const(0.0)),
+                        condition = Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
                         then = Emit(Str.Const("Buzz")),
                         otherwise = Emit(GetCounter()))),
-                SetCounter(add(GetCounter(), Const(1.0)))))
+                SetCounter(Add(GetCounter(), Const(1.0)))))
 
         assertEquals("""
-            (while
-              (f64.le (counter) (f64.const:20.0)) 
-              (block 
-                (if 
-                  (f64.eq (f64.mod (counter) (f64.const:3.0)) (f64.const:0.0))
-                  (if
-                    (f64.eq (f64.mod (counter) (f64.const:5.0)) (f64.const:0.0))
-                    (emit (str.const:"Fizz Buzz"))
-                    (emit (str.const:"Fizz")))
-                  (if
-                    (f64.eq (f64.mod (counter) (f64.const:5.0)) (f64.const:0.0))
-                    (emit (str.const:"Buzz"))
-                    (emit (counter))))
-                (set_counter)))""".superTrim(),
-            sExpression(fizBuzz))
+            while (counter() <= 20.0):
+              if ((counter() % 3.0) != 0.0):
+                if ((counter() % 5.0) != 0.0):
+                  emit("Fizz Buzz")
+                else:
+                  emit("Fizz")
+              else:
+                 if ((counter() % 5.0) != 0.0):
+                   emit("Buzz")
+                else:
+                  emit(counter())
+              set_counter((counter() + 1.0))""".superTrim(),
+            fizBuzz.toString("").superTrim())
 
         fizBuzz.eval(Unit)
 
         assertEquals(20, result.size)
 
-        assertEquals(mutableListOf(
+        assertEquals(mutableListOf<Any?>(
             1.0, 2.0, "Fizz", 4.0, "Buzz",
             "Fizz", 7.0, 8.0, "Fizz", "Buzz",
             11.0, "Fizz", 13.0, 14.0, "Fizz Buzz",

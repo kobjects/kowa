@@ -14,12 +14,14 @@ class Node<E>(
         return op(children, env)
     }
 
-    override fun name() = name
-
     override fun children() = children
 
     override fun reconstruct(newChildren: List<Evaluable<E>>) =
         Node(name, type = type, children = newChildren.toTypedArray(), op = op)
 
     override fun type(): KClass<*> = type
+
+    override fun toString(indent: String) =
+        "$name(${children.joinToString(", ") { it.toString(indent) }})"
+
 }

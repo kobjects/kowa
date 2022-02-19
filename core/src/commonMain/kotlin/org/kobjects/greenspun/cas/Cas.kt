@@ -3,7 +3,7 @@ package org.kobjects.greenspun.cas
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.F64
 import org.kobjects.greenspun.core.F64.Const
-import org.kobjects.greenspun.core.F64.add
+import org.kobjects.greenspun.core.F64.Add
 
 fun <C> Evaluable<C>.isConst(value: Double) = this is Const<*>
         && (this as Const<*>).value == value
@@ -13,8 +13,8 @@ fun <C> Evaluable<C>.doubleValue(): Double = (this as Const<*>).value
 fun <C> simplify(node: Evaluable<C>): Evaluable<C> {
     val simplified = node.children().map { simplify(it) }
 
-    return when (node.name()) {
-        "f64.add" ->
+    return when (node) {
+        is F64.Add ->
             if (simplified[0] is Const && simplified[1] is Const) {
                 Const(simplified[0].doubleValue() + simplified[1].doubleValue())
             } else if (simplified[0].isConst(0.0)) {
@@ -22,17 +22,17 @@ fun <C> simplify(node: Evaluable<C>): Evaluable<C> {
             } else if (simplified[1].isConst(0.0)) {
                 simplified[0]
             } else {
-                add(simplified[0], simplified[1])
+                Add(simplified[0], simplified[1])
             }
-        "f64.sub" ->
+        is F64.Sub ->
             if (simplified[0] is Const && simplified[1] is Const) {
                 Const(simplified[0].doubleValue() - simplified[1].doubleValue())
             } else if (simplified[1].isConst(0.0)) {
                 simplified[0]
             } else {
-                F64.sub(simplified[0], simplified[1])
+                F64.Sub(simplified[0], simplified[1])
             }
-        "f64.mul" ->
+        is F64.Mul ->
             if (simplified[0] is Const && simplified[1] is Const) {
                 Const(simplified[0].doubleValue()
                         * simplified[1].doubleValue())
@@ -44,9 +44,9 @@ fun <C> simplify(node: Evaluable<C>): Evaluable<C> {
             } else if (simplified[1].isConst(1.0)) {
                 simplified[0]
             } else {
-                F64.mul(simplified[0], simplified[1])
+                F64.Mul(simplified[0], simplified[1])
             }
-        "f64.div" ->
+        is F64.Div ->
             if (simplified[0] is Const && simplified[1] is Const) {
                 Const(simplified[0].doubleValue() / simplified[1].doubleValue())
             } else if (simplified[0].isConst(0.0)) {
@@ -54,19 +54,19 @@ fun <C> simplify(node: Evaluable<C>): Evaluable<C> {
             } else if (simplified[1].isConst(1.0)) {
                 simplified[0]
             } else {
-                F64.div(simplified[0], simplified[1])
+                F64.Div(simplified[0], simplified[1])
             }
-        "f64.ln" ->
+        is F64.Ln ->
             if (simplified[0].isConst(1.0)) {
                 Const(0.0)
             } else {
-                F64.ln(simplified[0])
+                F64.Ln(simplified[0])
             }
-        "f64.exp" ->
+        is F64.Exp ->
             if (simplified[0].isConst(0.0)) {
                 Const(1.0)
             } else {
-                F64.exp(simplified[0])
+                F64.Exp(simplified[0])
             }
         else -> node.reconstruct(simplified)
     }
@@ -74,20 +74,20 @@ fun <C> simplify(node: Evaluable<C>): Evaluable<C> {
 
 fun <C> derive(node: Evaluable<C>): Evaluable<C> {
     val children = node.children()
-    return simplify(when (node.name()) {
-        "f64.add" -> F64.add(derive(children[0]), derive(children[1]))
-        "f64.sub" -> F64.sub(derive(children[0]), derive(children[1]))
-        "f64.mul" -> F64.add(
-            F64.mul(derive(children[0]), children[1]),
-            F64.mul(children[0], derive(children[1])))
-        "f64.div" -> F64.div(
-            F64.add(
-                F64.mul(derive(children[0]), children[1]),
-            F64.mul(children[0], derive(children[1]))),
-            F64.mul(children[1], children[1]))
-        "f64.pow" -> derive(F64.exp(F64.mul(children[0], F64.ln(children[1]))))
-        "f64.exp" -> F64.mul(node, derive(children[0]))
-        "f64.ln" -> F64.mul(F64.div(Const(1.0), node), derive(children[0]))
+    return simplify(when (node) {
+        is F64.Add -> F64.Add(derive(children[0]), derive(children[1]))
+        is F64.Sub -> F64.Sub(derive(children[0]), derive(children[1]))
+        is F64.Mul -> F64.Add(
+            F64.Mul(derive(children[0]), children[1]),
+            F64.Mul(children[0], derive(children[1])))
+        is F64.Div -> F64.Div(
+            F64.Add(
+                F64.Mul(derive(children[0]), children[1]),
+            F64.Mul(children[0], derive(children[1]))),
+            F64.Mul(children[1], children[1]))
+        is F64.Pow -> derive(F64.Exp(F64.Mul(children[0], F64.Ln(children[1]))))
+        is F64.Exp -> F64.Mul(node, derive(children[0]))
+        is F64.Ln -> F64.Mul(F64.Div(Const(1.0), node), derive(children[0]))
         else -> {
             if (node is Const) {
                 return Const(0.0)
