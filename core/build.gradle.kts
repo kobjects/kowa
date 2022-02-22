@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.kobjects.greenspun"
-version = "0.1.2"
+version = "0.2.0"
 
 
 kotlin {
@@ -16,6 +16,7 @@ kotlin {
     iosX64()
     iosArm64()
     //iosSimulatorArm64() sure all ios dependencies support this target
+    jvm("desktop")
 
     cocoapods {
         summary = "Some description for the Shared Module"
@@ -59,6 +60,10 @@ kotlin {
             iosArm64Test.dependsOn(this)
             //iosSimulatorArm64Test.dependsOn(this)
         }
+
+
+        val desktopMain by getting
+        val desktopTest by getting
     }
 }
 

@@ -1,16 +1,14 @@
 package org.kobjects.greenspun
 
+import org.kobjects.greenspun.core.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.Control.*
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.F64.Const
 import org.kobjects.greenspun.core.F64.Add
 import org.kobjects.greenspun.core.F64.Le
 import org.kobjects.greenspun.core.F64.Eq
 import org.kobjects.greenspun.core.F64.Mod
-import org.kobjects.greenspun.core.Node
-import org.kobjects.greenspun.core.Str
 
 class ExecutionTests {
 
@@ -36,15 +34,15 @@ class ExecutionTests {
         var result = mutableListOf<Any?>()
         var counter = 1.0
 
-        fun Emit(expr: Evaluable<Unit>) = Node("emit", Unit::class, expr) { children, env ->
+        fun Display(expr: Evaluable<Unit>) = Node("display", Void, expr) { children, env ->
             result.add(children[0].eval(env))
         }
 
-        fun GetCounter() = Node<Unit>("counter", Double::class) { _, env ->
+        fun GetCounter() = Node<Unit>("counter", F64) { _, env ->
             counter
         }
 
-        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", Unit::class, expr) { children, context ->
+        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", Void, expr) { children, context ->
             counter = children[0].evalDouble(context)
             null
         }
@@ -56,28 +54,27 @@ class ExecutionTests {
                     condition = Eq(Mod(GetCounter(), Const(3.0)), Const(0.0)),
                     then = If (
                         condition = Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
-                        then = Emit(Str.Const("Fizz Buzz")),
-                        otherwise = Emit(Str.Const("Fizz"))),
+                        then = Display(Str.Const("Fizz Buzz")),
+                        otherwise = Display(Str.Const("Fizz"))),
                     otherwise = If(
                         condition = Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
-                        then = Emit(Str.Const("Buzz")),
-                        otherwise = Emit(GetCounter()))),
+                        then = Display(Str.Const("Buzz")),
+                        otherwise = Display(GetCounter()))),
                 SetCounter(Add(GetCounter(), Const(1.0)))))
 
         assertEquals("""
-            while (counter() <= 20.0):
-              if ((counter() % 3.0) != 0.0):
-                if ((counter() % 5.0) != 0.0):
-                  emit("Fizz Buzz")
-                else:
-                  emit("Fizz")
-              else:
-                 if ((counter() % 5.0) != 0.0):
-                   emit("Buzz")
-                else:
-                  emit(counter())
-              set_counter((counter() + 1.0))""".superTrim(),
-            fizBuzz.toString("").superTrim())
+            (while (<= (counter) 20.0)
+              (begin
+                (if (= (% (counter) 3.0) 0.0)
+                  (if (= (% (counter) 5.0) 0.0)
+                    (display "Fizz Buzz")
+                    (display "Fizz"))
+                  (if (= (% (counter) 5.0) 0.0)
+                    (display "Buzz")
+                    (display (counter))))
+              (set_counter (+ (counter) 1.0))))
+            """.superTrim(),
+            fizBuzz.toString().superTrim())
 
         fizBuzz.eval(Unit)
 

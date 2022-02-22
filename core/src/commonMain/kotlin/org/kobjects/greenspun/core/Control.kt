@@ -18,17 +18,15 @@ class Control {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = If(newChildren[0], newChildren[1], newChildren[2])
 
-        override fun type() = Unit::class
+        override val type
+            get() = Void
 
-        override fun toString(indent: String): String {
-            val sb = StringBuilder("if ")
-            sb.append(condition.toString(indent))
-            sb.append(":\n  ").append(indent)
-            sb.append(then.toString("  $indent"))
+        override fun toString(): String {
+            val sb = StringBuilder("(if $condition $then")
             if (!(otherwise is Block && otherwise.statements.isEmpty())) {
-                sb.append("\n").append(indent).append("else:\n  ").append(indent)
-                sb.append(otherwise.toString("  $indent"))
+                sb.append(" $otherwise")
             }
+            sb.append(")")
             return sb.toString()
         }
     }
@@ -49,11 +47,10 @@ class Control {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = While(newChildren[0], newChildren[1])
 
-        override fun type() = Unit::class
+        override val type
+            get() = Void
 
-        override fun toString(indent: String) =
-            "while ${condition.toString(indent)}:\n$indent${body.toString(' ' + indent + ' ')}"
-
+        override fun toString() = "(while $condition $body)"
     }
 
     class Block<C>(
@@ -70,10 +67,10 @@ class Control {
         override fun reconstruct(newChildren: List<Evaluable<C>>) =
             Block(statements = newChildren.toTypedArray())
 
-        override fun type() = Unit::class
+        override val type
+            get() = if (statements.isEmpty()) Void else statements[statements.size - 1].type
 
-        override fun toString(indent: String) =
-            statements.joinToString("\n$indent"){ it.toString(indent)}
-
+        override fun toString() =
+            statements.joinToString(" ", prefix = "(begin ", postfix = ")")
     }
 }

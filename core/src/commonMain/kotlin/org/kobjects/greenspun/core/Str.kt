@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core
 
 
-object Str {
+object Str : Type {
 
     class Const<C>(
         val value: String
@@ -12,8 +12,12 @@ object Str {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
 
-        override fun type() = String::class
+        override val type: Type
+            get() = Str
 
-        override fun toString(indent: String) = "\"$value\""
+        override fun toString() = "\"$value\""
     }
+
+    override val name: String
+        get() = "Str"
 }
