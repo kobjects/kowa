@@ -51,15 +51,15 @@ class ExecutionTests {
             condition = Le(GetCounter(), Const(20.0)),
             body = Block (
                 If (
-                    condition = Eq(Mod(GetCounter(), Const(3.0)), Const(0.0)),
-                    then = If (
-                        condition = Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
-                        then = Display(Str.Const("Fizz Buzz")),
-                        otherwise = Display(Str.Const("Fizz"))),
-                    otherwise = If(
-                        condition = Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
-                        then = Display(Str.Const("Buzz")),
-                        otherwise = Display(GetCounter()))),
+                    Eq(Mod(GetCounter(), Const(3.0)), Const(0.0)),
+                    If (
+                        Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
+                        Display(Str.Const("Fizz Buzz")),
+                        Display(Str.Const("Fizz"))),
+                    If(
+                        Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
+                        Display(Str.Const("Buzz")),
+                        Display(GetCounter()))),
                 SetCounter(Add(GetCounter(), Const(1.0)))))
 
         assertEquals("""

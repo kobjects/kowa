@@ -6,29 +6,27 @@ package org.kobjects.greenspun.core
 class Control {
 
     class If<C>(
-        val condition: Evaluable<C>,
-        val then: Evaluable<C>,
-        val otherwise: Evaluable<C> = Block<C>()
+        vararg val ifThenElse: Evaluable<C>
     ) : Evaluable<C> {
         override fun eval(env: C): Any? {
-            return if (condition.eval(env) as Boolean) then.eval(env) else otherwise.eval(env)
+            for (i in ifThenElse.indices step 2) {
+                if (i == ifThenElse.size - 1) {
+                    return ifThenElse[i].eval(env)
+                } else if (ifThenElse[i].eval(env) as Boolean) {
+                    return ifThenElse[i + 1].eval(env)
+                }
+            }
+            return Unit
         }
 
-        override fun children() = listOf(condition, then, otherwise)
+        override fun children() = ifThenElse.toList()
 
-        override fun reconstruct(newChildren: List<Evaluable<C>>) = If(newChildren[0], newChildren[1], newChildren[2])
+        override fun reconstruct(newChildren: List<Evaluable<C>>) = If(*newChildren.toTypedArray())
 
         override val type
             get() = Void
 
-        override fun toString(): String {
-            val sb = StringBuilder("(if $condition $then")
-            if (!(otherwise is Block && otherwise.statements.isEmpty())) {
-                sb.append(" $otherwise")
-            }
-            sb.append(")")
-            return sb.toString()
-        }
+        override fun toString() ="(if ${ifThenElse.joinToString(" ")})"
     }
 
 

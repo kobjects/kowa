@@ -65,7 +65,7 @@ object F64 : Type {
         Binary<C>("/", left, right, { l, r -> l / r })
 
     class Pow<C>(left: Evaluable<C>, right: Evaluable<C>) :
-        Binary<C>("^", left, right, { l, r -> l.pow(r) })
+        Binary<C>("**", left, right, { l, r -> l.pow(r) })
 
     open class Unary<C>(
         private val name: String,

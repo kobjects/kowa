@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.kobjects.greenspun"
-version = "0.2.0"
+version = "0.2.1"
 
 
 kotlin {
@@ -60,7 +60,6 @@ kotlin {
             iosArm64Test.dependsOn(this)
             //iosSimulatorArm64Test.dependsOn(this)
         }
-
 
         val desktopMain by getting
         val desktopTest by getting
