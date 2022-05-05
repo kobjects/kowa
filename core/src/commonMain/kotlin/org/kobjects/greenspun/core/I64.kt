@@ -7,10 +7,10 @@ import kotlin.math.pow
 /**
  * Operations.
  */
-object F64 : Type {
+object I64 : Type {
 
     class Const<C>(
-        val value: Double
+        val value: Long
     ): Evaluable<C> {
         override fun eval(ctx: C) = value
 
@@ -19,7 +19,7 @@ object F64 : Type {
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
 
         override val type: Type
-            get() = F64
+            get() = I64
 
         override fun toString() = value.toString()
     }
@@ -28,15 +28,15 @@ object F64 : Type {
         private val name: String,
         private val left: Evaluable<C>,
         private val right: Evaluable<C>,
-        private val op: (Double, Double) -> Double
+        private val op: (Long, Long) -> Long
     ) : Evaluable<C> {
         init {
-            require(F64.isAssignableFrom(left.type))
-            require(F64.isAssignableFrom(right.type))
+            require(I64.isAssignableFrom(left.type))
+            require(I64.isAssignableFrom(right.type))
         }
 
-        override fun eval(context: C): Double =
-            op(left.evalF64(context), right.evalF64(context))
+        override fun eval(context: C): Long =
+            op(left.evalI64(context), right.evalI64(context))
 
         override fun children() = listOf(left, right)
 
@@ -44,7 +44,7 @@ object F64 : Type {
             Binary(name, newChildren[0], newChildren[1], op)
 
         override val type: Type
-            get() = F64
+            get() = I64
 
         override fun toString() = "($name $left $right)"
     }
@@ -64,29 +64,23 @@ object F64 : Type {
     class Div<C>(left: Evaluable<C>, right: Evaluable<C>) :
         Binary<C>("/", left, right, { l, r -> l / r })
 
-    class Pow<C>(left: Evaluable<C>, right: Evaluable<C>) :
-        Binary<C>("**", left, right, { l, r -> l.pow(r) })
-
     open class Unary<C>(
         private val name: String,
         private val arg: Evaluable<C>,
-        private val op: (Double) -> Double
+        private val op: (Long) -> Long
     ) : Evaluable<C> {
-        override fun eval(ctx: C): Double =
-            op(arg.evalF64(ctx))
+        override fun eval(ctx: C): Long =
+            op(arg.evalI64(ctx))
 
         override fun children() = listOf(arg)
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> = Unary(name, newChildren[0], op)
 
         override val type: Type
-            get() = F64
+            get() = I64
 
         override fun toString(): String = "($name $arg)"
     }
-
-    class Ln<C>(arg: Evaluable<C>) : Unary<C>("ln", arg, { ln(it) })
-    class Exp<C>(arg: Evaluable<C>) : Unary<C>("exp", arg, { exp(it) })
 
 
     class Eq<C>(
@@ -124,7 +118,6 @@ object F64 : Type {
         override val type
             get() = Bool
 
-
         override fun toString() = "(!= $left $right)"
     }
 
@@ -132,10 +125,10 @@ object F64 : Type {
         val name: String,
         val left: Evaluable<C>,
         val right: Evaluable<C>,
-        val op: (Double, Double) -> Boolean,
+        val op: (Long, Long) -> Boolean,
     ) : Evaluable<C> {
         override fun eval(env: C): Boolean =
-            op(left.evalF64(env), right.evalF64(env))
+            op(left.evalI64(env), right.evalI64(env))
 
         override fun children() = listOf(left, right)
 
@@ -161,5 +154,5 @@ object F64 : Type {
     class Lt<C>(left: Evaluable<C>, right: Evaluable<C>) :
         Cmp<C>("<", left, right, {left, right -> left < right })
 
-    override fun toString() = "F64"
+    override fun toString() = "I64"
 }

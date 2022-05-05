@@ -43,7 +43,7 @@ class ExecutionTests {
         }
 
         fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", Void, expr) { children, context ->
-            counter = children[0].evalDouble(context)
+            counter = children[0].evalF64(context)
             null
         }
 

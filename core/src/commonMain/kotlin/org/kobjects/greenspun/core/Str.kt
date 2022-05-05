@@ -18,6 +18,5 @@ object Str : Type {
         override fun toString() = "\"$value\""
     }
 
-    override val name: String
-        get() = "Str"
+    override fun toString() = "Str"
 }

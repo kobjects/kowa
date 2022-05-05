@@ -1,11 +1,14 @@
 package org.kobjects.greenspun.core
 
 
-interface Evaluable<C> {
-    fun eval(ctx: C): Any?
+interface Evaluable<C> : Callable<C> {
 
-    fun evalDouble(context: C): Double {
+    fun evalF64(context: C): Double {
         return eval(context) as Double
+    }
+
+    fun evalI64(context: C): Long {
+        return eval(context) as Long
     }
 
     fun children(): List<Evaluable<C>>
