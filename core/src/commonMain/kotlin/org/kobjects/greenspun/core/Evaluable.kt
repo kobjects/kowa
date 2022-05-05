@@ -1,7 +1,8 @@
 package org.kobjects.greenspun.core
 
 
-interface Evaluable<C> : Callable<C> {
+interface Evaluable<C> {
+    fun eval(context: C): Any?
 
     fun evalF64(context: C): Double {
         return eval(context) as Double
