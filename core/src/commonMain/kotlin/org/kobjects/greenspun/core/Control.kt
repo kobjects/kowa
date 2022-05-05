@@ -59,7 +59,7 @@ class Control {
     }
 
     class Block<C>(
-        private vararg val statements: Evaluable<C>
+        vararg val statements: Evaluable<C>
     ): Evaluable<C> {
         override fun eval(env: C): Any? {
             var result: Any? = null
