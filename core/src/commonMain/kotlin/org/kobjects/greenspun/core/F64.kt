@@ -7,7 +7,7 @@ import kotlin.math.pow
 /**
  * Operations.
  */
-object F64 : Type {
+object F64 {
 
     class Const<C>(
         val value: Double
@@ -18,9 +18,6 @@ object F64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
 
-        override val type: Type
-            get() = F64
-
         override fun toString() = value.toString()
     }
 
@@ -30,10 +27,6 @@ object F64 : Type {
         private val right: Evaluable<C>,
         private val op: (Double, Double) -> Double
     ) : Evaluable<C> {
-        init {
-            require(F64.isAssignableFrom(left.type))
-            require(F64.isAssignableFrom(right.type))
-        }
 
         override fun eval(context: C): Double =
             op(left.evalF64(context), right.evalF64(context))
@@ -42,9 +35,6 @@ object F64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Binary(name, newChildren[0], newChildren[1], op)
-
-        override val type: Type
-            get() = F64
 
         override fun toString() = "($name $left $right)"
     }
@@ -79,9 +69,6 @@ object F64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> = Unary(name, newChildren[0], op)
 
-        override val type: Type
-            get() = F64
-
         override fun toString(): String = "($name $arg)"
     }
 
@@ -101,9 +88,6 @@ object F64 : Type {
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Eq(newChildren[0], newChildren[1])
 
-        override val type
-                get() = Bool
-
         override fun toString() =
             "(= $left $right)"
     }
@@ -121,10 +105,6 @@ object F64 : Type {
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Ne(newChildren[0], newChildren[1])
 
-        override val type
-            get() = Bool
-
-
         override fun toString() = "(!= $left $right)"
     }
 
@@ -141,9 +121,6 @@ object F64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Cmp(name, newChildren[0], newChildren[1], op)
-
-        override val type
-            get() = Bool
 
         override fun toString() =
             "($name $left $right)"

@@ -34,15 +34,15 @@ class ExecutionTests {
         var result = mutableListOf<Any?>()
         var counter = 1.0
 
-        fun Display(expr: Evaluable<Unit>) = Node("display", Void, expr) { children, env ->
+        fun Display(expr: Evaluable<Unit>) = Node("display", expr) { children, env ->
             result.add(children[0].eval(env))
         }
 
-        fun GetCounter() = Node<Unit>("counter", F64) { _, env ->
+        fun GetCounter() = Node<Unit>("counter") { _, env ->
             counter
         }
 
-        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", Void, expr) { children, context ->
+        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", expr) { children, context ->
             counter = children[0].evalF64(context)
             null
         }

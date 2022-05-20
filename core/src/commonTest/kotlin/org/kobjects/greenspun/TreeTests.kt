@@ -7,8 +7,6 @@ import kotlin.test.assertEquals
 
 class TreeTests {
 
-
-
     @Test
     fun testSimplify() {
         val expr = F64.Mul<Unit>(F64.Const(1.0), F64.Const(2.0))

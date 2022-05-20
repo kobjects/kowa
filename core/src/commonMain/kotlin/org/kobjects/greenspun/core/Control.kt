@@ -7,7 +7,6 @@ class Control {
 
     class If<C>(
         vararg val ifThenElse: Evaluable<C>,
-        returnType: Type = Void
     ) : Evaluable<C> {
         override fun eval(env: C): Any? {
             for (i in ifThenElse.indices step 2) {
@@ -23,8 +22,6 @@ class Control {
         override fun children() = ifThenElse.toList()
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = If(*newChildren.toTypedArray())
-
-        override val type = returnType
 
         override fun toString() ="(if ${ifThenElse.joinToString(" ")})"
     }
@@ -52,9 +49,6 @@ class Control {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = While(newChildren[0], newChildren[1])
 
-        override val type
-            get() = Void
-
         override fun toString() = "(while $condition $body)"
     }
 
@@ -76,9 +70,6 @@ class Control {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) =
             Block(statements = newChildren.toTypedArray())
-
-        override val type
-            get() = if (statements.isEmpty()) Void else statements[statements.size - 1].type
 
         override fun toString() =
             statements.joinToString(" ", prefix = "(begin ", postfix = ")")

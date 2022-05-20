@@ -7,7 +7,7 @@ import kotlin.math.pow
 /**
  * Operations.
  */
-object I64 : Type {
+object I64 {
 
     class Const<C>(
         val value: Long
@@ -18,9 +18,6 @@ object I64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
 
-        override val type: Type
-            get() = I64
-
         override fun toString() = value.toString()
     }
 
@@ -30,10 +27,6 @@ object I64 : Type {
         private val right: Evaluable<C>,
         private val op: (Long, Long) -> Long
     ) : Evaluable<C> {
-        init {
-            require(I64.isAssignableFrom(left.type))
-            require(I64.isAssignableFrom(right.type))
-        }
 
         override fun eval(context: C): Long =
             op(left.evalI64(context), right.evalI64(context))
@@ -42,9 +35,6 @@ object I64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Binary(name, newChildren[0], newChildren[1], op)
-
-        override val type: Type
-            get() = I64
 
         override fun toString() = "($name $left $right)"
     }
@@ -76,9 +66,6 @@ object I64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> = Unary(name, newChildren[0], op)
 
-        override val type: Type
-            get() = I64
-
         override fun toString(): String = "($name $arg)"
     }
 
@@ -94,9 +81,6 @@ object I64 : Type {
         override fun children() = listOf(left, right)
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Eq(newChildren[0], newChildren[1])
-
-        override val type
-                get() = Bool
 
         override fun toString() =
             "(= $left $right)"
@@ -115,9 +99,6 @@ object I64 : Type {
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Ne(newChildren[0], newChildren[1])
 
-        override val type
-            get() = Bool
-
         override fun toString() = "(!= $left $right)"
     }
 
@@ -134,9 +115,6 @@ object I64 : Type {
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> =
             Cmp(name, newChildren[0], newChildren[1], op)
-
-        override val type
-            get() = Bool
 
         override fun toString() =
             "($name $left $right)"

@@ -15,6 +15,4 @@ interface Evaluable<C> {
     fun children(): List<Evaluable<C>>
 
     fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C>
-
-    val type: Type
 }
