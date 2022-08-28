@@ -5,7 +5,7 @@ interface Evaluable<C> {
     fun eval(context: C): Any?
 
     fun evalF64(context: C): Double {
-        return eval(context) as Double
+        return (eval(context) as Number).toDouble()
     }
 
     fun evalI64(context: C): Long {
