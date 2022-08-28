@@ -9,7 +9,7 @@ interface Evaluable<C> {
     }
 
     fun evalI64(context: C): Long {
-        return eval(context) as Long
+        return (eval(context) as Number).toLong()
     }
 
     fun children(): List<Evaluable<C>>

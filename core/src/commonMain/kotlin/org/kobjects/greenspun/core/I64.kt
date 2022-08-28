@@ -14,6 +14,8 @@ object I64 {
     ): Evaluable<C> {
         override fun eval(ctx: C) = value
 
+        override fun evalI64(ctx: C) = value
+
         override fun children() = listOf<Evaluable<C>>()
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
@@ -29,6 +31,9 @@ object I64 {
     ) : Evaluable<C> {
 
         override fun eval(context: C): Long =
+            op(left.evalI64(context), right.evalI64(context))
+
+        override fun evalI64(context: C): Long =
             op(left.evalI64(context), right.evalI64(context))
 
         override fun children() = listOf(left, right)
@@ -62,13 +67,16 @@ object I64 {
         override fun eval(ctx: C): Long =
             op(arg.evalI64(ctx))
 
+        override fun evalI64(ctx: C): Long =
+            op(arg.evalI64(ctx))
+
         override fun children() = listOf(arg)
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> = Unary(name, newChildren[0], op)
 
         override fun toString(): String = "($name $arg)"
     }
-
+    class Neg<C>(arg: Evaluable<C>) : I64.Unary<C>("neg", arg, { -it })
 
     class Eq<C>(
         val left: Evaluable<C>,
@@ -91,7 +99,7 @@ object I64 {
         val right: Evaluable<C>,
     ): Evaluable<C> {
         override fun eval(context: C): Boolean {
-            return (left.evalF64(context) == right.evalF64(context))
+            return (left.evalI64(context) == right.evalI64(context))
         }
 
         override fun children() = listOf(left, right)

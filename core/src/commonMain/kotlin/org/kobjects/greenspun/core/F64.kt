@@ -14,6 +14,8 @@ object F64 {
     ): Evaluable<C> {
         override fun eval(ctx: C) = value
 
+        override fun evalF64(context: C) = value
+
         override fun children() = listOf<Evaluable<C>>()
 
         override fun reconstruct(newChildren: List<Evaluable<C>>) = this
@@ -29,6 +31,9 @@ object F64 {
     ) : Evaluable<C> {
 
         override fun eval(context: C): Double =
+            op(left.evalF64(context), right.evalF64(context))
+
+        override fun evalF64(context: C): Double =
             op(left.evalF64(context), right.evalF64(context))
 
         override fun children() = listOf(left, right)
@@ -65,6 +70,9 @@ object F64 {
         override fun eval(ctx: C): Double =
             op(arg.evalF64(ctx))
 
+        override fun evalF64(ctx: C): Double =
+            op(arg.evalF64(ctx))
+
         override fun children() = listOf(arg)
 
         override fun reconstruct(newChildren: List<Evaluable<C>>): Evaluable<C> = Unary(name, newChildren[0], op)
@@ -74,6 +82,7 @@ object F64 {
 
     class Ln<C>(arg: Evaluable<C>) : Unary<C>("ln", arg, { ln(it) })
     class Exp<C>(arg: Evaluable<C>) : Unary<C>("exp", arg, { exp(it) })
+    class Neg<C>(arg: Evaluable<C>) : Unary<C>("neg", arg, { -it })
 
 
     class Eq<C>(
