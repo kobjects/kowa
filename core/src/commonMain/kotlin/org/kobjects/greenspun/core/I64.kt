@@ -83,7 +83,7 @@ object I64 {
         val right: Evaluable<C>,
     ): Evaluable<C> {
         override fun eval(context: C): Boolean {
-            return (left.eval(context) == right.eval(context))
+            return (left.evalI64(context) == right.evalI64(context))
         }
 
         override fun children() = listOf(left, right)
