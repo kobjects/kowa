@@ -8,5 +8,5 @@ This project aims at providing a reasonable "dynamic" programming facility in Ko
 
 ## Examples
 
-- [FizzBuzz](https://github.com/kobjects/greenspun/blob/main/shared/src/commonTest/kotlin/org/kobjects/greenspun/ExecutionTests.kt) implemented in Greenspun
+- [FizzBuzz](https://github.com/kobjects/greenspun/blob/main/core/src/commonTest/kotlin/org/kobjects/greenspun/ExecutionTests.kt) implemented in Greenspun
 
