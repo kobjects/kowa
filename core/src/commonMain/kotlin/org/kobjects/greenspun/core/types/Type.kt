@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.types
 
-import org.kobjects.greenspun.core.control.Func
+import org.kobjects.greenspun.core.module.Func
 import org.kobjects.greenspun.core.data.Bool
 import org.kobjects.greenspun.core.data.F64
 import org.kobjects.greenspun.core.data.I64

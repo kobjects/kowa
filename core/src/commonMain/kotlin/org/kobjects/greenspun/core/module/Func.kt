@@ -1,12 +1,14 @@
-package org.kobjects.greenspun.core.control
+package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.FuncType
 import org.kobjects.greenspun.core.tree.LeafNode
 import org.kobjects.greenspun.core.context.LocalRuntimeContext
+import org.kobjects.greenspun.core.control.Invoke
 import org.kobjects.greenspun.core.types.Type
 
 class Func(
+    val index: Int,
     val type: FuncType,
     val localVariableCount: Int,
     val body: Node
@@ -25,14 +27,14 @@ class Func(
         override fun eval(context: LocalRuntimeContext) = func
 
         override fun stringify(sb: StringBuilder, indent: String) {
-            sb.append("F")
+            sb.append("func${func.index}")
         }
 
         override val returnType: Type
             get() = func.type
 
         operator fun invoke(vararg parameters: Any) =
-            Invoke(this, *parameters.map { it -> Node.of(it) }.toTypedArray() )
+            Invoke(this, *parameters.map { it -> of(it) }.toTypedArray() )
 
     }
 

@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.types
 
-import org.kobjects.greenspun.core.control.Func
+import org.kobjects.greenspun.core.module.Func
 import org.kobjects.greenspun.core.tree.Node
 
 data class FuncType(

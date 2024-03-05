@@ -1,12 +1,11 @@
 package org.kobjects.greenspun
 
-import org.kobjects.greenspun.core.context.LocalRuntimeContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.data.Void
-import org.kobjects.greenspun.core.dsl.Func
+import org.kobjects.greenspun.core.dsl.Module
 import org.kobjects.greenspun.core.tree.LambdaNode
 import org.kobjects.greenspun.core.tree.Node
 
@@ -20,26 +19,31 @@ class ExecutionTests {
             result.add(children[0].eval(context))
         }
 
-        val fizBuzz =
+        val fizBuzz = Module {
             Func(Void) {
                 val count = Local(1.0)
                 +While(count Le 20.0,
                     Block {
-                        +If (count % 3.0 Eq 0.0,
-                            If (count % 5.0 Eq 0.0,
+                        +If(
+                            count % 3.0 Eq 0.0,
+                            If(
+                                count % 5.0 Eq 0.0,
                                 Log("Fizz Buzz"),
-                                Log("Fizz")),
-                            If(count % 5.0 Eq 0.0,
+                                Log("Fizz")
+                            ),
+                            If(
+                                count % 5.0 Eq 0.0,
                                 Log("Buzz"),
-                                Log(count))
+                                Log(count)
+                            )
                         )
                         +Set(count, count + 1.0)
                     }
                 )
             }
+        }
 
-
-        fizBuzz.func(LocalRuntimeContext())
+        fizBuzz.funcs[0](fizBuzz.createContext())
 
                 assertEquals("""
                     Block { 
@@ -57,7 +61,7 @@ class ExecutionTests {
                         }
                     }
                     """.superTrim(),
-                    fizBuzz.func.body.toString().superTrim())
+                    fizBuzz.funcs[0].body.toString().superTrim())
 
 
         assertEquals(20, result.size)

@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.control
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.FuncType
 import org.kobjects.greenspun.core.context.LocalRuntimeContext
+import org.kobjects.greenspun.core.module.Func
 import org.kobjects.greenspun.core.types.Type
 
 

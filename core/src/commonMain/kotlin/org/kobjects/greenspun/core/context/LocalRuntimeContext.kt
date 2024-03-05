@@ -1,6 +1,8 @@
 package org.kobjects.greenspun.core.context
 
-class LocalRuntimeContext(size: Int = 0) {
+class LocalRuntimeContext(
+    val globalContext: GlobalRuntimeContext,
+    size: Int = 0) {
 
     val variables: Array<Any> = Array(size) { Unit }
 
@@ -11,6 +13,6 @@ class LocalRuntimeContext(size: Int = 0) {
         println("#0 set to $value")
     }
 
-    fun createChild(size: Int) = LocalRuntimeContext(size)
+    fun createChild(size: Int) = LocalRuntimeContext(globalContext, size)
 
 }
