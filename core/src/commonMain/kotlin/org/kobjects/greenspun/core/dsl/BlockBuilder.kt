@@ -14,7 +14,7 @@ open class BlockBuilder(
 
     operator fun Node.unaryPlus() = statements.add(this)
 
-    fun Var(initializerOrValue: Any): LocalReference {
+    fun Local(initializerOrValue: Any): LocalReference {
         val initializer = Node.of(initializerOrValue)
         statements.add(LocalDefinition(variables.size, initializer))
         val variable = LocalReference(variables.size, initializer.returnType)

@@ -28,6 +28,8 @@ interface Type {
 
     enum class RelationalOperator {
         EQ, GE, GT, LE, LT, NE;
+
+        override fun toString() = name[0] + name.substring(1).lowercase()
     }
 
     companion object {

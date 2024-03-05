@@ -7,11 +7,11 @@ class FunctionBuilder(
     val returnType: Type
 ) : BlockBuilder(mutableListOf()) {
 
-    var parameterCount = 0
+    var paramCount = 0
 
-    fun Parameter(type: Type): LocalReference {
+    fun Param(type: Type): LocalReference {
 
-        if (parameterCount != variables.size) {
+        if (paramCount != variables.size) {
             throw IllegalStateException("Parameters can't be declared after local variables.")
         }
 

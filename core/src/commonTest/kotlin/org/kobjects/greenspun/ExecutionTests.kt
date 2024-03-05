@@ -22,7 +22,7 @@ class ExecutionTests {
 
         val fizBuzz =
             Func(Void) {
-                val count = Var(1.0)
+                val count = Local(1.0)
                 +While(count Le 20.0,
                     Block {
                         +If (count % 3.0 Eq 0.0,
@@ -43,14 +43,14 @@ class ExecutionTests {
 
                 assertEquals("""
                     Block { 
-                      +val local0 = Var(F64(1.0))
-                      +While((local0 LE F64(20.0)),
+                      val local0 = Local(F64(1.0))
+                      +While((local0 Le F64(20.0)),
                         Block { 
-                          +If(((local0 % F64(3.0)) EQ F64(0.0)),
-                            If(((local0 % F64(5.0)) EQ F64(0.0)),
+                          +If(((local0 % F64(3.0)) Eq F64(0.0)),
+                            If(((local0 % F64(5.0)) Eq F64(0.0)),
                               Log(Str("Fizz Buzz")),
                               Log(Str("Fizz"))),
-                            If(((local0 % F64(5.0)) EQ F64(0.0)), 
+                            If(((local0 % F64(5.0)) Eq F64(0.0)), 
                               Log(Str("Buzz")),
                             Log(local0)))
                           +Set(local0, (local0 + F64(1.0)))

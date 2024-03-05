@@ -1,5 +1,6 @@
 package org.kobjects.greenspun.core.control
 
+import org.kobjects.greenspun.core.context.LocalDefinition
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.context.LocalRuntimeContext
 import org.kobjects.greenspun.core.types.Type
@@ -28,11 +29,18 @@ class Block(
         get() = if (statements.isEmpty()) Void else statements.last().returnType
 
     override fun stringify(sb: StringBuilder, indent: String) {
-        if (statements.isEmpty()) {
-            sb.append("Block {}")
-        } else {
+        sb.append("Block {")
+        if (statements.isNotEmpty()) {
             val innerIndent = "$indent  "
-            stringifyChildren(sb, innerIndent, "Block {$innerIndent+", "$innerIndent+", "$indent}")
+            for (statement in statements) {
+                sb.append(innerIndent)
+                if (statement !is LocalDefinition) {
+                    sb.append('+')
+                }
+                statement.stringify(sb, innerIndent)
+            }
+            sb.append(indent)
         }
+        sb.append("}")
     }
 }

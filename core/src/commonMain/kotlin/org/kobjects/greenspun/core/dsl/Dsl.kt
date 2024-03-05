@@ -10,7 +10,7 @@ fun Func(returnType: Type, init: FunctionBuilder.() -> Unit): Func.Const {
     val builder = FunctionBuilder(returnType)
     builder.init()
     val f = Func(
-        FuncType(returnType, builder.variables.subList(0, builder.parameterCount).map { returnType }),
+        FuncType(returnType, builder.variables.subList(0, builder.paramCount).map { returnType }),
         builder.variables.size,
         Block(*builder.statements.toTypedArray()))
 
