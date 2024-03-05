@@ -1,86 +1,68 @@
 package org.kobjects.greenspun
 
-import org.kobjects.greenspun.core.*
+import org.kobjects.greenspun.core.context.LocalRuntimeContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.kobjects.greenspun.core.Control.*
-import org.kobjects.greenspun.core.F64.Const
-import org.kobjects.greenspun.core.F64.Add
-import org.kobjects.greenspun.core.F64.Le
-import org.kobjects.greenspun.core.F64.Eq
-import org.kobjects.greenspun.core.F64.Mod
+import org.kobjects.greenspun.core.control.If
+import org.kobjects.greenspun.core.control.While
+import org.kobjects.greenspun.core.data.Void
+import org.kobjects.greenspun.core.dsl.Func
+import org.kobjects.greenspun.core.tree.LambdaNode
+import org.kobjects.greenspun.core.tree.Node
 
 class ExecutionTests {
 
-    fun String.superTrim(): String {
-        val sb = StringBuilder()
-        var ignoreWs = true
-        for (c in trim()) {
-            if (c <= ' ') {
-                if (!ignoreWs) {
-                    sb.append(' ')
-                    ignoreWs = true
-                }
-            } else {
-                sb.append(c)
-                ignoreWs = false
-            }
-        }
-        return sb.toString()
-    }
-
     @Test
     fun fizzBuzz() {
-        var result = mutableListOf<Any?>()
-        var counter = 1.0
+        var result = mutableListOf<Any>()
 
-        fun Display(expr: Evaluable<Unit>) = Node("display", expr) { children, env ->
-            result.add(children[0].eval(env))
+        fun Log(expr: Any) = LambdaNode("Log", Void, Node.of(expr)) { context, children ->
+            result.add(children[0].eval(context))
         }
 
-        fun GetCounter() = Node<Unit>("counter") { _, env ->
-            counter
-        }
+        val fizBuzz =
+            Func(Void) {
+                val count = Var(1.0)
+                +While(count Le 20.0,
+                    Block {
+                        +If (count % 3.0 Eq 0.0,
+                            If (count % 5.0 Eq 0.0,
+                                Log("Fizz Buzz"),
+                                Log("Fizz")),
+                            If(count % 5.0 Eq 0.0,
+                                Log("Buzz"),
+                                Log(count))
+                        )
+                        +Set(count, count + 1.0)
+                    }
+                )
+            }
 
-        fun SetCounter(expr: Evaluable<Unit>) = Node<Unit>("set_counter", expr) { children, context ->
-            counter = children[0].evalF64(context)
-            null
-        }
 
-        val fizBuzz = While(
-            condition = Le(GetCounter(), Const(20.0)),
-            body = Block (
-                If (
-                    Eq(Mod(GetCounter(), Const(3.0)), Const(0.0)),
-                    If (
-                        Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
-                        Display(Str.Const("Fizz Buzz")),
-                        Display(Str.Const("Fizz"))),
-                    If(
-                        Eq(Mod(GetCounter(), Const(5.0)), Const(0.0)),
-                        Display(Str.Const("Buzz")),
-                        Display(GetCounter()))),
-                SetCounter(Add(GetCounter(), Const(1.0)))))
+        fizBuzz.func(LocalRuntimeContext())
 
-        assertEquals("""
-            (while (<= (counter) 20.0)
-              (begin
-                (if (= (% (counter) 3.0) 0.0)
-                  (if (= (% (counter) 5.0) 0.0)
-                    (display "Fizz Buzz")
-                    (display "Fizz"))
-                  (if (= (% (counter) 5.0) 0.0)
-                    (display "Buzz")
-                    (display (counter))))
-              (set_counter (+ (counter) 1.0))))
-            """.superTrim(),
-            fizBuzz.toString().superTrim())
+                assertEquals("""
+                    Block { 
+                      +val local0 = Var(F64(1.0))
+                      +While((local0 LE F64(20.0)),
+                        Block { 
+                          +If(((local0 % F64(3.0)) EQ F64(0.0)),
+                            If(((local0 % F64(5.0)) EQ F64(0.0)),
+                              Log(Str("Fizz Buzz")),
+                              Log(Str("Fizz"))),
+                            If(((local0 % F64(5.0)) EQ F64(0.0)), 
+                              Log(Str("Buzz")),
+                            Log(local0)))
+                          +Set(local0, (local0 + F64(1.0)))
+                        }
+                    }
+                    """.superTrim(),
+                    fizBuzz.func.body.toString().superTrim())
 
-        fizBuzz.eval(Unit)
 
         assertEquals(20, result.size)
 
-        assertEquals(mutableListOf<Any?>(
+        assertEquals(mutableListOf<Any>(
             1.0, 2.0, "Fizz", 4.0, "Buzz",
             "Fizz", 7.0, 8.0, "Fizz", "Buzz",
             11.0, "Fizz", 13.0, 14.0, "Fizz Buzz",
@@ -88,4 +70,24 @@ class ExecutionTests {
     }
 
 
+    companion object {
+
+        fun String.superTrim(): String {
+            val sb = StringBuilder()
+            var ignoreWs = true
+            for (c in trim()) {
+                if (c <= ' ') {
+                    if (!ignoreWs) {
+                        sb.append(' ')
+                        ignoreWs = true
+                    }
+                } else {
+                    sb.append(c)
+                    ignoreWs = false
+                }
+            }
+            return sb.toString()
+        }
+
+    }
 }

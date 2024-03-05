@@ -1,0 +1,63 @@
+package org.kobjects.greenspun.core.tree
+
+import org.kobjects.greenspun.core.context.LocalRuntimeContext
+import org.kobjects.greenspun.core.types.Type
+
+
+abstract class Node {
+    abstract fun eval(context: LocalRuntimeContext): Any
+
+    // Override to avoid boxing; use to avoid type casts.
+    open fun evalF64(context: LocalRuntimeContext): Double {
+        return (eval(context) as Number).toDouble()
+    }
+
+    // Override to avoid boxing; use to avoid type casts.
+    open fun evalI64(context: LocalRuntimeContext): Long {
+        return (eval(context) as Number).toLong()
+    }
+
+    abstract fun children(): List<Node>
+
+    abstract fun reconstruct(newChildren: List<Node>): Node
+
+    abstract fun stringify(sb: StringBuilder, indent: String)
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+        stringify(sb, "\n")
+        return sb.toString()
+    }
+
+    fun stringifyChildren(sb: StringBuilder, indent: String, prefix: String, separator: String, suffix: String) {
+        val children = children()
+        sb.append(prefix)
+        for (i in children.indices) {
+            if (i > 0) {
+                sb.append(separator)
+            }
+            children[i].stringify(sb, indent)
+        }
+        sb.append(suffix)
+    }
+
+    abstract val returnType: Type
+
+    operator fun plus(other: Any) = returnType.createInfixOperation(Type.InfixOperator.PLUS, this, of(other))
+    operator fun minus(other: Any) = returnType.createInfixOperation(Type.InfixOperator.MINUS, this, of(other))
+    operator fun times(other: Any) = returnType.createInfixOperation(Type.InfixOperator.TIMES, this, of(other))
+    operator fun div(other: Any) = returnType.createInfixOperation(Type.InfixOperator.DIV, this, of(other))
+    operator fun rem(other: Any) = returnType.createInfixOperation(Type.InfixOperator.REM, this, of(other))
+
+    infix fun Eq(other: Any) = returnType.createRelationalOperation(Type.RelationalOperator.EQ, this, of(other))
+    infix fun Ne(other: Any) = returnType.createRelationalOperation(Type.RelationalOperator.NE, this, of(other))
+    infix fun Ge(other: Any) = returnType.createRelationalOperation(Type.RelationalOperator.GE, this, of(other))
+    infix fun Gt(other: Any) = returnType.createRelationalOperation(Type.RelationalOperator.GT, this, of(other))
+    infix fun Le(other: Any) = returnType.createRelationalOperation(Type.RelationalOperator.LE, this, of(other))
+    infix fun Lt(other: Any) = returnType.createRelationalOperation(Type.RelationalOperator.LT, this, of(other))
+
+
+    companion object {
+        fun of(value: Any): Node = if (value is Node) value else Type.of(value).createConstant(value)
+    }
+}
