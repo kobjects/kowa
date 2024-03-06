@@ -19,8 +19,10 @@ class ExecutionTests {
             result.add(children[0].eval(context))
         }
 
-        val fizBuzz = Module {
-            Func(Void) {
+        val fizzBuzz = Module {
+            // val Log = Import("log", )
+
+            val fizzBuzz = Func(Void) {
                 val count = Local(1.0)
                 +While(count Le 20.0,
                     Block {
@@ -41,9 +43,13 @@ class ExecutionTests {
                     }
                 )
             }
+
+            Export("fizzBuzz", fizzBuzz)
         }
 
-        fizBuzz.funcs[0](fizBuzz.createContext())
+        val context = fizzBuzz.createContext()
+
+        fizzBuzz.exports["fizzBuzz"]!!.invoke(context)
 
                 assertEquals("""
                     Block { 
@@ -61,7 +67,7 @@ class ExecutionTests {
                         }
                     }
                     """.superTrim(),
-                    fizBuzz.funcs[0].body.toString().superTrim())
+                    fizzBuzz.funcs[0].body.toString().superTrim())
 
 
         assertEquals(20, result.size)
