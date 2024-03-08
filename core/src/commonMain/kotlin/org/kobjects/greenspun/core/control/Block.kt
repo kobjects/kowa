@@ -1,8 +1,8 @@
 package org.kobjects.greenspun.core.control
 
-import org.kobjects.greenspun.core.context.LocalDefinition
+import org.kobjects.greenspun.core.func.LocalDefinition
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.context.LocalRuntimeContext
+import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.types.Type
 import org.kobjects.greenspun.core.data.Void
 

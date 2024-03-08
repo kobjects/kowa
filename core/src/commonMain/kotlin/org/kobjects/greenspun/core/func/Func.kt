@@ -1,26 +1,21 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.func
 
+import org.kobjects.greenspun.core.control.Call
+import org.kobjects.greenspun.core.control.Callable
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.FuncType
 import org.kobjects.greenspun.core.tree.LeafNode
-import org.kobjects.greenspun.core.context.LocalRuntimeContext
-import org.kobjects.greenspun.core.control.Invoke
 import org.kobjects.greenspun.core.types.Type
 
 class Func(
     val index: Int,
-    val type: FuncType,
-    val localVariableCount: Int,
+    override val type: FuncType,
+    override val localContextSize: Int,
     val body: Node
-) {
+) : Callable {
 
-    operator fun invoke(context: LocalRuntimeContext, vararg args: Any): Any {
-        val functionContext = context.createChild(localVariableCount)
-        for (i in args.indices) {
-            functionContext.setLocal(i, args[i])
-        }
-        return body.eval(functionContext)
-    }
+    override fun call(context: LocalRuntimeContext) =
+        body.eval(context)
 
 
     class Const(val func: Func) : LeafNode() {
@@ -34,7 +29,7 @@ class Func(
             get() = func.type
 
         operator fun invoke(vararg parameters: Any) =
-            Invoke(this, *parameters.map { it -> of(it) }.toTypedArray() )
+            Call(func, *parameters.map { it -> of(it) }.toTypedArray() )
 
     }
 

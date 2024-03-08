@@ -1,9 +1,8 @@
-package org.kobjects.greenspun.core.dsl
+package org.kobjects.greenspun.core.control
 
-import org.kobjects.greenspun.core.context.LocalAssignment
-import org.kobjects.greenspun.core.context.LocalDefinition
-import org.kobjects.greenspun.core.context.LocalReference
-import org.kobjects.greenspun.core.control.Block
+import org.kobjects.greenspun.core.func.LocalAssignment
+import org.kobjects.greenspun.core.func.LocalDefinition
+import org.kobjects.greenspun.core.func.LocalReference
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.Type
 

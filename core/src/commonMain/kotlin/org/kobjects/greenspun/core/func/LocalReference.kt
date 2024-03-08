@@ -1,7 +1,6 @@
-package org.kobjects.greenspun.core.context
+package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.context.LocalRuntimeContext
 import org.kobjects.greenspun.core.types.Type
 
 class LocalReference(

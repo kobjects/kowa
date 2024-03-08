@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.context
+package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.module.Instance
 

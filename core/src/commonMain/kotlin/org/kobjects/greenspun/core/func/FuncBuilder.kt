@@ -1,12 +1,12 @@
-package org.kobjects.greenspun.core.dsl
+package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.types.Type
-import org.kobjects.greenspun.core.context.LocalReference
 import org.kobjects.greenspun.core.control.Block
-import org.kobjects.greenspun.core.module.Func
+import org.kobjects.greenspun.core.control.AbstractBlockBuilder
+import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.types.FuncType
 
-class FunctionBuilder(
+class FuncBuilder(
     val moduleBuilder: ModuleBuilder,
     val returnType: Type
 ) : AbstractBlockBuilder(mutableListOf()) {
@@ -31,7 +31,7 @@ class FunctionBuilder(
 
     internal fun build() = Func(
         moduleBuilder.funcs.size,
-        FuncType(returnType, variables.subList(0, paramCount).map { returnType }),
+        moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount).map { returnType }),
         variables.size,
         Block(*statements.toTypedArray())
     )
