@@ -20,7 +20,7 @@ class LambdaNode(
     override fun reconstruct(newChildren: List<Node>) =
         LambdaNode(name, returnType = returnType, children = newChildren.toTypedArray(), op = op)
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        stringifyChildren(sb, indent, "$name(", ", ", ")")
+    override fun toString(writer: CodeWriter) {
+        stringifyChildren(writer, "$name(", ", ", ")")
     }
 }

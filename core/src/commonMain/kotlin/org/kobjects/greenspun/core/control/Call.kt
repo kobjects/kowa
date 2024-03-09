@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.control
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.Type
 
@@ -36,15 +37,15 @@ class Call(
     override fun reconstruct(newChildren: List<Node>) =
         Call(callable, *newChildren.toTypedArray())
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("$callable(")
+    override fun toString(writer: CodeWriter) {
+        writer.write("$callable(")
         for (i in parameters.indices) {
             if (i > 0) {
-                sb.append(", ")
+                writer.write(", ")
             }
-            parameters[i].stringify(sb, indent)
+            parameters[i].toString(writer)
         }
-        sb.append(')')
+        writer.write(")")
     }
 
     override val returnType: Type

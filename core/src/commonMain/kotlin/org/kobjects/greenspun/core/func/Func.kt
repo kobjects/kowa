@@ -2,6 +2,7 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.control.Call
 import org.kobjects.greenspun.core.control.Callable
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.FuncType
 import org.kobjects.greenspun.core.tree.LeafNode
@@ -21,8 +22,8 @@ class Func(
     class Const(val func: Func) : LeafNode() {
         override fun eval(context: LocalRuntimeContext) = func
 
-        override fun stringify(sb: StringBuilder, indent: String) {
-            sb.append("func${func.index}")
+        override fun toString(writer: CodeWriter) {
+            writer.write("func${func.index}")
         }
 
         override val returnType: Type

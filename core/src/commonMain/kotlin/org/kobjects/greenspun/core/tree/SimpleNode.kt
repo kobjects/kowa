@@ -10,8 +10,6 @@ class SimpleNode(
 
     override fun eval(context: LocalRuntimeContext) = operation(context)
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append(name)
-    }
+    override fun toString(writer: CodeWriter) = writer.write(name)
 
 }

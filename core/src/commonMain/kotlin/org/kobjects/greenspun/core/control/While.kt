@@ -4,14 +4,15 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.types.Type
 import org.kobjects.greenspun.core.data.Void
+import org.kobjects.greenspun.core.tree.CodeWriter
 
 class While(
     val condition: Node,
     val body: Node
 ): Node() {
-    override fun eval(env: LocalRuntimeContext): Any {
-        while (condition.eval(env) as Boolean) {
-            val result = body.eval(env)
+    override fun eval(context: LocalRuntimeContext): Any {
+        while (condition.evalBool(context)) {
+            val result = body.eval(context)
             if (result is FlowSignal) {
                 when (result.kind) {
                     FlowSignal.Kind.BREAK -> break
@@ -31,11 +32,7 @@ class While(
     override val returnType: Type
         get() = Void
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("While(")
-        condition.stringify(sb, indent)
-        val innerIndent = "$indent  "
-        sb.append(",$innerIndent")
-        body.stringify(sb, innerIndent)
+    override fun toString(writer: CodeWriter) {
+        writer.write("While(", condition, ", ", body, ")")
     }
 }

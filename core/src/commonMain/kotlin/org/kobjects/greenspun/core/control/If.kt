@@ -1,40 +1,33 @@
 package org.kobjects.greenspun.core.control
 
+import org.kobjects.greenspun.core.data.Void
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.types.Type
 
 class If(
-    vararg val ifThenElse: Node,
+    val condition: Node,
+    val then: Node,
+    val otherwise: Node? = null
 ) : Node() {
-    override fun eval(context: LocalRuntimeContext): Any {
-        for (i in ifThenElse.indices step 2) {
-            if (i == ifThenElse.size - 1) {
-                return ifThenElse[i].eval(context)
-            } else if (ifThenElse[i].eval(context) as Boolean) {
-                return ifThenElse[i + 1].eval(context)
-            }
+    override fun eval(context: LocalRuntimeContext) =
+        if (condition.evalBool(context)) then.eval(context) else otherwise?.eval(context) ?: Unit
+
+    override fun children() = if (otherwise == null) listOf(condition, then) else listOf(condition, then, otherwise)
+
+    override fun reconstruct(newChildren: List<Node>) =
+        If(newChildren[0], newChildren[1], if (newChildren.size > 2) newChildren[2] else null)
+
+    override fun toString(writer: CodeWriter) {
+        writer.write("If(", condition, ", ", then)
+        if (otherwise != null) {
+            writer.write(", ", otherwise)
         }
-        return Unit
-    }
-
-    override fun children() = ifThenElse.toList()
-
-    override fun reconstruct(newChildren: List<Node>) = If(*newChildren.toTypedArray())
-
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("If(")
-        sb.append(ifThenElse[0])
-        val innerIndent = indent + "  "
-        for (i in 1 until ifThenElse.size) {
-            sb.append(",$innerIndent")
-            ifThenElse[i].stringify(sb, innerIndent)
-        }
-        sb.append(")")
+        writer.write(")")
     }
 
     override val returnType: Type
-        get() = ifThenElse[1].returnType
+        get() = if (otherwise == null) Void else then.returnType
 
-    override fun toString() ="(if ${ifThenElse.joinToString(" ")})"
 }

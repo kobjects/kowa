@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.data
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.LeafNode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.types.Type
 
 /**
@@ -37,10 +38,10 @@ object F64 : Type {
 
         override fun evalF64(context: LocalRuntimeContext) = value
 
-        override fun stringify(sb: StringBuilder, indent: String) {
-            sb.append("F64(")
-            sb.append(value)
-            sb.append(")")
+        override fun toString(writer: CodeWriter) {
+            writer.write("F64(")
+            writer.write(value.toString())
+            writer.write(')')
         }
 
         override val returnType: Type
@@ -77,9 +78,8 @@ object F64 : Type {
         override fun reconstruct(newChildren: List<Node>): Node =
             InfixOperation(operator, newChildren[0], newChildren[1])
 
-        override fun stringify(sb: StringBuilder, indent: String) {
-            stringifyChildren(sb, indent, "(", " $operator ", ")")
-        }
+        override fun toString(writer: CodeWriter) =
+            stringifyChildren(writer, "(", " $operator ", ")")
 
         override val returnType: Type
             get() = F64
@@ -103,15 +103,10 @@ object F64 : Type {
         override fun children() = listOf(operand)
 
         override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(name, newChildren[0], operation)
-
-
-        override fun toString(): String = "$name($operand)"
-
-        override fun stringify(sb: StringBuilder, indent: String) {
-            sb.append(name)
-            sb.append("(")
-            operand.stringify(sb, indent)
-            sb.append(")")
+        override fun toString(writer: CodeWriter) {
+            writer.write("$name(")
+            writer.write(operand)
+            writer.write(')')
         }
 
         override val returnType: Type
@@ -146,8 +141,8 @@ object F64 : Type {
         override fun reconstruct(newChildren: List<Node>): Node =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
-        override fun stringify(sb: StringBuilder, indent: String) =
-            stringifyChildren(sb, indent, "(", " $operator ", ")")
+        override fun toString(writer: CodeWriter) =
+            stringifyChildren(writer, "(", " $operator ", ")")
 
         override val returnType: Type
             get() = Bool

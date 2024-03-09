@@ -1,5 +1,6 @@
 package org.kobjects.greenspun.core.func
 
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.Type
 
@@ -13,7 +14,6 @@ class LocalReference(
 
     override fun reconstruct(newChildren: List<Node>) = this
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("local$index")
-    }
+    override fun toString(writer: CodeWriter) =
+        writer.write("local$index")
 }

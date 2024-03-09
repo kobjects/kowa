@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.Type
 import org.kobjects.greenspun.core.data.Void
+import org.kobjects.greenspun.core.tree.CodeWriter
 
 open class LocalAssignment(
     val index: Int,
@@ -20,9 +21,9 @@ open class LocalAssignment(
     override val returnType: Type
         get() = Void
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("Set(local$index, ")
-        expression.stringify(sb, indent)
-        sb.append(")")
+    override fun toString(writer: CodeWriter) {
+        writer.write("Set(local$index, ")
+        writer.write(expression)
+        writer.write(')')
     }
 }

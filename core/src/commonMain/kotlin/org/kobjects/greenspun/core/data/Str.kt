@@ -2,6 +2,7 @@ package org.kobjects.greenspun.core.data
 
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.types.Type
 
 
@@ -20,9 +21,8 @@ object Str : Type {
 
         override fun reconstruct(newChildren: List<Node>) = this
 
-        override fun stringify(sb: StringBuilder, indent: String) {
-            sb.append("Str(\"$value\")")
-        }
+        override fun toString(writer: CodeWriter) =
+            writer.write("Str(\"$value\")")
 
         override val returnType: Type
             get() = Str
@@ -39,8 +39,8 @@ object Str : Type {
         override fun reconstruct(newChildren: List<Node>) =
             Add(newChildren[0], newChildren[1])
 
-        override fun stringify(sb: StringBuilder, indent: String) =
-            stringifyChildren(sb, indent, "(", " + ", ")")
+        override fun toString(writer: CodeWriter) =
+            stringifyChildren(writer, "(", " + ", ")")
 
         override val returnType: Type
             get() = Str

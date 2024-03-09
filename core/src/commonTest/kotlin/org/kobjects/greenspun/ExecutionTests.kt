@@ -73,7 +73,7 @@ class ExecutionTests {
                               import0(Str("Buzz")),
                             import1(local0)))
                           +Set(local0, (local0 + F64(1.0)))
-                        }
+                        })
                     }
                     """.superTrim(),
                     fizzBuzzModule.funcs[0].body.toString().superTrim())

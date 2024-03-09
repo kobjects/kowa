@@ -5,6 +5,7 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.types.Type
 import org.kobjects.greenspun.core.data.Void
+import org.kobjects.greenspun.core.tree.CodeWriter
 
 class Block(
     vararg val statements: Node
@@ -28,19 +29,19 @@ class Block(
     override val returnType: Type
         get() = if (statements.isEmpty()) Void else statements.last().returnType
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("Block {")
+    override fun toString(writer: CodeWriter) {
+        writer.write("Block {")
         if (statements.isNotEmpty()) {
-            val innerIndent = "$indent  "
+            val innerWriter = writer.indented()
             for (statement in statements) {
-                sb.append(innerIndent)
+                innerWriter.newLine()
                 if (statement !is LocalDefinition) {
-                    sb.append('+')
+                    innerWriter.write("+")
                 }
-                statement.stringify(sb, innerIndent)
+                statement.toString(innerWriter)
             }
-            sb.append(indent)
+            writer.newLine()
         }
-        sb.append("}")
+        writer.write("}")
     }
 }

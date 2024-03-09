@@ -1,12 +1,13 @@
 package org.kobjects.greenspun.core.func
 
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 
 class LocalDefinition(index: Int, expression: Node) : LocalAssignment(index, expression) {
 
-    override fun stringify(sb: StringBuilder, indent: String) {
-        sb.append("val local$index = Local(")
-        expression.stringify(sb, indent)
-        sb.append(")")
+    override fun toString(writer: CodeWriter) {
+        writer.write("val local$index = Local(")
+        writer.write(expression)
+        writer.write(')')
     }
 }

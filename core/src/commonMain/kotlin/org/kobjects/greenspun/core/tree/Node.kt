@@ -2,6 +2,7 @@ package org.kobjects.greenspun.core.tree
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.wasm.WasmWriter
 
 
 abstract class Node {
@@ -9,36 +10,42 @@ abstract class Node {
 
     // Override to avoid boxing; use to avoid type casts.
     open fun evalF64(context: LocalRuntimeContext): Double {
-        return (eval(context) as Number).toDouble()
+        return eval(context) as Double
     }
 
     // Override to avoid boxing; use to avoid type casts.
     open fun evalI64(context: LocalRuntimeContext): Long {
-        return (eval(context) as Number).toLong()
+        return eval(context) as Long
+    }
+
+    open fun evalBool(context: LocalRuntimeContext): Boolean {
+        return eval(context) as Boolean
     }
 
     abstract fun children(): List<Node>
 
     abstract fun reconstruct(newChildren: List<Node>): Node
 
-    abstract fun stringify(sb: StringBuilder, indent: String)
+    abstract fun toString(writer: CodeWriter)
+
+    open fun toWasm(writer: WasmWriter): Unit = throw UnsupportedOperationException()
 
     override fun toString(): String {
-        val sb = StringBuilder()
-        stringify(sb, "\n")
-        return sb.toString()
+        val writer = CodeWriter()
+        toString(writer)
+        return writer.toString()
     }
 
-    fun stringifyChildren(sb: StringBuilder, indent: String, prefix: String, separator: String, suffix: String) {
+    fun stringifyChildren(writer: CodeWriter, prefix: String, separator: String, suffix: String) {
         val children = children()
-        sb.append(prefix)
+        writer.write(prefix)
         for (i in children.indices) {
             if (i > 0) {
-                sb.append(separator)
+                writer.write(separator)
             }
-            children[i].stringify(sb, indent)
+            children[i].toString(writer)
         }
-        sb.append(suffix)
+        writer.write(suffix)
     }
 
     abstract val returnType: Type
