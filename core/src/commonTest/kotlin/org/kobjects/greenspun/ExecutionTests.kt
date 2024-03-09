@@ -19,19 +19,9 @@ class ExecutionTests {
             val count = Local(1.0)
             +While(count Le 20.0,
                 Block {
-                    +If(
-                        count % 3.0 Eq 0.0,
-                        If(
-                            count % 5.0 Eq 0.0,
-                            LogStr("Fizz Buzz"),
-                            LogStr("Fizz")
-                        ),
-                        If(
-                            count % 5.0 Eq 0.0,
-                            LogStr("Buzz"),
-                            LogF64(count)
-                        )
-                    )
+                    +If(count % 3.0 Eq 0.0,
+                        If(count % 5.0 Eq 0.0, LogStr("Fizz Buzz"), LogStr("Fizz")),
+                        If(count % 5.0 Eq 0.0, LogStr("Buzz"), LogF64(count)))
                     +Set(count, count + 1.0)
                 }
             )

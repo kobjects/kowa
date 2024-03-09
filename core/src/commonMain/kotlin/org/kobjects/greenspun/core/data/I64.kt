@@ -4,6 +4,8 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.wasm.WasmOpcode
+import org.kobjects.greenspun.core.wasm.WasmWriter
 
 /**
  *  I64 type & builtin operations.
@@ -77,6 +79,18 @@ object I64 : Type {
 
         override val returnType: Type
             get() = I64
+
+        override fun toWasm(writer: WasmWriter) {
+            leftOperand.toWasm(writer)
+            rightOperand.toWasm(writer)
+            writer.write(when (operator) {
+                Type.InfixOperator.PLUS -> WasmOpcode.I64_ADD
+                Type.InfixOperator.MINUS -> WasmOpcode.I64_SUB
+                Type.InfixOperator.TIMES -> WasmOpcode.I64_MUL
+                Type.InfixOperator.DIV -> WasmOpcode.I64_DIV_S
+                Type.InfixOperator.REM -> WasmOpcode.I64_REM_S
+            })
+        }
     }
 
     class UnaryOperation(
@@ -131,6 +145,19 @@ object I64 : Type {
 
         override val returnType: Type
             get() = Bool
+
+        override fun toWasm(writer: WasmWriter) {
+            leftOperand.toWasm(writer)
+            rightOperand.toWasm(writer)
+            writer.write(when(operator) {
+                Type.RelationalOperator.EQ -> WasmOpcode.I64_EQ
+                Type.RelationalOperator.GE -> WasmOpcode.I64_GE_S
+                Type.RelationalOperator.GT -> WasmOpcode.I64_GT_S
+                Type.RelationalOperator.LE -> WasmOpcode.I64_LE_S
+                Type.RelationalOperator.LT -> WasmOpcode.I64_LT_S
+                Type.RelationalOperator.NE -> WasmOpcode.I64_NE
+            })
+        }
     }
 
 

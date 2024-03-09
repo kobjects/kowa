@@ -5,6 +5,8 @@ import org.kobjects.greenspun.core.tree.LeafNode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.wasm.WasmOpcode
+import org.kobjects.greenspun.core.wasm.WasmWriter
 
 /**
  * F64 type & builtin operations.
@@ -28,7 +30,7 @@ object F64 : Type {
     ): Node = RelationalOperation(operator, leftOperand, rightOperand)
 
     override fun createNegOperation(operand: Node): Node {
-        return UnaryOperation("-", operand) { -it }
+        return UnaryOperation("-", WasmOpcode.F64_NEG, operand) { -it }
     }
 
     class Const(
@@ -59,6 +61,9 @@ object F64 : Type {
             require(rightOperand.returnType == F64) { "Right operand type must be F64."}
         }
 
+        override val returnType: Type
+            get() = F64
+
         override fun eval(context: LocalRuntimeContext) = evalF64(context)
 
         override fun evalF64(context: LocalRuntimeContext): Double {
@@ -81,15 +86,26 @@ object F64 : Type {
         override fun toString(writer: CodeWriter) =
             stringifyChildren(writer, "(", " $operator ", ")")
 
-        override val returnType: Type
-            get() = F64
+        override fun toWasm(writer: WasmWriter) {
+            leftOperand.toWasm(writer)
+            rightOperand.toWasm(writer)
+            writer.write(when(operator) {
+                Type.InfixOperator.PLUS -> WasmOpcode.F64_ADD
+                Type.InfixOperator.MINUS -> WasmOpcode.F64_SUB
+                Type.InfixOperator.TIMES -> WasmOpcode.F64_MUL
+                Type.InfixOperator.DIV -> WasmOpcode.F64_DIV
+                Type.InfixOperator.REM -> throw UnsupportedOperationException()
+            })
+        }
+
     }
 
 
     open class UnaryOperation(
         val name: String,
+        val opcode: WasmOpcode,
         val operand: Node,
-        val operation: (Double) -> Double
+        val operation: (Double) -> Double,
     ) : Node() {
 
         init {
@@ -102,7 +118,7 @@ object F64 : Type {
 
         override fun children() = listOf(operand)
 
-        override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(name, newChildren[0], operation)
+        override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(name, opcode, newChildren[0], operation)
         override fun toString(writer: CodeWriter) {
             writer.write("$name(")
             writer.write(operand)
@@ -111,6 +127,10 @@ object F64 : Type {
 
         override val returnType: Type
             get() = F64
+
+        override fun toWasm(writer: WasmWriter) {
+            writer.write(opcode)
+        }
     }
 
     class RelationalOperation(
@@ -123,6 +143,9 @@ object F64 : Type {
             require(leftOperand.returnType == F64) { "Left operand type must be F64" }
             require(rightOperand.returnType == F64) { "Right operand type must be F64" }
         }
+
+        override val returnType: Type
+            get() = Bool
 
         override fun eval(context: LocalRuntimeContext): Boolean {
             val leftValue = leftOperand.evalF64(context)
@@ -144,8 +167,18 @@ object F64 : Type {
         override fun toString(writer: CodeWriter) =
             stringifyChildren(writer, "(", " $operator ", ")")
 
-        override val returnType: Type
-            get() = Bool
+        override fun toWasm(writer: WasmWriter) {
+            leftOperand.toWasm(writer)
+            rightOperand.toWasm(writer)
+            writer.write(when(operator) {
+                Type.RelationalOperator.EQ -> WasmOpcode.F64_EQ
+                Type.RelationalOperator.GE -> WasmOpcode.F64_GE
+                Type.RelationalOperator.GT -> WasmOpcode.F64_GT
+                Type.RelationalOperator.LE -> WasmOpcode.F64_LE
+                Type.RelationalOperator.LT -> WasmOpcode.F64_LT
+                Type.RelationalOperator.NE -> WasmOpcode.F64_NE
+            })
+        }
     }
 
     override fun toString() = "F64"

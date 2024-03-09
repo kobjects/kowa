@@ -1,8 +1,9 @@
 package org.kobjects.greenspun.core.wasm
 
+import org.kobjects.greenspun.core.module.Module
 import kotlin.math.max
 
-class WasmWriter {
+class WasmWriter(val module: Module) {
     var data: ByteArray = ByteArray(0)
     var size = 0
 
@@ -12,9 +13,14 @@ class WasmWriter {
         }
     }
 
-    fun write(byte: Byte) {
+    fun write(opcode: WasmOpcode) {
         ensureCapacity(size + 1)
-        data[size++] = byte
+        data[size++] = opcode.code.toByte()
     }
 
+    fun writeVarUInt32(value: Int) {
+        throw UnsupportedOperationException()
+    }
+
+    fun toByteArray() = data.copyOf(size)
 }
