@@ -5,6 +5,8 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 class If(
     val condition: Node,
@@ -25,6 +27,18 @@ class If(
             writer.write(", ", otherwise)
         }
         writer.write(")")
+    }
+
+    override fun toWasm(writer: WasmWriter) {
+        condition.toWasm(writer)
+        writer.write(WasmOpcode.IF)
+        returnType.toWasm(writer)
+        then.toWasm(writer)
+        if (otherwise != null) {
+            writer.write(WasmOpcode.ELSE)
+            otherwise.toWasm(writer)
+        }
+        writer.write(WasmOpcode.END)
     }
 
     override val returnType: Type

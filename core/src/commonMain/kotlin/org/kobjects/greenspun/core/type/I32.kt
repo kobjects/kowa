@@ -2,8 +2,9 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
-import org.kobjects.greenspun.core.wasm.WasmOpcode
-import org.kobjects.greenspun.core.wasm.WasmWriter
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmWriter
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
@@ -32,6 +33,8 @@ object I32 : Type {
     ) = RelationalOperation(operator, leftOperand, rightOperand)
 
     override fun toString() = "I32"
+
+    override fun toWasm(writer: WasmWriter) = writer.write(WasmType.I32)
 
     class Const(
         val value: Int

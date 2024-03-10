@@ -13,9 +13,11 @@ class ImportFunc(
     override val localContextSize: Int
         get() = type.parameterTypes.size
 
-    override fun call(context: LocalRuntimeContext): Any {
-        return context.instance.imports[index](context.variables)
-    }
+    override fun call(context: LocalRuntimeContext) =
+        context.instance.imports[index](context.variables)
+
+
+    override fun getFuncIdx(module: Module) = index
 
     override fun toString() = "import$index"
 

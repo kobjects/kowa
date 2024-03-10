@@ -2,8 +2,9 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
-import org.kobjects.greenspun.core.wasm.WasmOpcode
-import org.kobjects.greenspun.core.wasm.WasmWriter
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmWriter
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.sqrt
@@ -32,6 +33,10 @@ object F64 : Type {
 
     override fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node {
         return UnaryOperation(operator, operand)
+    }
+
+    override fun toWasm(writer: WasmWriter) {
+        writer.write(WasmType.F64)
     }
 
     override fun toString() = "F64"

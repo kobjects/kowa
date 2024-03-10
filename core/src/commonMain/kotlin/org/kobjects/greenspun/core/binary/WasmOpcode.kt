@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.wasm
+package org.kobjects.greenspun.core.binary
 
 enum class WasmOpcode(val code: Int) {
     UNREACHABLE(0),
@@ -16,7 +16,12 @@ enum class WasmOpcode(val code: Int) {
     CALL(0x10),
     CALL_INDIRECT(0x11),
 
-    BLOCKTYPE_NONE(0x40),
+    LOCAL_GET(0x20),
+    LOCAL_SET(0x21),
+    LOCAL_TEE(0x22),
+
+    GLOBAL_GET(0x23),
+    GLOBAL_SET(0x24),
 
     I32_CONST(0x41),
     I64_CONST(0x42),

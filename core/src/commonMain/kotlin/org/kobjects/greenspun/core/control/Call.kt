@@ -4,6 +4,8 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 
 class Call(
@@ -46,6 +48,14 @@ class Call(
             parameters[i].toString(writer)
         }
         writer.write(")")
+    }
+
+    override fun toWasm(writer: WasmWriter) {
+        for (parameter in parameters) {
+            parameter.toWasm(writer)
+        }
+        writer.write(WasmOpcode.CALL)
+        writer.writeUInt32(callable.getFuncIdx(writer.module).toUInt())
     }
 
     override val returnType: Type

@@ -6,10 +6,21 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 class Block(
     vararg val statements: Node
 ): Node() {
+
+    init {
+        for (i in 0 until statements.size - 1) {
+            val statement = statements[i]
+            require(statement.returnType == Void) {
+                "Statement type $i is ${statement.returnType} but all statements in a block (except for the last) must be Void"
+            }
+        }
+    }
+
     override fun eval(context: LocalRuntimeContext): Any {
         var result: Any = Unit
         for (statement: Node in statements) {
@@ -44,4 +55,7 @@ class Block(
         }
         writer.write("}")
     }
+
+    override fun toWasm(writer: WasmWriter) =
+        statements.forEach { it.toWasm(writer) }
 }

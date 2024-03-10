@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.wasm
+package org.kobjects.greenspun.core.binary
 
 import org.kobjects.greenspun.core.module.Module
 import kotlin.math.max
@@ -16,6 +16,10 @@ class WasmWriter(val module: Module) {
     fun write(value: Byte) {
         ensureCapacity(size + 1)
         data[size++] = value
+    }
+
+    fun write(type: WasmType) {
+        write(type.code)
     }
 
     fun write(opcode: WasmOpcode) {

@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.tree
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.wasm.WasmWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 
 abstract class Node {
@@ -36,7 +36,7 @@ abstract class Node {
 
     abstract fun toString(writer: CodeWriter)
 
-    open fun toWasm(writer: WasmWriter): Unit = throw UnsupportedOperationException()
+    abstract fun toWasm(writer: WasmWriter)
 
     override fun toString(): String {
         val writer = CodeWriter()

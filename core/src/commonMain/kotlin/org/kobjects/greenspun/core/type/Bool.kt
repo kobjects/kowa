@@ -2,8 +2,9 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
-import org.kobjects.greenspun.core.wasm.WasmOpcode
-import org.kobjects.greenspun.core.wasm.WasmWriter
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 object Bool : Type {
 
@@ -19,6 +20,10 @@ object Bool : Type {
 
     override fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node {
         return UnaryOperation(operator, operand)
+    }
+
+    override fun toWasm(writer: WasmWriter) {
+        writer.write(WasmType.I32.code)
     }
 
 
@@ -61,6 +66,10 @@ object Bool : Type {
         override fun reconstruct(newChildren: List<Node>) =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
+        override fun toWasm(writer: WasmWriter) {
+            TODO("Not yet implemented")
+        }
+
         override val returnType: Type
             get() = Bool
     }
@@ -69,7 +78,7 @@ object Bool : Type {
         operator: UnaryOperator,
         operand: Node
     ) : AbstractUnaryOperation(operator, operand) {
-        override fun eval(context: LocalRuntimeContext): Any =
+        override fun eval(context: LocalRuntimeContext) =
             when (operator) {
                 UnaryOperator.NOT -> !operand.evalBool(context)
                 else -> throw UnsupportedOperationException()
@@ -78,6 +87,12 @@ object Bool : Type {
 
         override fun reconstruct(newChildren: List<Node>) =
             UnaryOperation(operator, operand)
+
+        override fun toWasm(writer: WasmWriter) =
+            when (operator) {
+                UnaryOperator.NOT -> writer.write(WasmOpcode.I32_EQZ)
+                else -> throw UnsupportedOperationException()
+            }
 
         override val returnType: Type
             get() = operator.deviantResultType ?: Bool

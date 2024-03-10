@@ -5,6 +5,7 @@ import org.kobjects.greenspun.core.tree.BinaryOperator
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.RelationalOperator
 import org.kobjects.greenspun.core.tree.UnaryOperator
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 
 interface Type {
@@ -13,6 +14,8 @@ interface Type {
     fun createBinaryOperation(operator: BinaryOperator, leftOperand: Node, rightOperand: Node): Node = throw UnsupportedOperationException()
     fun createRelationalOperation(operator: RelationalOperator, leftOperand: Node, rightOperand: Node): Node = throw UnsupportedOperationException()
     fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node = throw UnsupportedOperationException()
+
+    fun toWasm(writer: WasmWriter)
 
     companion object {
 

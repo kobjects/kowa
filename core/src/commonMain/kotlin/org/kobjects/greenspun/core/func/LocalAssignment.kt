@@ -4,6 +4,8 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 open class LocalAssignment(
     val index: Int,
@@ -25,5 +27,11 @@ open class LocalAssignment(
         writer.write("Set(local$index, ")
         writer.write(expression)
         writer.write(')')
+    }
+
+    override fun toWasm(writer: WasmWriter) {
+        expression.toWasm(writer)
+        writer.write(WasmOpcode.LOCAL_SET)
+        writer.writeUInt32(index.toUInt())
     }
 }

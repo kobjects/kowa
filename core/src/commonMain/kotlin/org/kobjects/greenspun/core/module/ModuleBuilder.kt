@@ -9,15 +9,15 @@ import org.kobjects.greenspun.core.type.Type
 
 class ModuleBuilder {
     internal val types = mutableListOf<FuncType>()
-    internal val imports = mutableListOf<ImportFunc>()
+    internal val funcImports = mutableListOf<ImportFunc>()
     internal val funcs = mutableListOf<Func>()
     internal var start: Func? = null
     internal var globals = mutableListOf<GlobalDefinition>()
-    internal var exports = mutableMapOf<String, Func>()
+    internal var funcExports = mutableMapOf<String, Func>()
 
     fun ImportFunc(name: String, returnType: Type, vararg paramTypes: Type): ImportFunc {
-        val i = ImportFunc(imports.size, name, getFuncType(returnType, paramTypes.toList()))
-        imports.add(i)
+        val i = ImportFunc(funcImports.size, name, getFuncType(returnType, paramTypes.toList()))
+        funcImports.add(i)
         return i
     }
 
@@ -45,15 +45,15 @@ class ModuleBuilder {
     fun Const(initializerOrValue: Any) = global(false, initializerOrValue)
 
     fun Export(name: String, f: Func.Const) {
-        exports[name] = f.func
+        funcExports[name] = f.func
     }
 
     internal fun build() = Module(
-        imports.map { Pair(it.name, it) }.toMap(),
+        funcImports.map { Pair(it.name, it) }.toMap(),
         funcs.toList(),
         globals.toList(),
         start,
-        exports.toMap())
+        funcExports.toMap())
 
     internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {
         for (candidate in types) {

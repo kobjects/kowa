@@ -10,7 +10,7 @@ class Instance(
     val rootContext = LocalRuntimeContext(this)
     val globals = Array(module.globals.size) { module.globals[it].initializer.eval(rootContext) }
 
-    val exports = module.exports.mapValues { ExportInstance(it.value)  }
+    val exports = module.funcExports.mapValues { ExportInstance(it.value)  }
 
     init {
         module.start?.call(rootContext)

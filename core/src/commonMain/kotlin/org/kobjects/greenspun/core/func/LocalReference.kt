@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 class LocalReference(
     val index: Int,
@@ -16,4 +17,8 @@ class LocalReference(
 
     override fun toString(writer: CodeWriter) =
         writer.write("local$index")
+
+    override fun toWasm(writer: WasmWriter) {
+        TODO("Not yet implemented")
+    }
 }
