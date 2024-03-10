@@ -67,7 +67,29 @@ object Bool : Type {
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {
-            TODO("Not yet implemented")
+            when(operator) {
+                BinaryOperator.OR -> {
+                    leftOperand.toWasm(writer)
+                    writer.write(WasmOpcode.IF)
+                    Bool.toWasm(writer)
+                    writer.write(WasmOpcode.I32_CONST)
+                    writer.writeVarInt32(1)
+                    writer.write(WasmOpcode.ELSE)
+                    rightOperand.toWasm(writer)
+                    writer.write(WasmOpcode.END)
+                }
+                BinaryOperator.AND -> {
+                    leftOperand.toWasm(writer)
+                    writer.write(WasmOpcode.IF)
+                    Bool.toWasm(writer)
+                    rightOperand.toWasm(writer)
+                    writer.write(WasmOpcode.ELSE)
+                    writer.write(WasmOpcode.I32_CONST)
+                    writer.writeVarInt32(0)
+                    writer.write(WasmOpcode.END)
+                }
+                else -> throw UnsupportedOperationException()
+            }
         }
 
         override val returnType: Type
