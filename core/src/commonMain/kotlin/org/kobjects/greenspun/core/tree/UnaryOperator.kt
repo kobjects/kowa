@@ -1,8 +1,9 @@
 package org.kobjects.greenspun.core.tree
 
-import org.kobjects.greenspun.core.types.F64
-import org.kobjects.greenspun.core.types.I64
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.F64
+import org.kobjects.greenspun.core.type.I32
+import org.kobjects.greenspun.core.type.I64
+import org.kobjects.greenspun.core.type.Type
 
 enum class UnaryOperator(
     val typeSupport: TypeSupport = TypeSupport.ALL,
@@ -23,6 +24,7 @@ enum class UnaryOperator(
 
     SQRT(TypeSupport.FLOAT_ONLY),
 
+    TO_I32(TypeSupport.ALL, I32),
     TO_I64(TypeSupport.ALL, I64),
     TO_F64(TypeSupport.ALL, F64),
 

@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.types
+package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.Func
 import org.kobjects.greenspun.core.tree.BinaryOperator
@@ -19,6 +19,7 @@ interface Type {
         fun of(value: Any?) = when (value) {
             null,
             Unit -> Void
+            is Int -> I32
             is Long -> I64
             is Double -> F64
             is String -> Str

@@ -1,11 +1,11 @@
 package org.kobjects.greenspun.core.module
 
-import org.kobjects.greenspun.core.types.Void
+import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.func.FuncBuilder
 import org.kobjects.greenspun.core.func.Func
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.types.FuncType
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.FuncType
+import org.kobjects.greenspun.core.type.Type
 
 class ModuleBuilder {
     internal val types = mutableListOf<FuncType>()

@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Type
 
 class LocalReference(
     val index: Int,

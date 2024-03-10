@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.control
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.types.FuncType
+import org.kobjects.greenspun.core.type.FuncType
 
 interface Callable {
     val type: FuncType

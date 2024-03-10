@@ -1,10 +1,9 @@
 package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.control.Block
 import org.kobjects.greenspun.core.control.AbstractBlockBuilder
 import org.kobjects.greenspun.core.module.ModuleBuilder
-import org.kobjects.greenspun.core.types.FuncType
 
 class FuncBuilder(
     val moduleBuilder: ModuleBuilder,

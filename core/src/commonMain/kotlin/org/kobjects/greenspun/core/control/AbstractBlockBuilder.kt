@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.func.LocalAssignment
 import org.kobjects.greenspun.core.func.LocalDefinition
 import org.kobjects.greenspun.core.func.LocalReference
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractBlockBuilder(val variables: MutableList<Type>) {
     val statements = mutableListOf<Node>()

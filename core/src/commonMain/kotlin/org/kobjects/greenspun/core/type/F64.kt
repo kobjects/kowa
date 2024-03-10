@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.types
+package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
@@ -78,10 +78,10 @@ object F64 : Type {
             val leftValue = leftOperand.evalF64(context)
             val rightValue = rightOperand.evalF64(context)
             return when (operator) {
-                BinaryOperator.PLUS -> leftValue + rightValue
+                BinaryOperator.ADD -> leftValue + rightValue
                 BinaryOperator.DIV -> leftValue / rightValue
-                BinaryOperator.TIMES -> leftValue * rightValue
-                BinaryOperator.MINUS -> leftValue - rightValue
+                BinaryOperator.MUL -> leftValue * rightValue
+                BinaryOperator.SUB -> leftValue - rightValue
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -93,9 +93,9 @@ object F64 : Type {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
-                BinaryOperator.PLUS -> WasmOpcode.F64_ADD
-                BinaryOperator.MINUS -> WasmOpcode.F64_SUB
-                BinaryOperator.TIMES -> WasmOpcode.F64_MUL
+                BinaryOperator.ADD -> WasmOpcode.F64_ADD
+                BinaryOperator.SUB -> WasmOpcode.F64_SUB
+                BinaryOperator.MUL -> WasmOpcode.F64_MUL
                 BinaryOperator.DIV -> WasmOpcode.F64_DIV
                 BinaryOperator.REM -> throw UnsupportedOperationException()
                 BinaryOperator.COPYSIGN -> WasmOpcode.F64_COPYSIGN
@@ -134,6 +134,7 @@ object F64 : Type {
                 UnaryOperator.NEG -> -value
                 UnaryOperator.POPCNT -> throw UnsupportedOperationException()
                 UnaryOperator.SQRT -> sqrt(value)
+                UnaryOperator.TO_I32 -> value.toInt()
                 UnaryOperator.TO_I64 -> value.toLong()
                 UnaryOperator.TO_F64 -> value
                 UnaryOperator.TRUNC -> truncate(value)
@@ -159,6 +160,7 @@ object F64 : Type {
                 UnaryOperator.NOT -> throw UnsupportedOperationException()
                 UnaryOperator.POPCNT -> throw UnsupportedOperationException()
                 UnaryOperator.SQRT -> WasmOpcode.F64_SQRT
+                UnaryOperator.TO_I32 -> WasmOpcode.I32_TRUNC_F64_S
                 UnaryOperator.TO_I64 -> WasmOpcode.I64_TRUNC_F64_S
                 UnaryOperator.TO_F64 -> WasmOpcode.NOP
                 UnaryOperator.TRUNC -> WasmOpcode.F64_TRUNC

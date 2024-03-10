@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.types
+package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.Func
 import org.kobjects.greenspun.core.tree.Node

@@ -3,8 +3,8 @@ package org.kobjects.greenspun.core.control
 import org.kobjects.greenspun.core.func.LocalDefinition
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.types.Type
-import org.kobjects.greenspun.core.types.Void
+import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
 
 class Block(

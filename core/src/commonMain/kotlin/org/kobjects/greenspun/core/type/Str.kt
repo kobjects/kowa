@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.types
+package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
@@ -33,7 +33,7 @@ object Str : Type {
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext) =
             when (operator) {
-                BinaryOperator.PLUS -> leftOperand.eval(context).toString() + rightOperand.eval(context)
+                BinaryOperator.ADD -> leftOperand.eval(context).toString() + rightOperand.eval(context)
                 else -> throw UnsupportedOperationException()
             }
 

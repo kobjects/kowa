@@ -4,9 +4,9 @@ import org.kobjects.greenspun.core.control.Call
 import org.kobjects.greenspun.core.control.Callable
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.types.FuncType
+import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.tree.AbstractLeafNode
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Type
 
 class Func(
     val index: Int,

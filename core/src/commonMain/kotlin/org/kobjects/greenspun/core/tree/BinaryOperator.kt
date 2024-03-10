@@ -4,10 +4,10 @@ enum class BinaryOperator(
     val typeSupport: TypeSupport,
     val symbol: String? = null
 ) {
-    PLUS(TypeSupport.ALL,"+"),
+    ADD(TypeSupport.ALL,"+"),
     DIV(TypeSupport.ALL,"/"),
-    TIMES(TypeSupport.ALL,"*"),
-    MINUS(TypeSupport.ALL,"-"),
+    MUL(TypeSupport.ALL,"*"),
+    SUB(TypeSupport.ALL,"-"),
 
     REM(TypeSupport.INT_ONLY,"%"),
 

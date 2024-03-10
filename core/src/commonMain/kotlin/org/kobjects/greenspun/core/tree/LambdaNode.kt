@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.tree
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Type
 
 class LambdaNode(
     private val name: String,

@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.types
+package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
@@ -40,12 +40,11 @@ object I64 : Type {
 
         override fun evalI64(context: LocalRuntimeContext) = value
 
-        override fun toString(writer: CodeWriter) {
+        override fun toString(writer: CodeWriter) =
             writer.write("I64($value)")
-        }
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(WasmOpcode.F64_CONST)
+            writer.write(WasmOpcode.I64_CONST)
             writer.writeVarInt64(value)
         }
 
@@ -71,10 +70,10 @@ object I64 : Type {
             val leftValue = leftOperand.evalI64(context)
             val rightValue = rightOperand.evalI64(context)
             return when (operator) {
-                BinaryOperator.PLUS -> leftValue + rightValue
+                BinaryOperator.ADD -> leftValue + rightValue
                 BinaryOperator.DIV -> leftValue / rightValue
-                BinaryOperator.TIMES -> leftValue * rightValue
-                BinaryOperator.MINUS -> leftValue - rightValue
+                BinaryOperator.MUL -> leftValue * rightValue
+                BinaryOperator.SUB -> leftValue - rightValue
                 BinaryOperator.REM -> leftValue % rightValue
                 BinaryOperator.AND -> leftValue and rightValue
                 BinaryOperator.OR -> leftValue or rightValue
@@ -102,9 +101,9 @@ object I64 : Type {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when (operator) {
-                BinaryOperator.PLUS -> WasmOpcode.I64_ADD
-                BinaryOperator.MINUS -> WasmOpcode.I64_SUB
-                BinaryOperator.TIMES -> WasmOpcode.I64_MUL
+                BinaryOperator.ADD -> WasmOpcode.I64_ADD
+                BinaryOperator.SUB -> WasmOpcode.I64_SUB
+                BinaryOperator.MUL -> WasmOpcode.I64_MUL
                 BinaryOperator.DIV -> WasmOpcode.I64_DIV_S
                 BinaryOperator.REM -> WasmOpcode.I64_REM_S
                 BinaryOperator.AND -> WasmOpcode.I64_AND
@@ -138,6 +137,7 @@ object I64 : Type {
                 UnaryOperator.TRUNC -> throw UnsupportedOperationException()
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
+                UnaryOperator.TO_I32 -> value.toInt()
                 UnaryOperator.TO_I64 -> value
                 UnaryOperator.TO_F64 -> value.toDouble()
                 UnaryOperator.NOT -> value.inv()
@@ -172,6 +172,7 @@ object I64 : Type {
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.NOT -> WasmOpcode.I64_XOR
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
+                UnaryOperator.TO_I32 -> WasmOpcode.I32_WRAP_I64
                 UnaryOperator.TO_I64 -> WasmOpcode.NOP
                 UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I64_S
                 UnaryOperator.TRUNC -> throw UnsupportedOperationException()

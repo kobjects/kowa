@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.tree
 
-import org.kobjects.greenspun.core.types.Bool
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Bool
+import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractRelationalOperation(
     val operator: RelationalOperator,

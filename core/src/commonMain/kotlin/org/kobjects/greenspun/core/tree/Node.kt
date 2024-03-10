@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.tree
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.types.Type
+import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.wasm.WasmWriter
 
 
@@ -58,9 +58,9 @@ abstract class Node {
 
     abstract val returnType: Type
 
-    operator fun plus(other: Any) = returnType.createBinaryOperation(BinaryOperator.PLUS, this, of(other))
-    operator fun minus(other: Any) = returnType.createBinaryOperation(BinaryOperator.MINUS, this, of(other))
-    operator fun times(other: Any) = returnType.createBinaryOperation(BinaryOperator.TIMES, this, of(other))
+    operator fun plus(other: Any) = returnType.createBinaryOperation(BinaryOperator.ADD, this, of(other))
+    operator fun minus(other: Any) = returnType.createBinaryOperation(BinaryOperator.SUB, this, of(other))
+    operator fun times(other: Any) = returnType.createBinaryOperation(BinaryOperator.MUL, this, of(other))
     operator fun div(other: Any) = returnType.createBinaryOperation(BinaryOperator.DIV, this, of(other))
     operator fun rem(other: Any) = returnType.createBinaryOperation(BinaryOperator.REM, this, of(other))
 
