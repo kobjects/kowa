@@ -1,8 +1,7 @@
-package org.kobjects.greenspun.core.data
+package org.kobjects.greenspun.core.types
 
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.SimpleNode
-import org.kobjects.greenspun.core.types.Type
 
 object Void : Type {
     override fun createConstant(value: Any): Node = None

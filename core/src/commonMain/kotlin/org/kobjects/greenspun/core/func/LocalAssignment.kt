@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.Type
-import org.kobjects.greenspun.core.data.Void
+import org.kobjects.greenspun.core.types.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
 
 open class LocalAssignment(

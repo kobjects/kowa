@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.control
 
-import org.kobjects.greenspun.core.data.Void
+import org.kobjects.greenspun.core.types.Void
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter

@@ -7,18 +7,38 @@ class WasmWriter(val module: Module) {
     var data: ByteArray = ByteArray(0)
     var size = 0
 
-    fun ensureCapacity(capacity: Int) {
+    private fun ensureCapacity(capacity: Int) {
         if (data.size < capacity) {
             data = data.copyOf(max(capacity, data.size * 3 / 2))
         }
     }
 
-    fun write(opcode: WasmOpcode) {
+    fun write(value: Byte) {
         ensureCapacity(size + 1)
-        data[size++] = opcode.code.toByte()
+        data[size++] = value
     }
 
-    fun writeVarUInt32(value: Int) {
+    fun write(opcode: WasmOpcode) {
+        write(opcode.code.toByte())
+    }
+
+    fun writeVarInt32(value: Int) {
+        throw UnsupportedOperationException()
+    }
+
+    fun writeVarUInt32(value: UInt) {
+        throw UnsupportedOperationException()
+    }
+
+    fun writeUInt32(value: UInt) {
+        throw UnsupportedOperationException()
+    }
+
+    fun writeUint64(value: ULong) {
+        throw UnsupportedOperationException()
+    }
+
+    fun writeVarInt64(value: Long) {
         throw UnsupportedOperationException()
     }
 

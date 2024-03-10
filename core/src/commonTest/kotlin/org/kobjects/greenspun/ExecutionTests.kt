@@ -4,25 +4,29 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
-import org.kobjects.greenspun.core.data.F64
-import org.kobjects.greenspun.core.data.Str
-import org.kobjects.greenspun.core.data.Void
-import org.kobjects.greenspun.core.dsl.Module
+import org.kobjects.greenspun.core.types.I64
+import org.kobjects.greenspun.core.types.Str
+import org.kobjects.greenspun.core.types.Void
+import org.kobjects.greenspun.core.module.Module
 
 class ExecutionTests {
 
     val fizzBuzzModule = Module {
         val LogStr = ImportFunc("logStr", Void, Str)
-        val LogF64 = ImportFunc("logF64", Void, F64)
+        val LogI64 = ImportFunc("logI64", Void, I64)
 
         val fizzBuzz = Func(Void) {
-            val count = Local(1.0)
-            +While(count Le 20.0,
+            val count = Local(1L)
+            +While(count Le 20L,
                 Block {
-                    +If(count % 3.0 Eq 0.0,
-                        If(count % 5.0 Eq 0.0, LogStr("Fizz Buzz"), LogStr("Fizz")),
-                        If(count % 5.0 Eq 0.0, LogStr("Buzz"), LogF64(count)))
-                    +Set(count, count + 1.0)
+                    +If(count % 3L Eq 0L,
+                        If(count % 5L Eq 0L,
+                            LogStr("Fizz Buzz"),
+                            LogStr("Fizz")),
+                        If(count % 5L Eq 0L,
+                            LogStr("Buzz"),
+                            LogI64(count)))
+                    +Set(count, count + 1L)
                 }
             )
         }
@@ -37,7 +41,7 @@ class ExecutionTests {
 
         val fizzBuzzInstance = fizzBuzzModule.createInstance(
             "logStr" to { result.add(it[0]) },
-            "logF64" to { result.add(it[0]) }
+            "logI64" to { result.add(it[0]) }
         )
 
         fizzBuzzInstance.exports["fizzBuzz"]!!()
@@ -45,24 +49,24 @@ class ExecutionTests {
         assertEquals(20, result.size)
 
         assertEquals(mutableListOf<Any>(
-            1.0, 2.0, "Fizz", 4.0, "Buzz",
-            "Fizz", 7.0, 8.0, "Fizz", "Buzz",
-            11.0, "Fizz", 13.0, 14.0, "Fizz Buzz",
-            16.0, 17.0, "Fizz", 19.0, "Buzz"), result)
+            1L, 2L, "Fizz", 4L, "Buzz",
+            "Fizz", 7L, 8L, "Fizz", "Buzz",
+            11L, "Fizz", 13L, 14L, "Fizz Buzz",
+            16L, 17L, "Fizz", 19L, "Buzz"), result)
 
                 assertEquals("""
                     Block { 
-                      val local0 = Local(F64(1.0))
-                      +While((local0 Le F64(20.0)),
+                      val local0 = Local(I64(1))
+                      +While((local0 Le I64(20)),
                         Block { 
-                          +If(((local0 % F64(3.0)) Eq F64(0.0)),
-                            If(((local0 % F64(5.0)) Eq F64(0.0)),
+                          +If(((local0 % I64(3)) Eq I64(0)),
+                            If(((local0 % I64(5)) Eq I64(0)),
                               import0(Str("Fizz Buzz")),
                               import0(Str("Fizz"))),
-                            If(((local0 % F64(5.0)) Eq F64(0.0)), 
+                            If(((local0 % I64(5)) Eq I64(0)), 
                               import0(Str("Buzz")),
                             import1(local0)))
-                          +Set(local0, (local0 + F64(1.0)))
+                          +Set(local0, (local0 + I64(1)))
                         })
                     }
                     """.superTrim(),

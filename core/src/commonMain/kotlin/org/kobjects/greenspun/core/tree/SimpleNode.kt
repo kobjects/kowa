@@ -6,7 +6,7 @@ import org.kobjects.greenspun.core.types.Type
 class SimpleNode(
     val name: String,
     override val returnType: Type,
-    val operation: (LocalRuntimeContext) -> Any) : LeafNode() {
+    val operation: (LocalRuntimeContext) -> Any) : AbstractLeafNode() {
 
     override fun eval(context: LocalRuntimeContext) = operation(context)
 

@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.control.Callable
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.types.FuncType
-import org.kobjects.greenspun.core.tree.LeafNode
+import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.types.Type
 
 class Func(
@@ -19,7 +19,7 @@ class Func(
         body.eval(context)
 
 
-    class Const(val func: Func) : LeafNode() {
+    class Const(val func: Func) : AbstractLeafNode() {
         override fun eval(context: LocalRuntimeContext) = func
 
         override fun toString(writer: CodeWriter) {
