@@ -31,7 +31,7 @@ class FuncBuilder(
     internal fun build() = Func(
         moduleBuilder.funcs.size,
         moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount).map { returnType }),
-        variables.size,
+        variables.subList(paramCount, variables.size),
         Block(*statements.toTypedArray())
     )
 }

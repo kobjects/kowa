@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.binary
 
-enum class WasmSection(val id: Int) {
+enum class WasmSection(val id: Byte) {
     CUSTOM(0),
     TYPE(1),
     IMPORT(2),

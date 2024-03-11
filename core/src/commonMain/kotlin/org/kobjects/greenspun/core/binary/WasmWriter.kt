@@ -34,6 +34,10 @@ class WasmWriter(val module: Module) {
         throw UnsupportedOperationException()
     }
 
+    fun writeUInt32(value: Int) {
+        writeUInt32(value.toUInt())
+    }
+
     fun writeUInt32(value: UInt) {
         throw UnsupportedOperationException()
     }
@@ -47,4 +51,14 @@ class WasmWriter(val module: Module) {
     }
 
     fun toByteArray() = data.copyOf(size)
+
+    fun write(bytes: ByteArray) {
+        for (byte in bytes) {
+            write(byte)
+        }
+    }
+
+    fun writeName(module: String) {
+        throw UnsupportedOperationException()
+    }
 }

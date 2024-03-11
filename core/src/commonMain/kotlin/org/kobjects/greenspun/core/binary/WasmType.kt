@@ -10,5 +10,7 @@ enum class WasmType(val code: Byte) {
     V128(0x7b),
 
     FUNC_REF(0x70),
-    EXTERN_REF(0x6f)
+    EXTERN_REF(0x6f),
+
+    FUNC(0x60)
 }

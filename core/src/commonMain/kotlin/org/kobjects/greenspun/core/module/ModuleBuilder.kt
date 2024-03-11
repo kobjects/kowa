@@ -15,8 +15,8 @@ class ModuleBuilder {
     internal var globals = mutableListOf<GlobalDefinition>()
     internal var funcExports = mutableMapOf<String, Func>()
 
-    fun ImportFunc(name: String, returnType: Type, vararg paramTypes: Type): ImportFunc {
-        val i = ImportFunc(funcImports.size, name, getFuncType(returnType, paramTypes.toList()))
+    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): ImportFunc {
+        val i = ImportFunc(funcImports.size, module, name, getFuncType(returnType, paramTypes.toList()))
         funcImports.add(i)
         return i
     }
@@ -49,7 +49,8 @@ class ModuleBuilder {
     }
 
     internal fun build() = Module(
-        funcImports.map { Pair(it.name, it) }.toMap(),
+        types.toList(),
+        funcImports.toList(),
         funcs.toList(),
         globals.toList(),
         start,

@@ -6,6 +6,7 @@ import org.kobjects.greenspun.core.type.FuncType
 
 class ImportFunc(
     val index: Int,
+    val module: String,
     val name: String,
     override val type: FuncType
 ) : Callable {
@@ -15,7 +16,6 @@ class ImportFunc(
 
     override fun call(context: LocalRuntimeContext) =
         context.instance.imports[index](context.variables)
-
 
     override fun getFuncIdx(module: Module) = index
 
