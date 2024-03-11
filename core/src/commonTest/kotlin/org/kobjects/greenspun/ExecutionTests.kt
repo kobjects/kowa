@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
+import org.kobjects.greenspun.core.module.ImportObject
 import org.kobjects.greenspun.core.type.I64
 import org.kobjects.greenspun.core.type.Str
 import org.kobjects.greenspun.core.type.Void
@@ -13,8 +14,8 @@ import org.kobjects.greenspun.core.type.I32
 class ExecutionTests {
 
     val fizzBuzzModule = Module {
-        val LogStr = ImportFunc("logStr", Void, Str)
-        val LogI32 = ImportFunc("logI32", Void, I32)
+        val LogStr = ImportFunc("test", "logStr", Void, Str)
+        val LogI32 = ImportFunc("test", "logI32", Void, I32)
 
         val fizzBuzz = Func(Void) {
             val count = Local(1)
@@ -40,10 +41,11 @@ class ExecutionTests {
     fun fizzBuzz() {
         var result = mutableListOf<Any>()
 
-        val fizzBuzzInstance = fizzBuzzModule.createInstance(
-            "logStr" to { result.add(it[0]) },
-            "logI32" to { result.add(it[0]) }
-        )
+        val importObject = ImportObject()
+        importObject.addFunc("test", "logStr") { result.add(it[0]) }
+        importObject.addFunc("test", "logI32") { result.add(it[0]) }
+
+        val fizzBuzzInstance = fizzBuzzModule.createInstance(importObject)
 
         fizzBuzzInstance.exports["fizzBuzz"]!!()
 
