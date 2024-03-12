@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
@@ -34,7 +34,7 @@ object I64 : Type {
 
     override fun toString() = "I64"
 
-    override fun toWasm(writer: WasmWriter) =
+    override fun toWasm(writer: ModuleWriter) =
         writer.write(WasmType.I64)
 
     class Const(
@@ -47,9 +47,9 @@ object I64 : Type {
         override fun toString(writer: CodeWriter) =
             writer.write("I64($value)")
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             writer.write(WasmOpcode.I64_CONST)
-            writer.writeVarInt64(value)
+            writer.writeI64(value)
         }
 
         override val returnType: Type
@@ -101,7 +101,7 @@ object I64 : Type {
         override val returnType: Type
             get() = I64
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when (operator) {
@@ -156,13 +156,13 @@ object I64 : Type {
         override fun toString(writer: CodeWriter) =
             writer.write("$operator(", operand, ")")
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             if (operator == UnaryOperator.NEG) {
                 writer.write(WasmOpcode.I64_CONST)
-                writer.writeVarInt64(0)
+                writer.writeI64(0)
             } else if (operator == UnaryOperator.NOT) {
                 writer.write(WasmOpcode.I64_CONST)
-                writer.writeVarInt64(-1)
+                writer.writeI64(-1)
             }
             operand.toWasm(writer)
             writer.write(when (operator) {
@@ -208,7 +208,7 @@ object I64 : Type {
         override fun reconstruct(newChildren: List<Node>): Node =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {

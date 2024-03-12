@@ -5,11 +5,11 @@ import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.binary.WasmType
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 object Void : Type {
     override fun createConstant(value: Any): Node = None
-    override fun toWasm(writer: WasmWriter) {
+    override fun toWasm(writer: ModuleWriter) {
         writer.write(WasmType.VOID.code)
     }
 
@@ -23,7 +23,7 @@ object Void : Type {
         override val returnType: Type
             get() = Void
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
         }
     }
 }

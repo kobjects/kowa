@@ -3,7 +3,7 @@ package org.kobjects.greenspun.core.type
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.func.Func
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 data class FuncType(
     val index: Int,
@@ -15,15 +15,15 @@ data class FuncType(
         return Func.Const(value as Func)
     }
 
-    override fun toWasm(writer: WasmWriter) {
+    override fun toWasm(writer: ModuleWriter) {
         writer.write(WasmType.FUNC)
         if (returnType == Void) {
-            writer.writeUInt32(0)
+            writer.writeU32(0)
         } else {
-            writer.writeUInt32(1)
+            writer.writeU32(1)
             returnType.toWasm(writer)
         }
-        writer.writeUInt32(parameterTypes.size)
+        writer.writeU32(parameterTypes.size)
         for (parameterType in parameterTypes) {
             parameterType.toWasm(writer)
         }

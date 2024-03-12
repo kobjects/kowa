@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 open class LocalAssignment(
     val index: Int,
@@ -29,9 +29,9 @@ open class LocalAssignment(
         writer.write(')')
     }
 
-    override fun toWasm(writer: WasmWriter) {
+    override fun toWasm(writer: ModuleWriter) {
         expression.toWasm(writer)
         writer.write(WasmOpcode.LOCAL_SET)
-        writer.writeUInt32(index.toUInt())
+        writer.writeU32(index.toUInt())
     }
 }

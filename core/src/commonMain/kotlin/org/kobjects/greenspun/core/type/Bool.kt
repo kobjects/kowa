@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 object Bool : Type {
 
@@ -22,7 +22,7 @@ object Bool : Type {
         return UnaryOperation(operator, operand)
     }
 
-    override fun toWasm(writer: WasmWriter) {
+    override fun toWasm(writer: ModuleWriter) {
         writer.write(WasmType.I32.code)
     }
 
@@ -43,9 +43,9 @@ object Bool : Type {
         override val returnType: Type
             get() = Bool
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             writer.write(WasmOpcode.I32_CONST)
-            writer.writeVarInt32(if (value) 1 else 0)
+            writer.writeI32(if (value) 1 else 0)
         }
     }
 
@@ -66,14 +66,14 @@ object Bool : Type {
         override fun reconstruct(newChildren: List<Node>) =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             when(operator) {
                 BinaryOperator.OR -> {
                     leftOperand.toWasm(writer)
                     writer.write(WasmOpcode.IF)
                     Bool.toWasm(writer)
                     writer.write(WasmOpcode.I32_CONST)
-                    writer.writeVarInt32(1)
+                    writer.writeI32(1)
                     writer.write(WasmOpcode.ELSE)
                     rightOperand.toWasm(writer)
                     writer.write(WasmOpcode.END)
@@ -85,7 +85,7 @@ object Bool : Type {
                     rightOperand.toWasm(writer)
                     writer.write(WasmOpcode.ELSE)
                     writer.write(WasmOpcode.I32_CONST)
-                    writer.writeVarInt32(0)
+                    writer.writeI32(0)
                     writer.write(WasmOpcode.END)
                 }
                 else -> throw UnsupportedOperationException()
@@ -110,7 +110,7 @@ object Bool : Type {
         override fun reconstruct(newChildren: List<Node>) =
             UnaryOperation(operator, operand)
 
-        override fun toWasm(writer: WasmWriter) =
+        override fun toWasm(writer: ModuleWriter) =
             when (operator) {
                 UnaryOperator.NOT -> writer.write(WasmOpcode.I32_EQZ)
                 else -> throw UnsupportedOperationException()

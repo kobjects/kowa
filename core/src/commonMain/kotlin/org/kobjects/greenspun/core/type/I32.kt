@@ -4,7 +4,8 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.binary.loadI32
+import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
@@ -34,7 +35,7 @@ object I32 : Type {
 
     override fun toString() = "I32"
 
-    override fun toWasm(writer: WasmWriter) = writer.write(WasmType.I32)
+    override fun toWasm(writer: ModuleWriter) = writer.write(WasmType.I32)
 
     class Const(
         val value: Int
@@ -46,9 +47,9 @@ object I32 : Type {
         override fun toString(writer: CodeWriter) =
             writer.write("I32($value)")
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             writer.write(WasmOpcode.I32_CONST)
-            writer.writeVarInt32(value)
+            writer.writeI32(value)
         }
 
         override val returnType: Type
@@ -100,7 +101,7 @@ object I32 : Type {
         override val returnType: Type
             get() = I32
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when (operator) {
@@ -155,13 +156,13 @@ object I32 : Type {
         override fun toString(writer: CodeWriter) =
             writer.write("$operator(", operand, ")")
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             if (operator == UnaryOperator.NEG) {
                 writer.write(WasmOpcode.I32_CONST)
-                writer.writeVarInt64(0)
+                writer.writeI32(0)
             } else if (operator == UnaryOperator.NOT) {
                 writer.write(WasmOpcode.I32_CONST)
-                writer.writeVarInt64(-1)
+                writer.writeI32(-1)
             }
             operand.toWasm(writer)
             writer.write(when (operator) {
@@ -207,7 +208,7 @@ object I32 : Type {
         override fun reconstruct(newChildren: List<Node>): Node =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
-        override fun toWasm(writer: WasmWriter) {
+        override fun toWasm(writer: ModuleWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
@@ -221,5 +222,24 @@ object I32 : Type {
         }
     }
 
+
+    class Load(val address: Node) : Node() {
+        override fun eval(context: LocalRuntimeContext) = context.instance.memory.loadI32(address.evalI32(context))
+
+        override fun children(): List<Node> = listOf(address)
+
+        override fun reconstruct(newChildren: List<Node>) = Load(newChildren[0])
+
+        override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
+
+        override fun toWasm(writer: ModuleWriter) {
+            writer.write(WasmOpcode.I32_LOAD)
+            writer.writeU32(0)
+            writer.writeU32(0)
+        }
+
+        override val returnType: Type
+            get() = I32
+    }
 
 }

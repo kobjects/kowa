@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 
 class Call(
@@ -50,12 +50,12 @@ class Call(
         writer.write(")")
     }
 
-    override fun toWasm(writer: WasmWriter) {
+    override fun toWasm(writer: ModuleWriter) {
         for (parameter in parameters) {
             parameter.toWasm(writer)
         }
         writer.write(WasmOpcode.CALL)
-        writer.writeUInt32(callable.getFuncIdx(writer.module).toUInt())
+        writer.writeU32(callable.getFuncIdx(writer.module))
     }
 
     override val returnType: Type

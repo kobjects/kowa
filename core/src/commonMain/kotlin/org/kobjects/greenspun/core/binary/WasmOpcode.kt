@@ -16,12 +16,49 @@ enum class WasmOpcode(val code: Int) {
     CALL(0x10),
     CALL_INDIRECT(0x11),
 
+    DROP(0x1A),
+    SELECT(0x1B),
+    SELECT_T(0x1C),
+
     LOCAL_GET(0x20),
     LOCAL_SET(0x21),
     LOCAL_TEE(0x22),
 
     GLOBAL_GET(0x23),
     GLOBAL_SET(0x24),
+
+    TABLE_GET(0x25),
+    TABLE_SET(0x26),
+
+
+    I32_LOAD(0x28),
+    I64_LOAD(0x29),
+    F32_LOAD(0x2A),
+    F64_LOAD(0x2B),
+
+    I32_LOAD_8_S(0x2C),
+    I32_LOAD_8_U(0x2D),
+    I32_LOAD_16_S(0x2E),
+    I32_LOAD_16_U(0x2F),
+
+    I64_LOAD_8_S(0x30),
+    I64_LOAD_8_U(0x31),
+    I64_LOAD_16_S(0x32),
+    I64_LOAD_16_U(0x33),
+    I64_LOAD_32_S(0x34),
+    I64_LOAD_32_U(0x35),
+
+    I32_STORE(0x36),
+    I64_STORE(0x37),
+    F32_STORE(0x38),
+    F64_STORE(0x39),
+    I32_STORE_8(0x3A),
+    I32_STORE_16(0x3B),
+    I64_STORE_8(0x3C),
+    I64_STORE_16(0x3D),
+    I64_STORE_32(0x3E),
+    MEMORY_SIZE(0x3F),
+    MEMORY_GROW(0x40),
 
     I32_CONST(0x41),
     I64_CONST(0x42),
@@ -163,4 +200,20 @@ enum class WasmOpcode(val code: Int) {
     I64_REINTERPRET_F64(0xBD),
     F32_REINTERPRET_I32(0xBE),
     F64_REINTERPRET_F64(0xBF),
+
+    REF_NULL(0xD0),
+    REF_IS_NULL(0xD1),
+    REF_FUNC(0xD2),
+
+    MEMORY_INIT(0xFC08),
+    DATA_DROP(0xFC09),
+    MEMORY_COPY(0xFC10),
+    MEMORY_FILL(0xFC11),
+
+    TABLE_INIT(0xFC12),
+    TABLE_DROP(0xFC13),
+    TABLE_COPY(0xFC14),
+    TABLE_GROW(0xFC15),
+    TABLE_SIZE(0xFC16),
+    TABLE_FILL(0xFC17)
 }

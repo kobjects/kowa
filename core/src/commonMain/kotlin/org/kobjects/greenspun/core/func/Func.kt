@@ -9,7 +9,7 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 class Func(
     val index: Int,
@@ -27,10 +27,10 @@ class Func(
         index + module.funcImports.size
 
     // Called from the module code segment writer
-    fun writeCode(writer: WasmWriter) {
-        writer.writeUInt32(locals.size)
+    fun writeCode(writer: ModuleWriter) {
+        writer.writeU32(locals.size)
         for (local in locals) {
-            writer.writeUInt32(1)  // TODO: Add compression
+            writer.writeU32(1)  // TODO: Add compression
             local.toWasm(writer)
         }
         body.toWasm(writer)
@@ -51,7 +51,7 @@ class Func(
         operator fun invoke(vararg parameters: Any) =
             Call(func, *parameters.map { of(it) }.toTypedArray() )
 
-        override fun toWasm(writer: WasmWriter) = throw UnsupportedOperationException()
+        override fun toWasm(writer: ModuleWriter) = throw UnsupportedOperationException()
 
     }
 

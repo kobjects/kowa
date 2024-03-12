@@ -7,6 +7,7 @@ class Instance(
     val module: Module,
     val imports: List<(Array<Any>) -> Any>
 ) {
+    val memory = ByteArray(65536)
     val rootContext = LocalRuntimeContext(this)
     val globals = Array(module.globals.size) { module.globals[it].initializer.eval(rootContext) }
 

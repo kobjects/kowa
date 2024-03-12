@@ -5,15 +5,18 @@ import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.module.ImportObject
-import org.kobjects.greenspun.core.type.I64
 import org.kobjects.greenspun.core.type.Str
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32
 
-class ExecutionTests {
+class FizzBuzzTest {
 
     val fizzBuzzModule = Module {
+
+        val fizz = ActiveData("Fizz")
+        val buzz = ActiveData("Buzz")
+
         val LogStr = ImportFunc("test", "logStr", Void, Str)
         val LogI32 = ImportFunc("test", "logI32", Void, I32)
 
@@ -37,8 +40,10 @@ class ExecutionTests {
     }
 
 
+
     @Test
     fun fizzBuzz() {
+
         var result = mutableListOf<Any>()
 
         val importObject = ImportObject()
@@ -74,7 +79,6 @@ class ExecutionTests {
                     }
                     """.superTrim(),
                     fizzBuzzModule.funcs[0].body.toString().superTrim())
-
     }
 
 

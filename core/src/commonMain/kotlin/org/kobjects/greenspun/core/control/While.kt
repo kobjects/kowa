@@ -6,7 +6,7 @@ import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 class While(
     val condition: Node,
@@ -38,7 +38,7 @@ class While(
         writer.write("While(", condition, ", ", body, ")")
     }
 
-    override fun toWasm(writer: WasmWriter) {
+    override fun toWasm(writer: ModuleWriter) {
         writer.write(WasmOpcode.BLOCK)
         Void.toWasm(writer)
         writer.write(WasmOpcode.LOOP)
@@ -46,9 +46,9 @@ class While(
         condition.toWasm(writer)
         writer.write(WasmOpcode.I32_EQZ)
         writer.write(WasmOpcode.BR_IF)
-        writer.writeUInt32(1u)  // Exit block
+        writer.writeU32(1)  // Exit block
         body.toWasm(writer)
-        writer.writeUInt32(0u)  // Loop
+        writer.writeU32(0)  // Loop
         writer.write(WasmOpcode.END)
     }
 }

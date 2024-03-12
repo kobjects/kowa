@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.tree
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.ModuleWriter
 
 
 abstract class Node {
@@ -36,7 +36,7 @@ abstract class Node {
 
     abstract fun toString(writer: CodeWriter)
 
-    abstract fun toWasm(writer: WasmWriter)
+    abstract fun toWasm(writer: ModuleWriter)
 
     override fun toString(): String {
         val writer = CodeWriter()
@@ -44,7 +44,7 @@ abstract class Node {
         return writer.toString()
     }
 
-    fun stringifyChildren(writer: CodeWriter, prefix: String, separator: String, suffix: String) {
+    fun stringifyChildren(writer: CodeWriter, prefix: String, separator: String = ", ", suffix: String = ")") {
         val children = children()
         writer.write(prefix)
         for (i in children.indices) {

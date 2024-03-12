@@ -1,9 +1,10 @@
 package org.kobjects.greenspun.core.module
 
+import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmSection
-import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.Func
 import org.kobjects.greenspun.core.type.FuncType
+import org.kobjects.greenspun.core.type.I32
 
 class Module(
     val types: List<FuncType>,
@@ -11,7 +12,8 @@ class Module(
     val funcs: List<Func>,
     val globals: List<GlobalDefinition>,
     val start: Func?,
-    val funcExports: Map<String, Func>
+    val funcExports: Map<String, Func>,
+    val datas: List<Data>
 ) {
     fun createInstance(importObject: ImportObject): Instance {
         val resolvedImports = List<((Array<Any>) -> Any)>(this.funcImports.size) {
@@ -22,66 +24,81 @@ class Module(
         return Instance(this, resolvedImports)
     }
 
-    private fun writeTypes(writer: WasmWriter) {
-        writer.writeUInt32(types.size)
+    private fun writeTypes(writer: ModuleWriter) {
+        writer.writeU32(types.size)
         for (type in types) {
            type.toWasm(writer)
         }
     }
 
-    private fun writeImports(writer: WasmWriter) {
-        writer.writeUInt32(funcImports.size)
+    private fun writeImports(writer: ModuleWriter) {
+        writer.writeU32(funcImports.size)
         for (i in funcImports) {
-            writer.writeName(i.module)
-            writer.writeName(i.name)
+            writer.write(i.module)
+            writer.write(i.name)
             writer.write(0)
-            writer.writeUInt32(i.index)
+            writer.writeU32(i.index)
         }
     }
 
-    private fun writeFunctions(writer: WasmWriter) {
-        writer.writeUInt32(funcs.size)
+    private fun writeFunctions(writer: ModuleWriter) {
+        writer.writeU32(funcs.size)
         for (func in funcs) {
-            writer.writeUInt32(func.type.index)
+            writer.writeU32(func.type.index)
         }
     }
 
-    private fun writeCode(writer: WasmWriter) {
-        writer.writeUInt32(funcs.size)
+    private fun writeCode(writer: ModuleWriter) {
+        writer.writeU32(funcs.size)
         for (func in funcs) {
-            val funcWriter = WasmWriter(this)
+            val funcWriter = ModuleWriter(this)
             func.writeCode(funcWriter)
             val bytes = funcWriter.toByteArray()
-            writer.writeUInt32(bytes.size)
+            writer.writeU32(bytes.size)
             writer.write(bytes)
         }
     }
 
-    private fun writeExports(writer: WasmWriter) {
-        writer.writeUInt32(funcExports.size)
+    private fun writeExports(writer: ModuleWriter) {
+        writer.writeU32(funcExports.size)
         for (funcExport in funcExports) {
-            writer.writeName(funcExport.key)
+            writer.write(funcExport.key)
             writer.write(0)
-            writer.writeUInt32(funcExport.value.index)
+            writer.writeU32(funcExport.value.index)
         }
     }
 
 
-    private fun writeSection(writer: WasmWriter, section: WasmSection, writeSection: (WasmWriter) -> Unit) {
-        val sectionWriter = WasmWriter(this)
+    private fun writeDatas(writer: ModuleWriter) {
+        writer.writeU32(datas.size)
+        for (data in datas) {
+            if (data.offset == null) {
+                writer.writeU32(1)
+            } else {
+                writer.writeU32(0)
+                I32.Const(data.offset).toWasm(writer)
+                writer.write(WasmOpcode.END)
+            }
+            writer.writeU32(data.data.size)
+            writer.write(data.data)
+        }
+    }
+
+    private fun writeSection(writer: ModuleWriter, section: WasmSection, writeSection: (ModuleWriter) -> Unit) {
+        val sectionWriter = ModuleWriter(this)
         writeSection(sectionWriter)
         val bytes = sectionWriter.toByteArray()
 
         if (bytes.isNotEmpty()) {
             writer.write(section.id)
-            writer.writeUInt32(bytes.size)
+            writer.writeU32(bytes.size)
             writer.write(bytes)
         }
     }
 
 
     fun toWasm(): ByteArray {
-        val writer = WasmWriter(this)
+        val writer = ModuleWriter(this)
 
         // Magic
         writer.write(0)
@@ -101,7 +118,7 @@ class Module(
         writeSection(writer, WasmSection.FUNCTION, ::writeFunctions)
         writeSection(writer, WasmSection.CODE, ::writeCode)
         writeSection(writer, WasmSection.EXPORT, ::writeExports)
-
+        writeSection(writer, WasmSection.DATA, ::writeDatas)
 
         return writer.toByteArray()
     }
