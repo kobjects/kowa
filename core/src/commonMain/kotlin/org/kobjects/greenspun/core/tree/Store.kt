@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.memory
+package org.kobjects.greenspun.core.tree
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.storeF64
@@ -6,8 +6,6 @@ import org.kobjects.greenspun.core.binary.storeI32
 import org.kobjects.greenspun.core.binary.storeI64
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.module.ModuleWriter
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.*
 
 class Store(val target: Node, val value: Node) : Node() {

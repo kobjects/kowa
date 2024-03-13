@@ -32,6 +32,6 @@ open class LocalAssignment(
     override fun toWasm(writer: ModuleWriter) {
         expression.toWasm(writer)
         writer.write(WasmOpcode.LOCAL_SET)
-        writer.writeU32(index.toUInt())
+        writer.writeU32(index)
     }
 }

@@ -6,6 +6,12 @@ abstract class AbstractBinaryOperation(
     val rightOperand: Node,
 ) : Node() {
 
+    init {
+        require(rightOperand.returnType == leftOperand.returnType) {
+            "Second operand type ${rightOperand.returnType} does not match first operand type ${leftOperand.returnType}."
+        }
+    }
+
     final override fun toString(writer: CodeWriter) =
         when (operator) {
             BinaryOperator.MIN,

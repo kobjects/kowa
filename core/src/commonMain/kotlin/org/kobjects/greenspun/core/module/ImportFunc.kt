@@ -15,7 +15,7 @@ class ImportFunc(
         get() = type.parameterTypes.size
 
     override fun call(context: LocalRuntimeContext) =
-        context.instance.imports[index](context.variables)
+        context.instance.imports[index](context.instance, context.variables)
 
     override fun getFuncIdx(module: Module) = index
 

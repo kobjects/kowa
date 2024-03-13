@@ -56,7 +56,7 @@ object F64 : Type {
 
         override fun toWasm(writer: ModuleWriter) {
             writer.write(WasmOpcode.F64_CONST)
-            writer.write(value.toBits())
+            writer.writeF64(value)
         }
 
         override val returnType: Type

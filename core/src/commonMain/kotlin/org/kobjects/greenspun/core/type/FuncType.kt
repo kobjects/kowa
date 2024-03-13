@@ -17,15 +17,15 @@ data class FuncType(
 
     override fun toWasm(writer: ModuleWriter) {
         writer.write(WasmType.FUNC)
+        writer.writeU32(parameterTypes.size)
+        for (parameterType in parameterTypes) {
+            parameterType.toWasm(writer)
+        }
         if (returnType == Void) {
             writer.writeU32(0)
         } else {
             writer.writeU32(1)
             returnType.toWasm(writer)
-        }
-        writer.writeU32(parameterTypes.size)
-        for (parameterType in parameterTypes) {
-            parameterType.toWasm(writer)
         }
     }
 

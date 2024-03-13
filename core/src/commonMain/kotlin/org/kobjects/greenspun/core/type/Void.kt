@@ -10,7 +10,7 @@ import org.kobjects.greenspun.core.module.ModuleWriter
 object Void : Type {
     override fun createConstant(value: Any): Node = None
     override fun toWasm(writer: ModuleWriter) {
-        writer.write(WasmType.VOID.code)
+        writer.writeByte(WasmType.VOID.code)
     }
 
     object None : AbstractLeafNode() {

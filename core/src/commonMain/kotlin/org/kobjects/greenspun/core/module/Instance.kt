@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 
 class Instance(
     val module: Module,
-    val imports: List<(Array<Any>) -> Any>
+    val imports: List<(Instance, Array<Any>) -> Any>
 ) {
     val memory = ByteArray(65536)
     val rootContext = LocalRuntimeContext(this)
@@ -14,6 +14,12 @@ class Instance(
     val exports = module.funcExports.mapValues { ExportInstance(it.value)  }
 
     init {
+        for (data in module.datas) {
+            if (data.offset != null) {
+                data.data.copyInto(memory, data.offset)
+            }
+        }
+
         module.start?.call(rootContext)
     }
 

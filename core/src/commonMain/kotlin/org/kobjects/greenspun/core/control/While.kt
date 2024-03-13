@@ -48,7 +48,7 @@ class While(
         writer.write(WasmOpcode.BR_IF)
         writer.writeU32(1)  // Exit block
         body.toWasm(writer)
-        writer.writeU32(0)  // Loop
+        writer.write(WasmOpcode.END)
         writer.write(WasmOpcode.END)
     }
 }

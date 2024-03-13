@@ -23,7 +23,7 @@ object Bool : Type {
     }
 
     override fun toWasm(writer: ModuleWriter) {
-        writer.write(WasmType.I32.code)
+        writer.writeByte(WasmType.I32.code)
     }
 
 

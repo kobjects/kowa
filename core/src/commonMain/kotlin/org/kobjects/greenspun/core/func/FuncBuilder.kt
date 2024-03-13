@@ -25,13 +25,15 @@ class FuncBuilder(
         val variable = LocalReference(variables.size, type)
         variables.add(type)
 
+        paramCount++
+
         return variable
     }
 
     internal fun build() = Func(
-        moduleBuilder.funcs.size,
-        moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount).map { returnType }),
-        variables.subList(paramCount, variables.size),
-        Block(*statements.toTypedArray())
+        index = moduleBuilder.funcs.size,
+        type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),
+        locals = variables.subList(paramCount, variables.size),
+        body = Block(*statements.toTypedArray())
     )
 }

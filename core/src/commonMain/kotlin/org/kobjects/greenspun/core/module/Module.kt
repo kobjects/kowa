@@ -16,7 +16,7 @@ class Module(
     val datas: List<Data>
 ) {
     fun createInstance(importObject: ImportObject): Instance {
-        val resolvedImports = List<((Array<Any>) -> Any)>(this.funcImports.size) {
+        val resolvedImports = List<((Instance, Array<Any>) -> Any)>(this.funcImports.size) {
             val funcImport = funcImports[it]
             importObject.funcs[funcImport.module to funcImport.name] ?: throw IllegalStateException(
                 "Import function ${funcImport.module}.${funcImport.name} not found.")
@@ -27,17 +27,19 @@ class Module(
     private fun writeTypes(writer: ModuleWriter) {
         writer.writeU32(types.size)
         for (type in types) {
-           type.toWasm(writer)
+            type.toWasm(writer)
         }
     }
 
     private fun writeImports(writer: ModuleWriter) {
-        writer.writeU32(funcImports.size)
-        for (i in funcImports) {
-            writer.write(i.module)
-            writer.write(i.name)
-            writer.write(0)
-            writer.writeU32(i.index)
+        if (funcImports.isNotEmpty()) {
+            writer.writeU32(funcImports.size)
+            for (i in funcImports) {
+                writer.writeName(i.module)
+                writer.writeName(i.name)
+                writer.writeByte(0)
+                writer.writeU32(i.index)
+            }
         }
     }
 
@@ -54,33 +56,38 @@ class Module(
             val funcWriter = ModuleWriter(this)
             func.writeCode(funcWriter)
             val bytes = funcWriter.toByteArray()
+
             writer.writeU32(bytes.size)
-            writer.write(bytes)
+            writer.writeBytes(bytes)
         }
     }
 
     private fun writeExports(writer: ModuleWriter) {
-        writer.writeU32(funcExports.size)
-        for (funcExport in funcExports) {
-            writer.write(funcExport.key)
-            writer.write(0)
-            writer.writeU32(funcExport.value.index)
+        if (funcExports.isNotEmpty()) {
+            writer.writeU32(funcExports.size)
+            for (funcExport in funcExports) {
+                writer.writeName(funcExport.key)
+                writer.writeByte(0)
+                writer.writeU32(funcExport.value.index)
+            }
         }
     }
 
 
     private fun writeDatas(writer: ModuleWriter) {
-        writer.writeU32(datas.size)
-        for (data in datas) {
-            if (data.offset == null) {
-                writer.writeU32(1)
-            } else {
-                writer.writeU32(0)
-                I32.Const(data.offset).toWasm(writer)
-                writer.write(WasmOpcode.END)
+        if (datas.isNotEmpty()) {
+            writer.writeU32(datas.size)
+            for (data in datas) {
+                if (data.offset == null) {
+                    writer.writeU32(1)
+                } else {
+                    writer.writeU32(0)
+                    I32.Const(data.offset).toWasm(writer)
+                    writer.write(WasmOpcode.END)
+                }
+                writer.writeU32(data.data.size)
+                writer.writeBytes(data.data)
             }
-            writer.writeU32(data.data.size)
-            writer.write(data.data)
         }
     }
 
@@ -90,9 +97,9 @@ class Module(
         val bytes = sectionWriter.toByteArray()
 
         if (bytes.isNotEmpty()) {
-            writer.write(section.id)
+            writer.writeByte(section.id)
             writer.writeU32(bytes.size)
-            writer.write(bytes)
+            writer.writeBytes(bytes)
         }
     }
 
@@ -101,23 +108,26 @@ class Module(
         val writer = ModuleWriter(this)
 
         // Magic
-        writer.write(0)
-        writer.write(0x61)
-        writer.write(0x73)
-        writer.write(0x6d)
+        writer.writeByte(0)
+        writer.writeByte(0x61)
+        writer.writeByte(0x73)
+        writer.writeByte(0x6d)
 
         // Version
-        writer.write(1)
-        writer.write(0)
-        writer.write(0)
-        writer.write(0)
+        writer.writeInt(1)
 
         // Sections
         writeSection(writer, WasmSection.TYPE, ::writeTypes)
         writeSection(writer, WasmSection.IMPORT, ::writeImports)
         writeSection(writer, WasmSection.FUNCTION, ::writeFunctions)
-        writeSection(writer, WasmSection.CODE, ::writeCode)
+        // Table
+        // Memory
+        // Global
         writeSection(writer, WasmSection.EXPORT, ::writeExports)
+        // Start
+        // Elements
+        // Data count
+        writeSection(writer, WasmSection.CODE, ::writeCode)
         writeSection(writer, WasmSection.DATA, ::writeDatas)
 
         return writer.toByteArray()

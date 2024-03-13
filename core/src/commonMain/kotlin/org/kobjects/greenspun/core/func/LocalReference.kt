@@ -1,9 +1,11 @@
 package org.kobjects.greenspun.core.func
 
+import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.type.I32
 
 class LocalReference(
     val index: Int,
@@ -19,6 +21,7 @@ class LocalReference(
         writer.write("local$index")
 
     override fun toWasm(writer: ModuleWriter) {
-        TODO("Not yet implemented")
+        writer.write(WasmOpcode.LOCAL_GET)
+        writer.writeU32(index)
     }
 }
