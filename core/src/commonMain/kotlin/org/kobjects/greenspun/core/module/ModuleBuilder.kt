@@ -16,7 +16,7 @@ class ModuleBuilder {
     internal val datas = mutableListOf<Data>()
     internal var start: Func? = null
     internal var globals = mutableListOf<GlobalDefinition>()
-    internal var funcExports = mutableMapOf<String, Func>()
+    internal var funcExports = mutableListOf<Func>()
     internal var activeDataAddress = 0
 
     fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): ImportFunc {
@@ -46,9 +46,17 @@ class ModuleBuilder {
         return result
     }
 
+    fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
+        val result = Func(name, returnType, init)
+        funcExports.add(result.func)
+        return result
+    }
 
-    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
-        val builder = FuncBuilder(this, returnType)
+
+    fun Func(returnType: Type, init: FuncBuilder.() -> Unit) = Func(null, returnType, init)
+
+    fun Func(name: String?, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
+        val builder = FuncBuilder(this, name, returnType)
         builder.init()
         val f = builder.build()
         funcs.add(f)
@@ -70,9 +78,6 @@ class ModuleBuilder {
 
     fun Const(initializerOrValue: Any) = global(false, initializerOrValue)
 
-    fun Export(name: String, f: Func.Const) {
-        funcExports[name] = f.func
-    }
 
     internal fun build() = Module(
         types.toList(),
@@ -80,7 +85,7 @@ class ModuleBuilder {
         funcs.toList(),
         globals.toList(),
         start,
-        funcExports.toMap(),
+        funcExports.toList(),
         datas.toList())
 
     internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {

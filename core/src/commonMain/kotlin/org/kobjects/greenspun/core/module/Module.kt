@@ -12,7 +12,7 @@ class Module(
     val funcs: List<Func>,
     val globals: List<GlobalDefinition>,
     val start: Func?,
-    val funcExports: Map<String, Func>,
+    val funcExports: List<Func>,
     val datas: List<Data>
 ) {
     fun createInstance(importObject: ImportObject): Instance {
@@ -66,9 +66,9 @@ class Module(
         if (funcExports.isNotEmpty()) {
             writer.writeU32(funcExports.size)
             for (funcExport in funcExports) {
-                writer.writeName(funcExport.key)
+                writer.writeName(funcExport.name!!)
                 writer.writeByte(0)
-                writer.writeU32(funcExport.value.index)
+                writer.writeU32(funcExport.index)
             }
         }
     }

@@ -16,20 +16,19 @@ class FactorialTest {
 
     val module = Module {
 
-        val factorial = Func(I64) {
-            val param = Param(I64)
+        ExportFunc("factorial", I64) {
+            val value = Param(I64)
+
             val result = Local(1L)
 
-            +While(param Gt 1L,
+            +While(value Gt 1L,
                 Block {
-                    +Set(result, result * param)
-                    +Set(param, param - 1L)
+                    +Set(result, result * value)
+                    +Set(value, value - 1L)
                 }
             )
             +result
         }
-
-        Export("factorial", factorial)
     }
 
     @Test

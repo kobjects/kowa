@@ -13,6 +13,7 @@ import org.kobjects.greenspun.core.module.ModuleWriter
 
 class Func(
     val index: Int,
+    val name: String?,  // Required for exported functions
     override val type: FuncType,
     val locals: List<Type>,
     val body: Node

@@ -6,7 +6,7 @@ import org.kobjects.greenspun.core.module.ModuleWriter
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
-class Unused(val child: Node) : Node() {
+class Drop(val child: Node) : Node() {
     override fun eval(context: LocalRuntimeContext): Any {
         child.eval(context)
         return Unit
@@ -14,7 +14,7 @@ class Unused(val child: Node) : Node() {
 
     override fun children(): List<Node> = listOf(child)
 
-    override fun reconstruct(newChildren: List<Node>) = Unused(newChildren[0])
+    override fun reconstruct(newChildren: List<Node>) = Drop(newChildren[0])
 
     override fun toString(writer: CodeWriter) {
         writer.write("Unused(")

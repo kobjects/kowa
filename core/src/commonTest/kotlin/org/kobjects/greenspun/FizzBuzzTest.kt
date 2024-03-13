@@ -1,15 +1,12 @@
 package org.kobjects.greenspun
 
-import org.kobjects.greenspun.core.binary.storeI32
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.module.ImportObject
-import org.kobjects.greenspun.core.type.Str
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
-import org.kobjects.greenspun.core.tree.Unused
 import org.kobjects.greenspun.core.type.I32
 
 class FizzBuzzTest {
@@ -23,7 +20,7 @@ class FizzBuzzTest {
         val LogStr = ImportFunc("console", "logStr", Void, I32, I32)
         val LogI32 = ImportFunc("console", "logI32", Void, I32)
 
-        val f = Func(Void) {
+        ExportFunc("fizzBuzz", Void) {
             val count = Local(1)
             +While(count Le 20,
                 Block {
@@ -38,8 +35,6 @@ class FizzBuzzTest {
                 }
             )
         }
-
-        Export("fizzBuzz", f)
     }
 
 
@@ -61,7 +56,7 @@ class FizzBuzzTest {
 
         val fizzBuzzInstance = fizzBuzzModule.createInstance(importObject)
 
-        fizzBuzzInstance.exports["fizzBuzz"]!!()
+        fizzBuzzInstance.funcExports["fizzBuzz"]!!()
 
         assertEquals(20, result.size)
 
