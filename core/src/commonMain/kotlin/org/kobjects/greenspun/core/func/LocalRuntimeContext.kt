@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.module.Instance
+import org.kobjects.greenspun.core.instance.Instance
 
 class LocalRuntimeContext(
     val instance: Instance,

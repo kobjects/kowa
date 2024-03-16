@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
-import org.kobjects.greenspun.core.module.ImportObject
+import org.kobjects.greenspun.core.instance.ImportObject
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32
@@ -73,7 +73,7 @@ assertEquals("""
       val func0 = ImportFunc("console", "logStr", Void, I32, I32)
       val func1 = ImportFunc("console", "logI32", Void, I32)
       
-      val func2 = ExportFunc("fizzBuzz", Void) {
+      val func2 = Func(Void) {
         val local0 = Local(I32(1))
         +While((local0 Le I32(20)),
           Block {
@@ -86,6 +86,8 @@ assertEquals("""
               import1(local0)))
             +Set(local0, (local0 + I32(1)))
           })
+      }
+      Export("fizzBuzz", func2) 
     }
     """.superTrim(),
     fizzBuzzModule.toString().superTrim())

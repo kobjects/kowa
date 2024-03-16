@@ -1,11 +1,12 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.module.ModuleWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
 
-class GlobalReference(val global: GlobalDefinition) : AbstractLeafNode() {
+class GlobalReference(val global: GlobalInterface) : AbstractLeafNode() {
 
     override fun eval(context: LocalRuntimeContext) =
         context.instance.getGlobal(global.index)
@@ -18,5 +19,5 @@ class GlobalReference(val global: GlobalDefinition) : AbstractLeafNode() {
     }
 
     override val returnType: Type
-        get() = global.initializer.returnType
+        get() = global.type
 }

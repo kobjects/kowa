@@ -1,6 +1,5 @@
-package org.kobjects.greenspun.core.control
+package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
@@ -9,7 +8,7 @@ import org.kobjects.greenspun.core.module.ModuleWriter
 
 
 class Call(
-    val callable: Callable,
+    val callable: FuncInterface,
     vararg val parameters: Node
 ) : Node() {
 

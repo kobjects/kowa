@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.instance
 
 class ImportObject {
     val funcs = mutableMapOf<Pair<String, String>, (Instance, Array<Any>) -> Any>()

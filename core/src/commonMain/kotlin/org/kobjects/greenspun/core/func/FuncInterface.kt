@@ -1,12 +1,12 @@
-package org.kobjects.greenspun.core.control
+package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.module.Module
+import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 
-interface Callable {
+interface FuncInterface : Exportable {
     val index: Int
     val type: FuncType
     val localContextSize: Int
@@ -17,4 +17,9 @@ interface Callable {
         Call(this, *node.map { Node.of(it) }.toTypedArray())
 
     fun toString(writer: CodeWriter)
+
+    override fun writeExport(writer: WasmWriter) {
+        writer.writeByte(0)
+        writer.writeU32(index)
+    }
 }

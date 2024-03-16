@@ -1,16 +1,14 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.control.Callable
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 
-class ImportFunc(
+class ImportedFunc(
     override val index: Int,
     val module: String,
     val name: String,
     override val type: FuncType
-) : Callable {
+) : FuncInterface {
 
     override val localContextSize: Int
         get() = type.parameterTypes.size

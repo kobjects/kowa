@@ -2,8 +2,12 @@ package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmSection
-import org.kobjects.greenspun.core.control.Callable
+import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.Func
+import org.kobjects.greenspun.core.func.ImportedFunc
+import org.kobjects.greenspun.core.global.Global
+import org.kobjects.greenspun.core.instance.ImportObject
+import org.kobjects.greenspun.core.instance.Instance
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
@@ -11,13 +15,14 @@ import org.kobjects.greenspun.core.type.I32
 class Module(
     val types: List<FuncType>,
 //    val funcImports: List<ImportFunc>,
-    val funcs: List<Callable>,
-    val globals: List<GlobalDefinition>,
+    val funcs: List<FuncInterface>,
+    val globals: List<Global>,
     val start: Func?,
-    val datas: List<Data>
+    val datas: List<Data>,
+    val exports: List<Export>
 ) {
     fun createInstance(importObject: ImportObject): Instance {
-        val funcImports = funcs.filterIsInstance<ImportFunc>()
+        val funcImports = funcs.filterIsInstance<ImportedFunc>()
 
         val resolvedImports = List<((Instance, Array<Any>) -> Any)>(funcImports.size) {
             val funcImport = funcImports[it]
@@ -35,7 +40,7 @@ class Module(
     }
 
     private fun writeImports(writer: ModuleWriter) {
-        val funcImports = funcs.filterIsInstance<ImportFunc>()
+        val funcImports = funcs.filterIsInstance<ImportedFunc>()
         if (funcImports.isNotEmpty()) {
             writer.writeU32(funcImports.size)
             for (i in funcImports) {
@@ -59,7 +64,7 @@ class Module(
         writer.writeU32(funcs.size)
         for (func in funcs) {
             val funcWriter = ModuleWriter(this)
-            func.writeCode(funcWriter)
+            func.writeBody(funcWriter)
             val bytes = funcWriter.toByteArray()
 
             writer.writeU32(bytes.size)
@@ -68,13 +73,11 @@ class Module(
     }
 
     private fun writeExports(writer: ModuleWriter) {
-        val funcExports = funcs.filterIsInstance<Func>().filter { it.exported }
-        if (funcExports.isNotEmpty()) {
-            writer.writeU32(funcExports.size)
-            for (funcExport in funcExports) {
-                writer.writeName(funcExport.name!!)
-                writer.writeByte(0)
-                writer.writeU32(funcExport.index)
+        if (exports.isNotEmpty()) {
+            writer.writeU32(exports.size)
+            for (export in exports) {
+                writer.writeName(export.name)
+                export.value.writeExport(writer)
             }
         }
     }
@@ -146,6 +149,24 @@ class Module(
         for (func in funcs) {
             func.toString(inner)
         }
+
+        writer.newLine()
+
+        for (export in exports) {
+            writer.newLine()
+            writer.write("Export(")
+            writer.writeQuoted(export.name)
+            writer.write(", ")
+            writer.write(when (export.value) {
+                is FuncInterface -> "func${export.value.index}"
+                is Global -> "global${export.value.index}"
+                else -> throw UnsupportedOperationException()
+            })
+            writer.write(")")
+        }
+
+        writer.newLine()
+        writer.write("}\n")
     }
 
     override fun toString(): String {

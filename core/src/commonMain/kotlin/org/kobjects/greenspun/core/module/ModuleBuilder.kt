@@ -1,10 +1,13 @@
 package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.control.Callable
+import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.func.FuncBuilder
 import org.kobjects.greenspun.core.func.Func
+import org.kobjects.greenspun.core.func.ImportedFunc
+import org.kobjects.greenspun.core.global.Global
+import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
@@ -12,17 +15,18 @@ import org.kobjects.greenspun.core.type.Type
 
 class ModuleBuilder {
     internal val types = mutableListOf<FuncType>()
-    internal val funcs = mutableListOf<Callable>()
+    internal val funcs = mutableListOf<FuncInterface>()
     internal val datas = mutableListOf<Data>()
     internal var start: Func? = null
-    internal var globals = mutableListOf<GlobalDefinition>()
+    internal var globals = mutableListOf<Global>()
     internal var activeDataAddress = 0
+    internal val exports = mutableMapOf<String, Export>()
 
-    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): ImportFunc {
+    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): ImportedFunc {
         require (funcs.lastOrNull() !is Func) {
             "All func imports need to be declared before any function declaration."
         }
-        val i = ImportFunc(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
+        val i = ImportedFunc(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
         funcs.add(i)
         return i
     }
@@ -49,18 +53,17 @@ class ModuleBuilder {
     }
 
     fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
-        val builder = FuncBuilder(this, true, name, returnType)
-        builder.init()
-        val f = builder.build()
-        funcs.add(f)
-        return Func.Const(f)
+        val result = Func(returnType, init)
+        require(!exports.containsKey(name)) {
+            "Export '$name' already defined."
+        }
+        exports.put(name, Export(name, result.func))
+        return result
     }
 
 
-    fun Func(returnType: Type, init: FuncBuilder.() -> Unit) = Func(null, returnType, init)
-
-    fun Func(name: String?, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
-        val builder = FuncBuilder(this, false, name, returnType)
+    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
+        val builder = FuncBuilder(this, returnType)
         builder.init()
         val f = builder.build()
         funcs.add(f)
@@ -73,7 +76,7 @@ class ModuleBuilder {
 
     private fun global(mutable: Boolean, initializerOrValue: Any): GlobalReference {
         val initializer = Node.of(initializerOrValue)
-        val global = GlobalDefinition(globals.size, mutable, initializer)
+        val global = Global(globals.size, mutable, initializer)
         globals.add(global)
         return GlobalReference(global)
     }
@@ -88,7 +91,8 @@ class ModuleBuilder {
         funcs.toList(),
         globals.toList(),
         start,
-        datas.toList())
+        datas.toList(),
+        exports.values.toList())
 
     internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {
         for (candidate in types) {

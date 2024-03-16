@@ -1,7 +1,8 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.instance
 
-import org.kobjects.greenspun.core.func.Func
+import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.module.Module
 
 class Instance(
     val module: Module,
@@ -11,10 +12,9 @@ class Instance(
     val rootContext = LocalRuntimeContext(this)
     val globals = Array(module.globals.size) { module.globals[it].initializer.eval(rootContext) }
 
-    val funcExports = module.funcs
-        .filterIsInstance<Func>()
-        .filter { it.exported }
-        .map { it.name!! to ExportInstance(it) }
+    val funcExports = module.exports
+        .filter { it.value is FuncInterface }
+        .map { it.name!! to ExportInstance(it.value as FuncInterface) }
         .toMap()
 
     init {
@@ -35,7 +35,7 @@ class Instance(
     fun getGlobal(index: Int): Any = globals[index]
 
 
-    inner class ExportInstance(val func: Func) {
+    inner class ExportInstance(val func: FuncInterface) {
 
         operator fun invoke(vararg params: Any): Any {
             val context = rootContext.createChild(func.localContextSize)

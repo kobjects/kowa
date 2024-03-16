@@ -2,24 +2,18 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.control.Block
-import org.kobjects.greenspun.core.control.Call
-import org.kobjects.greenspun.core.control.Callable
-import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.module.ModuleWriter
 
 class Func(
-    val exported: Boolean,
     override val index: Int,
-    val name: String?,  // Required for exported functions
     override val type: FuncType,
     val locals: List<Type>,
     val body: Block
-) : Callable {
+) : FuncInterface {
     override val localContextSize: Int
         get() = type.parameterTypes.size + locals.size
 
@@ -30,14 +24,7 @@ class Func(
         writer.newLine()
         writer.newLine()
         writer.write("val func$index = ")
-        if (exported) {
-            writer.write("Export")
-        }
         writer.write("Func(")
-        if (name != null) {
-            writer.writeQuoted(name)
-            writer.write(", ")
-        }
         writer.write(type.returnType)
         writer.write(") {")
         val inner = writer.indented()
@@ -54,7 +41,7 @@ class Func(
     }
 
     // Called from the module code segment writer
-    fun writeCode(writer: ModuleWriter) {
+    fun writeBody(writer: ModuleWriter) {
         writer.writeU32(locals.size)
         for (local in locals) {
             writer.writeU32(1)  // TODO: Add compression
