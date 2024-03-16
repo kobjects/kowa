@@ -2,21 +2,24 @@ package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmSection
+import org.kobjects.greenspun.core.control.Callable
 import org.kobjects.greenspun.core.func.Func
+import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
 
 class Module(
     val types: List<FuncType>,
-    val funcImports: List<ImportFunc>,
-    val funcs: List<Func>,
+//    val funcImports: List<ImportFunc>,
+    val funcs: List<Callable>,
     val globals: List<GlobalDefinition>,
     val start: Func?,
-    val funcExports: List<Func>,
     val datas: List<Data>
 ) {
     fun createInstance(importObject: ImportObject): Instance {
-        val resolvedImports = List<((Instance, Array<Any>) -> Any)>(this.funcImports.size) {
+        val funcImports = funcs.filterIsInstance<ImportFunc>()
+
+        val resolvedImports = List<((Instance, Array<Any>) -> Any)>(funcImports.size) {
             val funcImport = funcImports[it]
             importObject.funcs[funcImport.module to funcImport.name] ?: throw IllegalStateException(
                 "Import function ${funcImport.module}.${funcImport.name} not found.")
@@ -32,6 +35,7 @@ class Module(
     }
 
     private fun writeImports(writer: ModuleWriter) {
+        val funcImports = funcs.filterIsInstance<ImportFunc>()
         if (funcImports.isNotEmpty()) {
             writer.writeU32(funcImports.size)
             for (i in funcImports) {
@@ -51,6 +55,7 @@ class Module(
     }
 
     private fun writeCode(writer: ModuleWriter) {
+        val funcs = funcs.filterIsInstance<Func>()
         writer.writeU32(funcs.size)
         for (func in funcs) {
             val funcWriter = ModuleWriter(this)
@@ -63,6 +68,7 @@ class Module(
     }
 
     private fun writeExports(writer: ModuleWriter) {
+        val funcExports = funcs.filterIsInstance<Func>().filter { it.exported }
         if (funcExports.isNotEmpty()) {
             writer.writeU32(funcExports.size)
             for (funcExport in funcExports) {
@@ -133,4 +139,18 @@ class Module(
         return writer.toByteArray()
     }
 
+
+    fun toString(writer: CodeWriter) {
+        writer.write("Module {")
+        val inner = writer.indented()
+        for (func in funcs) {
+            func.toString(inner)
+        }
+    }
+
+    override fun toString(): String {
+        val writer = CodeWriter()
+        toString(writer)
+        return writer.toString()
+    }
 }

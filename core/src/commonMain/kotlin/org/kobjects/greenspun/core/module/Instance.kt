@@ -11,7 +11,11 @@ class Instance(
     val rootContext = LocalRuntimeContext(this)
     val globals = Array(module.globals.size) { module.globals[it].initializer.eval(rootContext) }
 
-    val funcExports = module.funcExports.map { it.name!! to ExportInstance(it) }.toMap()
+    val funcExports = module.funcs
+        .filterIsInstance<Func>()
+        .filter { it.exported }
+        .map { it.name!! to ExportInstance(it) }
+        .toMap()
 
     init {
         for (data in module.datas) {

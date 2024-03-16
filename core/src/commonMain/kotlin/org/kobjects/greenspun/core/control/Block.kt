@@ -43,17 +43,21 @@ class Block(
     override fun toString(writer: CodeWriter) {
         writer.write("Block {")
         if (statements.isNotEmpty()) {
-            val innerWriter = writer.indented()
-            for (statement in statements) {
-                innerWriter.newLine()
-                if (statement !is LocalDefinition) {
-                    innerWriter.write("+")
-                }
-                statement.toString(innerWriter)
-            }
+            stringifyChildren(writer.indented())
             writer.newLine()
         }
         writer.write("}")
+    }
+
+    fun stringifyChildren(writer: CodeWriter) {
+        for (statement in statements) {
+            writer.newLine()
+            if (statement !is LocalDefinition) {
+                writer.write("+")
+            }
+            statement.toString(writer)
+        }
+
     }
 
     override fun toWasm(writer: ModuleWriter) =

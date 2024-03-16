@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.control.Callable
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.func.FuncBuilder
 import org.kobjects.greenspun.core.func.Func
@@ -11,17 +12,18 @@ import org.kobjects.greenspun.core.type.Type
 
 class ModuleBuilder {
     internal val types = mutableListOf<FuncType>()
-    internal val funcImports = mutableListOf<ImportFunc>()
-    internal val funcs = mutableListOf<Func>()
+    internal val funcs = mutableListOf<Callable>()
     internal val datas = mutableListOf<Data>()
     internal var start: Func? = null
     internal var globals = mutableListOf<GlobalDefinition>()
-    internal var funcExports = mutableListOf<Func>()
     internal var activeDataAddress = 0
 
     fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): ImportFunc {
-        val i = ImportFunc(funcImports.size, module, name, getFuncType(returnType, paramTypes.toList()))
-        funcImports.add(i)
+        require (funcs.lastOrNull() !is Func) {
+            "All func imports need to be declared before any function declaration."
+        }
+        val i = ImportFunc(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
+        funcs.add(i)
         return i
     }
 
@@ -47,16 +49,18 @@ class ModuleBuilder {
     }
 
     fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
-        val result = Func(name, returnType, init)
-        funcExports.add(result.func)
-        return result
+        val builder = FuncBuilder(this, true, name, returnType)
+        builder.init()
+        val f = builder.build()
+        funcs.add(f)
+        return Func.Const(f)
     }
 
 
     fun Func(returnType: Type, init: FuncBuilder.() -> Unit) = Func(null, returnType, init)
 
     fun Func(name: String?, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
-        val builder = FuncBuilder(this, name, returnType)
+        val builder = FuncBuilder(this, false, name, returnType)
         builder.init()
         val f = builder.build()
         funcs.add(f)
@@ -81,11 +85,9 @@ class ModuleBuilder {
 
     internal fun build() = Module(
         types.toList(),
-        funcImports.toList(),
         funcs.toList(),
         globals.toList(),
         start,
-        funcExports.toList(),
         datas.toList())
 
     internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {

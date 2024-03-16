@@ -55,7 +55,7 @@ class Call(
             parameter.toWasm(writer)
         }
         writer.write(WasmOpcode.CALL)
-        writer.writeU32(callable.getFuncIdx(writer.module))
+        writer.writeU32(callable.index)
     }
 
     override val returnType: Type

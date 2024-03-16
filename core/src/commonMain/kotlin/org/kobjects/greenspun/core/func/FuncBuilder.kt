@@ -7,6 +7,7 @@ import org.kobjects.greenspun.core.module.ModuleBuilder
 
 class FuncBuilder(
     val moduleBuilder: ModuleBuilder,
+    val exported: Boolean,
     val name: String?,
     val returnType: Type
 ) : AbstractBlockBuilder(mutableListOf()) {
@@ -33,6 +34,7 @@ class FuncBuilder(
 
     internal fun build() = Func(
         index = moduleBuilder.funcs.size,
+        exported = exported,
         name = name,
         type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),
         locals = variables.subList(paramCount, variables.size),

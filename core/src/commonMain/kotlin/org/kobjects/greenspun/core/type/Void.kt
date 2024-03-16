@@ -26,4 +26,6 @@ object Void : Type {
         override fun toWasm(writer: ModuleWriter) {
         }
     }
+
+    override fun toString() = "Void"
 }

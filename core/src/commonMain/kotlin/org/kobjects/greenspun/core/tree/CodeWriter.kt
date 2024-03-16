@@ -22,4 +22,9 @@ class CodeWriter(
     }
 
     override fun toString() = sb.toString()
+    fun writeQuoted(s: String) {
+        sb.append("\"")
+        sb.append(s)
+        sb.append("\"")
+    }
 }

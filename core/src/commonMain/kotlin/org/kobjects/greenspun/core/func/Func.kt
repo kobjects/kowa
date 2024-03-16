@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.control.Block
 import org.kobjects.greenspun.core.control.Call
 import org.kobjects.greenspun.core.control.Callable
 import org.kobjects.greenspun.core.module.Module
@@ -12,11 +13,12 @@ import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.module.ModuleWriter
 
 class Func(
-    val index: Int,
+    val exported: Boolean,
+    override val index: Int,
     val name: String?,  // Required for exported functions
     override val type: FuncType,
     val locals: List<Type>,
-    val body: Node
+    val body: Block
 ) : Callable {
     override val localContextSize: Int
         get() = type.parameterTypes.size + locals.size
@@ -24,8 +26,32 @@ class Func(
     override fun call(context: LocalRuntimeContext) =
         body.eval(context)
 
-    override fun getFuncIdx(module: Module) =
-        index + module.funcImports.size
+    override fun toString(writer: CodeWriter) {
+        writer.newLine()
+        writer.newLine()
+        writer.write("val func$index = ")
+        if (exported) {
+            writer.write("Export")
+        }
+        writer.write("Func(")
+        if (name != null) {
+            writer.writeQuoted(name)
+            writer.write(", ")
+        }
+        writer.write(type.returnType)
+        writer.write(") {")
+        val inner = writer.indented()
+
+        for (i in type.parameterTypes.indices) {
+            inner.newLine()
+            inner.write("val param$i = param(${type.parameterTypes[i]})")
+        }
+
+        body.stringifyChildren(inner)
+
+        writer.newLine()
+        writer.write("}")
+    }
 
     // Called from the module code segment writer
     fun writeCode(writer: ModuleWriter) {
@@ -55,6 +81,7 @@ class Func(
         override fun toWasm(writer: ModuleWriter) = throw UnsupportedOperationException()
 
     }
+
 
 }
 

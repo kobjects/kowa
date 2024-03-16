@@ -66,44 +66,50 @@ class FizzBuzzTest {
             11, "Fizz", 13, 14, "FizzBuzz",
             16, 17, "Fizz", 19, "Buzz"), result)
 
-                assertEquals("""
-                    Block { 
-                      val local0 = Local(I32(1))
-                      +While((local0 Le I32(20)),
-                        Block { 
-                          +If(((local0 % I32(3)) Eq I32(0)),
-                            If(((local0 % I32(5)) Eq I32(0)),
-                              import0(I32(8), I32(8)),
-                              import0(I32(0), I32(4))),
-                            If(((local0 % I32(5)) Eq I32(0)), 
-                              import0(I32(4), I32(4)),
-                            import1(local0)))
-                          +Set(local0, (local0 + I32(1)))
-                        })
-                    }
-                    """.superTrim(),
-                    fizzBuzzModule.funcs[0].body.toString().superTrim())
+
+
+assertEquals("""
+    Module {
+      val func0 = ImportFunc("console", "logStr", Void, I32, I32)
+      val func1 = ImportFunc("console", "logI32", Void, I32)
+      
+      val func2 = ExportFunc("fizzBuzz", Void) {
+        val local0 = Local(I32(1))
+        +While((local0 Le I32(20)),
+          Block {
+            +If(((local0 % I32(3)) Eq I32(0)),
+              If(((local0 % I32(5)) Eq I32(0)),
+                import0(I32(8), I32(8)),
+                import0(I32(0), I32(4))),
+              If(((local0 % I32(5)) Eq I32(0)),
+                import0(I32(4), I32(4)),
+              import1(local0)))
+            +Set(local0, (local0 + I32(1)))
+          })
     }
+    """.superTrim(),
+    fizzBuzzModule.toString().superTrim())
+}
 
 
-    companion object {
+companion object {
 
-        fun String.superTrim(): String {
-            val sb = StringBuilder()
-            var ignoreWs = true
-            for (c in trim()) {
-                if (c <= ' ') {
-                    if (!ignoreWs) {
-                        sb.append(' ')
-                        ignoreWs = true
-                    }
-                } else {
-                    sb.append(c)
-                    ignoreWs = false
-                }
-            }
-            return sb.toString()
-        }
-
+fun String.superTrim(): String {
+val sb = StringBuilder()
+var ignoreWs = true
+for (c in trim()) {
+if (c <= ' ') {
+    if (!ignoreWs) {
+        sb.append(' ')
+        ignoreWs = true
     }
+} else {
+    sb.append(c)
+    ignoreWs = false
+}
+}
+return sb.toString()
+}
+
+}
 }
