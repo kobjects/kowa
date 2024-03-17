@@ -2,31 +2,39 @@ package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncInterface
-import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.func.FuncBuilder
-import org.kobjects.greenspun.core.func.Func
-import org.kobjects.greenspun.core.func.ImportedFunc
-import org.kobjects.greenspun.core.global.Global
+import org.kobjects.greenspun.core.func.FuncImpl
+import org.kobjects.greenspun.core.func.FuncImport
+import org.kobjects.greenspun.core.global.GlobalImpl
+import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalReference
+import org.kobjects.greenspun.core.global.GlobalImport
+import org.kobjects.greenspun.core.memory.MemoryImpl
+import org.kobjects.greenspun.core.memory.MemoryImport
+import org.kobjects.greenspun.core.memory.MemoryInterface
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
 
 class ModuleBuilder {
-    internal val types = mutableListOf<FuncType>()
-    internal val funcs = mutableListOf<FuncInterface>()
-    internal val datas = mutableListOf<Data>()
-    internal var start: Func? = null
-    internal var globals = mutableListOf<Global>()
-    internal var activeDataAddress = 0
-    internal val exports = mutableMapOf<String, Export>()
+    val types = mutableListOf<FuncType>()
+    val funcs = mutableListOf<FuncInterface>()
+    val datas = mutableListOf<DataImpl>()
+    var start: Int? = null
+    var globals = mutableListOf<GlobalInterface>()
+    val exports = mutableMapOf<String, Export>()
+    var memory: MemoryInterface? = null
 
-    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): ImportedFunc {
-        require (funcs.lastOrNull() !is Func) {
+    private var memoryImplied = false
+    private var activeDataAddress = 0
+
+
+    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): FuncImport {
+        require (funcs.lastOrNull() !is FuncImpl) {
             "All func imports need to be declared before any function declaration."
         }
-        val i = ImportedFunc(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
+        val i = FuncImport(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
         funcs.add(i)
         return i
     }
@@ -35,64 +43,122 @@ class ModuleBuilder {
      * Defines an active data block at the 'current' address, starting with 0, incrementing the current address
      * accordingly, returning an I32 const for the data start address.
      */
-    fun ActiveData(vararg data: Any) = ActiveDataAt(activeDataAddress, *data)
+    fun Data(data: Any) = Data(activeDataAddress, data)
 
-    fun ActiveDataAt(offset: Int, vararg data: Any): I32.Const {
-        activeDataAddress = offset
+    fun Data(offset: Int, data: Any): I32.Const {
+
+        if (offset < activeDataAddress) {
+            throw IllegalArgumentException("Potentially overlapping data")
+        }
 
         val writer = WasmWriter()
-        for (item in data) {
-            writer.writeAny(item)
-        }
+        writer.writeAny(data)
 
-        datas.add(Data(offset, writer.toByteArray()))
+        datas.add(DataImpl(offset, writer.toByteArray()))
 
         val result = I32.Const(activeDataAddress)
-        activeDataAddress += writer.size
-        return result
-    }
+        activeDataAddress = offset + writer.size
 
-    fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
-        val result = Func(returnType, init)
-        require(!exports.containsKey(name)) {
-            "Export '$name' already defined."
+        if (activeDataAddress > 65536 * (memory?.min ?: 0)) {
+            if (memory == null || memoryImplied) {
+                memory = MemoryImpl((65535 + activeDataAddress) / 65536)
+                memoryImplied = true
+            } else {
+                throw IllegalArgumentException("Data offset exceeds minimum size")
+            }
         }
-        exports.put(name, Export(name, result.func))
+
         return result
     }
 
+    fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl.Const {
+        val result = Func(returnType, init)
+        export(name, result.func)
+        return result
+    }
 
-    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): Func.Const {
+    fun Export(name: String, funcReference: FuncImpl.Const): FuncImpl.Const {
+        export(name, funcReference.func)
+        return funcReference
+    }
+
+    fun Export(name: String, globalReference: GlobalReference): GlobalReference {
+        export(name, globalReference.global)
+        return globalReference
+    }
+
+    fun Memory(min: Int, max: Int? = null) {
+        if (memory != null) {
+            throw IllegalStateException("multiple memories")
+        }
+        memory = MemoryImpl(min, max)
+    }
+
+    fun ImportMemory(module: String, name: String, min: Int, max: Int? = null) {
+        if (memory != null) {
+            throw IllegalStateException("multiple memories")
+        }
+        memory = MemoryImport(module, name, min, max)
+    }
+
+    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl.Const {
         val builder = FuncBuilder(this, returnType)
         builder.init()
         val f = builder.build()
         funcs.add(f)
-        return Func.Const(f)
+        return FuncImpl.Const(f)
     }
 
-    fun Start(init: FuncBuilder.() -> Unit) {
-        start = Func(Void, init).func
+    fun Start(func: FuncImpl.Const) {
+        start = func.func.index
     }
 
-    private fun global(mutable: Boolean, initializerOrValue: Any): GlobalReference {
+    fun Global(initializerOrValue: Any) = global(null, true, initializerOrValue)
+
+    fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
+
+    fun ImportGlobal(module: String, name: String, type: Type) = importGlobal(module, name, true, type)
+
+    fun ImportConst(module: String, name : String, type: Type) = importGlobal(module, name, false, type)
+
+
+   fun export(name: String, exportable: Exportable) {
+        require(!exports.containsKey(name)) {
+            "Export '$name' already defined."
+        }
+        exports.put(name, Export(name, exportable))
+    }
+
+    fun global(name: String?, mutable: Boolean, initializerOrValue: Any): GlobalReference {
         val initializer = Node.of(initializerOrValue)
-        val global = Global(globals.size, mutable, initializer)
+        val global = GlobalImpl(globals.size, mutable, initializer)
         globals.add(global)
+        if (name != null) {
+            exports.put(name, Export(name, global))
+        }
         return GlobalReference(global)
     }
 
-    fun Var(initializerOrValue: Any) = global(true, initializerOrValue)
+    fun importGlobal(module: String, name: String, mutable: Boolean, type: Type): GlobalReference {
+        require(globals.lastOrNull() !is GlobalImpl) {
+            "All global imports must be declared before declaring global variables."
+        }
+        val global = GlobalImport(globals.size, module, name, mutable, type)
+        globals.add(global)
+        return(GlobalReference(global))
+    }
 
-    fun Const(initializerOrValue: Any) = global(false, initializerOrValue)
-
-
-    internal fun build() = Module(
+    fun build() = Module(
         types.toList(),
         funcs.toList(),
+        // Tables
+        memory,
         globals.toList(),
+        exports.values.toList(),
         start,
+        // code
         datas.toList(),
-        exports.values.toList())
+        )
 
     internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {
         for (candidate in types) {

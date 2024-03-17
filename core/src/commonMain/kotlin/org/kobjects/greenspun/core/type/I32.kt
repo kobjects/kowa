@@ -4,6 +4,7 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.binary.loadI32
 import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.max
@@ -35,7 +36,7 @@ object I32 : Type {
 
     override fun toString() = "I32"
 
-    override fun toWasm(writer: ModuleWriter) = writer.write(WasmType.I32)
+    override fun toWasm(writer: WasmWriter) = writer.write(WasmType.I32)
 
     class Const(
         val value: Int

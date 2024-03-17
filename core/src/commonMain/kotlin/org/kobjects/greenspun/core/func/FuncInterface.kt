@@ -16,10 +16,12 @@ interface FuncInterface : Exportable {
     operator fun invoke(vararg node: Any) =
         Call(this, *node.map { Node.of(it) }.toTypedArray())
 
-    fun toString(writer: CodeWriter)
-
-    override fun writeExport(writer: WasmWriter) {
+    override fun writeExportDescription(writer: WasmWriter) {
         writer.writeByte(0)
         writer.writeU32(index)
+    }
+
+    override fun writeExportDescription(writer: CodeWriter) {
+        writer.write("func$index")
     }
 }

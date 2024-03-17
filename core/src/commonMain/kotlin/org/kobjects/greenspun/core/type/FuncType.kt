@@ -1,7 +1,8 @@
 package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmType
-import org.kobjects.greenspun.core.func.Func
+import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.func.FuncImpl
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.module.ModuleWriter
 
@@ -12,10 +13,10 @@ data class FuncType(
 ) : Type {
 
     override fun createConstant(value: Any): Node {
-        return Func.Const(value as Func)
+        return FuncImpl.Const(value as FuncImpl)
     }
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         writer.write(WasmType.FUNC)
         writer.writeU32(parameterTypes.size)
         for (parameterType in parameterTypes) {

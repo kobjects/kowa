@@ -30,7 +30,7 @@ class FuncBuilder(
         return variable
     }
 
-    internal fun build() = Func(
+    internal fun build() = FuncImpl(
         index = moduleBuilder.funcs.size,
         type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),
         locals = variables.subList(paramCount, variables.size),

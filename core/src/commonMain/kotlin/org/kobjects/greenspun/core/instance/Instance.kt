@@ -2,19 +2,23 @@ package org.kobjects.greenspun.core.instance
 
 import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.module.Module
 
 class Instance(
     val module: Module,
     val imports: List<(Instance, Array<Any>) -> Any>
 ) {
-    val memory = ByteArray(65536)
+    val memory = ByteArray(65536 * (module.memory?.min ?: 0))
     val rootContext = LocalRuntimeContext(this)
-    val globals = Array(module.globals.size) { module.globals[it].initializer.eval(rootContext) }
+    val globals = Array(module.globals.size) {
+        val global = module.globals[it]
+        if (global is GlobalImpl) global.initializer.eval(rootContext) else Unit
+    }
 
     val funcExports = module.exports
         .filter { it.value is FuncInterface }
-        .map { it.name!! to ExportInstance(it.value as FuncInterface) }
+        .map { it.name to FuncExport(it.value as FuncInterface) }
         .toMap()
 
     init {
@@ -24,7 +28,13 @@ class Instance(
             }
         }
 
-        module.start?.call(rootContext)
+        if (module.start != null) {
+            module.funcs[module.start].call(rootContext)
+        }
+    }
+
+    fun invoke(name: String, vararg args: Any): Any {
+        return funcExports[name]!!.invoke(*args)
     }
 
 
@@ -35,7 +45,7 @@ class Instance(
     fun getGlobal(index: Int): Any = globals[index]
 
 
-    inner class ExportInstance(val func: FuncInterface) {
+    inner class FuncExport(val func: FuncInterface) {
 
         operator fun invoke(vararg params: Any): Any {
             val context = rootContext.createChild(func.localContextSize)

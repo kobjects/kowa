@@ -39,7 +39,7 @@ class Call(
         Call(callable, *newChildren.toTypedArray())
 
     override fun toString(writer: CodeWriter) {
-        writer.write("$callable(")
+        writer.write("func${callable.index}(")
         for (i in parameters.indices) {
             if (i > 0) {
                 writer.write(", ")

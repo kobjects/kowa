@@ -1,5 +1,6 @@
 package org.kobjects.greenspun.core.type
 
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.module.ModuleWriter
@@ -15,7 +16,7 @@ object Str : Type {
         return BinaryOperation(operator, leftOperand, rightOperand)
     }
 
-    override fun toWasm(writer: ModuleWriter) = throw UnsupportedOperationException("NYI")
+    override fun toWasm(writer: WasmWriter) = throw UnsupportedOperationException("NYI")
 
     override fun toString() = "Str"
 

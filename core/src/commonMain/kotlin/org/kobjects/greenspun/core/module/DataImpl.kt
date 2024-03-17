@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.module
 
-class Data(
+class DataImpl(
     val offset: Int?,
     val data: ByteArray
 )

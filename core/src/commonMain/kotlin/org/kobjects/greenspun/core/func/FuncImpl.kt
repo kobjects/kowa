@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.module.ModuleWriter
 
-class Func(
+class FuncImpl(
     override val index: Int,
     override val type: FuncType,
     val locals: List<Type>,
@@ -20,7 +20,7 @@ class Func(
     override fun call(context: LocalRuntimeContext) =
         body.eval(context)
 
-    override fun toString(writer: CodeWriter) {
+    fun toString(writer: CodeWriter) {
         writer.newLine()
         writer.newLine()
         writer.write("val func$index = ")
@@ -40,6 +40,8 @@ class Func(
         writer.write("}")
     }
 
+
+
     // Called from the module code segment writer
     fun writeBody(writer: ModuleWriter) {
         writer.writeU32(locals.size)
@@ -52,7 +54,7 @@ class Func(
     }
 
 
-    class Const(val func: Func) : AbstractLeafNode() {
+    class Const(val func: FuncImpl) : AbstractLeafNode() {
         override fun eval(context: LocalRuntimeContext) = func
 
         override fun toString(writer: CodeWriter) {

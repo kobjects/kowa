@@ -4,6 +4,7 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -35,7 +36,7 @@ object F64 : Type {
         return UnaryOperation(operator, operand)
     }
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         writer.write(WasmType.F64)
     }
 

@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.instance.ImportObject
+import org.kobjects.greenspun.core.instance.instantiate
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32
@@ -13,9 +14,9 @@ class FizzBuzzTest {
 
     val fizzBuzzModule = Module {
 
-        val fizz = ActiveData("Fizz")
-        val buzz = ActiveData("Buzz")
-        val fizzBuzz = ActiveData("FizzBuzz")
+        val fizz = Data("Fizz")
+        val buzz = Data("Buzz")
+        val fizzBuzz = Data("FizzBuzz")
 
         val LogStr = ImportFunc("console", "logStr", Void, I32, I32)
         val LogI32 = ImportFunc("console", "logI32", Void, I32)
@@ -40,7 +41,7 @@ class FizzBuzzTest {
 
 
     @Test
-    fun fizzBuzz() {
+    fun fizzBuzzTest() {
 
         var result = mutableListOf<Any>()
 
@@ -54,7 +55,7 @@ class FizzBuzzTest {
             result.add(bytes.decodeToString())
         }
 
-        val fizzBuzzInstance = fizzBuzzModule.createInstance(importObject)
+        val fizzBuzzInstance = fizzBuzzModule.instantiate(importObject)
 
         fizzBuzzInstance.funcExports["fizzBuzz"]!!()
 
@@ -68,50 +69,49 @@ class FizzBuzzTest {
 
 
 
-assertEquals("""
-    Module {
-      val func0 = ImportFunc("console", "logStr", Void, I32, I32)
-      val func1 = ImportFunc("console", "logI32", Void, I32)
+        assertEquals("""
+            Module {
+              val func0 = ImportFunc("console", "logStr", Void, I32, I32)
+              val func1 = ImportFunc("console", "logI32", Void, I32)
       
-      val func2 = Func(Void) {
-        val local0 = Local(I32(1))
-        +While((local0 Le I32(20)),
-          Block {
-            +If(((local0 % I32(3)) Eq I32(0)),
-              If(((local0 % I32(5)) Eq I32(0)),
-                import0(I32(8), I32(8)),
-                import0(I32(0), I32(4))),
-              If(((local0 % I32(5)) Eq I32(0)),
-                import0(I32(4), I32(4)),
-              import1(local0)))
-            +Set(local0, (local0 + I32(1)))
-          })
-      }
-      Export("fizzBuzz", func2) 
+              val func2 = Func(Void) {
+                val local0 = Local(I32(1))
+                +While((local0 Le I32(20)),
+                  Block {
+                    +If(((local0 % I32(3)) Eq I32(0)),
+                      If(((local0 % I32(5)) Eq I32(0)),
+                        func0(I32(8), I32(8)),
+                        func0(I32(0), I32(4))),
+                      If(((local0 % I32(5)) Eq I32(0)),
+                        func0(I32(4), I32(4)),
+                        func1(local0)))
+                    +Set(local0, (local0 + I32(1)))
+                  })
+              }
+              Export("fizzBuzz", func2) 
+            }
+            """.superTrim(),
+            fizzBuzzModule.toString().superTrim())
     }
-    """.superTrim(),
-    fizzBuzzModule.toString().superTrim())
-}
 
 
-companion object {
+    companion object {
 
-fun String.superTrim(): String {
-val sb = StringBuilder()
-var ignoreWs = true
-for (c in trim()) {
-if (c <= ' ') {
-    if (!ignoreWs) {
-        sb.append(' ')
-        ignoreWs = true
+        fun String.superTrim(): String {
+            val sb = StringBuilder()
+            var ignoreWs = true
+            for (c in trim()) {
+                if (c <= ' ') {
+                    if (!ignoreWs) {
+                        sb.append(' ')
+                        ignoreWs = true
+                    }
+                } else {
+                    sb.append(c)
+                    ignoreWs = false
+                }
+            }
+            return sb.toString()
+        }
     }
-} else {
-    sb.append(c)
-    ignoreWs = false
-}
-}
-return sb.toString()
-}
-
-}
 }

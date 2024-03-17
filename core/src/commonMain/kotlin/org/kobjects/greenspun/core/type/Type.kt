@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.func.Func
+import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.func.FuncImpl
 import org.kobjects.greenspun.core.tree.BinaryOperator
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.RelationalOperator
@@ -15,7 +16,7 @@ interface Type {
     fun createRelationalOperation(operator: RelationalOperator, leftOperand: Node, rightOperand: Node): Node = throw UnsupportedOperationException()
     fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node = throw UnsupportedOperationException()
 
-    fun toWasm(writer: ModuleWriter)
+    fun toWasm(writer: WasmWriter)
 
     companion object {
 
@@ -27,7 +28,7 @@ interface Type {
             is Double -> F64
             is String -> Str
             is Boolean -> Bool
-            is Func -> value.type
+            is FuncImpl -> value.type
             else -> throw IllegalArgumentException("Unrecognized type for $value")
         }
     }
