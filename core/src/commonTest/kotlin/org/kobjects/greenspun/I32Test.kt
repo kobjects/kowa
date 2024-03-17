@@ -1,6 +1,5 @@
 package org.kobjects.greenspun
 
-import org.kobjects.greenspun.core.instance.instantiate
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32
 import kotlin.test.Test

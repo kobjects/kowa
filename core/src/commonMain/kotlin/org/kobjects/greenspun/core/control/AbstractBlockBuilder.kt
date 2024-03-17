@@ -3,6 +3,8 @@ package org.kobjects.greenspun.core.control
 import org.kobjects.greenspun.core.func.LocalAssignment
 import org.kobjects.greenspun.core.func.LocalDefinition
 import org.kobjects.greenspun.core.func.LocalReference
+import org.kobjects.greenspun.core.global.GlobalAssignment
+import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 
@@ -25,6 +27,14 @@ abstract class AbstractBlockBuilder(val variables: MutableList<Type>) {
         return builder.build()
     }
 
-    fun Set(variable: LocalReference, expression: Node) =
-        LocalAssignment(variable.index, expression)
+    fun Set(variable: LocalReference, expression: Node): LocalAssignment {
+        require(expression.returnType == variable.returnType) {
+            "Expression type ${expression.returnType} does not match variable type ${variable.returnType}"
+        }
+        return LocalAssignment(variable.index, expression)
+    }
+
+    fun Set(variable: GlobalReference, expression: Node) =
+        GlobalAssignment(variable.global, expression)
+
 }

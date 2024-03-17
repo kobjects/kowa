@@ -1,13 +1,9 @@
 package org.kobjects.greenspun
 
 import org.kobjects.greenspun.core.binary.hexDump
-import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.module.Module
-import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.I64
-import org.kobjects.greenspun.core.type.Str
-import org.kobjects.greenspun.core.type.Void
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

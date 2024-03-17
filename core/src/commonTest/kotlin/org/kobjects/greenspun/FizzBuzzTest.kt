@@ -6,7 +6,6 @@ import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.instance.ImportObject
 import org.kobjects.greenspun.core.instance.Memory
-import org.kobjects.greenspun.core.instance.instantiate
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32

@@ -8,6 +8,8 @@ import org.kobjects.greenspun.core.func.FuncImport
 import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalImport
+import org.kobjects.greenspun.core.instance.ImportObject
+import org.kobjects.greenspun.core.instance.Instance
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.memory.MemoryInterface
@@ -33,6 +35,8 @@ class Module(
                     (if (memory == null) emptyList() else listOf(memory))
             ) as List<Imported>
 
+
+    fun instantiate(importObject: ImportObject = ImportObject()) = Instance(this, importObject)
 
     private fun writeTypes(writer: ModuleWriter) {
         writer.writeU32(types.size)
