@@ -3,7 +3,7 @@ package org.kobjects.greenspun
 import org.kobjects.greenspun.core.instance.instantiate
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32
-import org.kobjects.greenspun.core.memory.Memory
+import org.kobjects.greenspun.core.memory.MemorySize
 import kotlin.test.*
 
 class MemoryTest {
@@ -47,7 +47,7 @@ class MemoryTest {
             0,
             Module {
                 Data("")
-                ExportFunc("memsize", I32) { +Memory.Size() }
+                ExportFunc("memsize", I32) { +MemorySize() }
             }.instantiate().invoke("memsize")
         )
 
@@ -55,7 +55,7 @@ class MemoryTest {
             1,
             Module {
                 Data("x")
-                ExportFunc("memsize", I32) { +Memory.Size() }
+                ExportFunc("memsize", I32) { +MemorySize() }
             }.instantiate().invoke("memsize")
         )
     }

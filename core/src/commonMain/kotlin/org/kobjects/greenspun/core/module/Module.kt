@@ -161,6 +161,24 @@ class Module(
         writer.write("Module {")
         val inner = writer.indented()
 
+        if (memory != null) {
+            inner.newLine()
+            if (memory is MemoryImport) {
+                inner.write("ImportMemory(")
+                inner.writeQuoted(memory.module)
+                inner.write(", ")
+                inner.writeQuoted(memory.name)
+                inner.write(", ")
+            } else {
+                inner.write("Memory(")
+            }
+            inner.write(memory.min)
+            if (memory.max != null) {
+                inner.write(", ${memory.max}")
+            }
+            inner.write(")")
+        }
+
         for (global in globals.filterIsInstance<GlobalImport>()) {
             global.writeImport(writer)
         }

@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.control.While
 import org.kobjects.greenspun.core.instance.ImportObject
+import org.kobjects.greenspun.core.instance.Memory
 import org.kobjects.greenspun.core.instance.instantiate
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
@@ -13,6 +14,8 @@ import org.kobjects.greenspun.core.type.I32
 class FizzBuzzTest {
 
     val fizzBuzzModule = Module {
+
+        ImportMemory("console", "memory", 1)
 
         val fizz = Data("Fizz")
         val buzz = Data("Buzz")
@@ -44,14 +47,15 @@ class FizzBuzzTest {
     fun fizzBuzzTest() {
 
         var result = mutableListOf<Any>()
+        val memory = Memory(1)
 
         val importObject = ImportObject()
-
-        importObject.addFunc("console", "logI32") { _, params -> result.add(params[0]) }
-        importObject.addFunc("console", "logStr") { instance, params ->
+        importObject.addMemory("console", "memory", memory)
+        importObject.addFunc("console", "logI32") { params -> result.add(params[0]) }
+        importObject.addFunc("console", "logStr") { params ->
             val memPos = params[0] as Int
             val size = params[1] as Int
-            val bytes = instance.memory.copyOfRange(memPos, memPos + size)
+            val bytes = memory.buffer.copyOfRange(memPos, memPos + size)
             result.add(bytes.decodeToString())
         }
 
@@ -71,6 +75,8 @@ class FizzBuzzTest {
 
         assertEquals("""
             Module {
+              ImportMemory("console", "memory", 1)
+            
               val func0 = ImportFunc("console", "logStr", Void, I32, I32)
               val func1 = ImportFunc("console", "logI32", Void, I32)
       

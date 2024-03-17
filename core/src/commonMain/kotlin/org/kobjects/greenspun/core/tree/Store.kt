@@ -13,10 +13,10 @@ class Store(val target: Node, val value: Node) : Node() {
         val memory = context.instance.memory
         val address = target.evalI32(context)
         when (value.returnType) {
-            Bool -> memory.storeI32(address, if (value.evalBool(context)) 1 else 0)
-            I32 -> memory.storeI32(address, value.evalI32(context))
-            I64 -> memory.storeI64(address, value.evalI64(context))
-            F64 -> memory.storeF64(address, value.evalF64(context))
+            Bool -> memory.buffer.storeI32(address, if (value.evalBool(context)) 1 else 0)
+            I32 -> memory.buffer.storeI32(address, value.evalI32(context))
+            I64 -> memory.buffer.storeI64(address, value.evalI64(context))
+            F64 -> memory.buffer.storeF64(address, value.evalF64(context))
             else -> throw UnsupportedOperationException()
         }
         return Unit

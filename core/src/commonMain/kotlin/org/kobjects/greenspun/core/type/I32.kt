@@ -225,7 +225,7 @@ object I32 : Type {
 
 
     class Load(val address: Node) : Node() {
-        override fun eval(context: LocalRuntimeContext) = context.instance.memory.loadI32(address.evalI32(context))
+        override fun eval(context: LocalRuntimeContext) = context.instance.memory.buffer.loadI32(address.evalI32(context))
 
         override fun children(): List<Node> = listOf(address)
 
