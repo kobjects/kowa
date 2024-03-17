@@ -30,7 +30,6 @@ enum class WasmOpcode(val code: Int) {
     TABLE_GET(0x25),
     TABLE_SET(0x26),
 
-
     I32_LOAD(0x28),
     I64_LOAD(0x29),
     F32_LOAD(0x2A),
