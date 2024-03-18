@@ -1,11 +1,3 @@
 package org.kobjects.greenspun.core.control
 
-data class FlowSignal(
-    val kind: Kind,
-    val value: Any? = null) {
-
-    enum class Kind {
-        BREAK, CONTINUE, RETURN
-    }
-
-}
+data class FlowSignal(val branchLabel: Int, val value: Any = Unit)

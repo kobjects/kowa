@@ -82,8 +82,13 @@ abstract class Node {
     infix fun Lt(other: Any) = returnType.createRelationalOperation(RelationalOperator.LT, this, of(other))
 
 
+
     companion object {
         fun of(value: Any): Node = if (value is Node) value else Type.of(value).createConstant(value)
+
+        fun Not(value: Any): Node = (if (value is Node) value.returnType else Type.of(value)).createUnaryOperation(UnaryOperator.NOT, Node.of(value))
+
+
     }
 
     fun Max(left: Node, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MAX, left, of(right))

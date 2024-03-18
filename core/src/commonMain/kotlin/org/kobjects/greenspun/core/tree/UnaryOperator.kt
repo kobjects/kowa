@@ -28,5 +28,8 @@ enum class UnaryOperator(
     TO_I64(TypeSupport.ALL, I64),
     TO_F64(TypeSupport.ALL, F64),
 
-    TRUNC(TypeSupport.FLOAT_ONLY),
+    TRUNC(TypeSupport.FLOAT_ONLY);
+
+
+    override fun toString() = name.titleCase()
 }

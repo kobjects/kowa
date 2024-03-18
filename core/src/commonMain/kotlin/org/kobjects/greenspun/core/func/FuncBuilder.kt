@@ -1,14 +1,14 @@
 package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.control.Block
-import org.kobjects.greenspun.core.control.AbstractBlockBuilder
+import org.kobjects.greenspun.core.control.Sequence
+import org.kobjects.greenspun.core.control.SequenceBuilder
 import org.kobjects.greenspun.core.module.ModuleBuilder
 
 class FuncBuilder(
     val moduleBuilder: ModuleBuilder,
     val returnType: Type
-) : AbstractBlockBuilder(mutableListOf()) {
+) : SequenceBuilder(mutableListOf()) {
 
     internal var paramCount = 0
 
@@ -34,6 +34,6 @@ class FuncBuilder(
         index = moduleBuilder.funcs.size,
         type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),
         locals = variables.subList(paramCount, variables.size),
-        body = Block(*statements.toTypedArray())
+        body = Sequence(*statements.toTypedArray())
     )
 }

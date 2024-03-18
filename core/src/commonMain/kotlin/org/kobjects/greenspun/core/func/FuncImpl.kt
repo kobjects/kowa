@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.control.Block
+import org.kobjects.greenspun.core.control.Sequence
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.tree.AbstractLeafNode
@@ -12,7 +12,7 @@ class FuncImpl(
     override val index: Int,
     override val type: FuncType,
     val locals: List<Type>,
-    val body: Block
+    val body: Sequence
 ) : FuncInterface {
     override val localContextSize: Int
         get() = type.parameterTypes.size + locals.size
@@ -34,7 +34,7 @@ class FuncImpl(
             inner.write("val param$i = param(${type.parameterTypes[i]})")
         }
 
-        body.stringifyChildren(inner)
+        body.toString(inner)
 
         writer.newLine()
         writer.write("}")

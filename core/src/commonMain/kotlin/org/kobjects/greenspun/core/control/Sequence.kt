@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.module.ModuleWriter
 
-class Block(
+class Sequence(
     vararg val statements: Node
 ): Node() {
 
@@ -35,21 +35,12 @@ class Block(
     override fun children() = statements.asList()
 
     override fun reconstruct(newChildren: List<Node>) =
-        Block(statements = newChildren.toTypedArray())
+        Sequence(statements = newChildren.toTypedArray())
 
     override val returnType: Type
         get() = if (statements.isEmpty()) Void else statements.last().returnType
 
     override fun toString(writer: CodeWriter) {
-        writer.write("Block {")
-        if (statements.isNotEmpty()) {
-            stringifyChildren(writer.indented())
-            writer.newLine()
-        }
-        writer.write("}")
-    }
-
-    fun stringifyChildren(writer: CodeWriter) {
         for (statement in statements) {
             writer.newLine()
             if (statement !is LocalDefinition) {
@@ -57,7 +48,6 @@ class Block(
             }
             statement.toString(writer)
         }
-
     }
 
     override fun toWasm(writer: ModuleWriter) =
