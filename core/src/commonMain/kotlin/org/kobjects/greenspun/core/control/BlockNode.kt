@@ -10,20 +10,16 @@ import org.kobjects.greenspun.core.type.Void
 
 class BlockNode(val child: Sequence) : Node() {
 
-    init {
-        require(child.returnType == Void) {
-            "Void type expected for Block body."
-        }
-    }
     override fun eval(context: LocalRuntimeContext): Any {
-        val result = child.eval(context)
-        if (result is FlowSignal) {
-            if (result.branchLabel == 0) {
-                return Unit
+        while (true) {
+            try {
+                return child.eval(context)
+            } catch (signal: BranchSignal) {
+                if (signal.label > 0) {
+                    throw BranchSignal(signal.label - 1)
+                }
             }
-            return FlowSignal(result.branchLabel - 1)
         }
-        return result
     }
 
     override fun children() = listOf(child)

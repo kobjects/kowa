@@ -10,7 +10,7 @@ import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
 class Branch(val label: Int = 0) : AbstractLeafNode() {
-    override fun eval(context: LocalRuntimeContext) = FlowSignal(label)
+    override fun eval(context: LocalRuntimeContext) = throw BranchSignal(label)
 
     override fun toString(writer: CodeWriter) {
         writer.write("Branch(")

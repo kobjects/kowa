@@ -10,7 +10,7 @@ import org.kobjects.greenspun.core.type.Void
 
 class BranchIf(val condition: Node, val label: Int = 0) : Node() {
     override fun eval(context: LocalRuntimeContext): Any =
-        if (condition.evalBool(context)) FlowSignal(label) else Unit
+        if (condition.evalBool(context)) throw BranchSignal(label) else Unit
 
     override fun children() = listOf(condition)
 

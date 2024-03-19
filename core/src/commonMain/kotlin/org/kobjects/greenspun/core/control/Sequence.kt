@@ -25,9 +25,6 @@ class Sequence(
         var result: Any = Unit
         for (statement: Node in statements) {
             result = statement.eval(context)
-            if (result is FlowSignal) {
-                return result
-            }
         }
         return result
     }

@@ -17,12 +17,13 @@ class LoopNode(val child: Sequence) : Node() {
     }
     override fun eval(context: LocalRuntimeContext): Any {
         while (true) {
-            val result = child.eval(context)
-            if (result is FlowSignal) {
-                if (result.branchLabel == 0) {
-                    return Unit
+            try {
+                child.eval(context)
+            } catch (signal: BranchSignal) {
+                if (signal.label > 0) {
+                    throw BranchSignal(signal.label - 1)
                 }
-                return FlowSignal(result.branchLabel - 1, Unit)
+                return Unit
             }
         }
     }
