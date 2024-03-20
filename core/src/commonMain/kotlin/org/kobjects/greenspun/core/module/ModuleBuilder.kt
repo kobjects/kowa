@@ -43,11 +43,11 @@ class ModuleBuilder {
      * Defines an active data block at the 'current' address, starting with 0, incrementing the current address
      * accordingly, returning an I32 const for the data start address.
      */
-    fun Data(data: Any) = Data(activeDataAddress, data)
+    fun Data(data: Any) = Data(I32.Const(activeDataAddress), data)
 
-    fun Data(offset: Int, data: Any): I32.Const {
+    fun Data(offset: Node, data: Any): DataReference {
 
-        if (offset < activeDataAddress) {
+        if (offset is I32.Const && offset.value < activeDataAddress) {
             throw IllegalArgumentException("Potentially overlapping data")
         }
 
@@ -56,15 +56,17 @@ class ModuleBuilder {
 
         datas.add(DataImpl(offset, writer.toByteArray()))
 
-        val result = I32.Const(activeDataAddress)
-        activeDataAddress = offset + writer.size
+        val result = DataReference(offset, writer.size)
 
-        if (activeDataAddress > 65536 * (memory?.min ?: 0)) {
-            if (memory == null || memoryImplied) {
-                memory = MemoryImpl((65535 + activeDataAddress) / 65536)
-                memoryImplied = true
-            } else {
-                throw IllegalArgumentException("Data offset exceeds minimum size")
+        if (offset is I32.Const) {
+            activeDataAddress = offset.value + writer.size
+            if (activeDataAddress > 65536 * (memory?.min ?: 0)) {
+                if (memory == null || memoryImplied) {
+                    memory = MemoryImpl((65535 + activeDataAddress) / 65536)
+                    memoryImplied = true
+                } else {
+                    throw IllegalArgumentException("Data offset exceeds minimum size")
+                }
             }
         }
 

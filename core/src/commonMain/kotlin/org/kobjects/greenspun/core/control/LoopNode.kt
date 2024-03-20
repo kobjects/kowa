@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.control
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.control.Sequence.Companion.stringifyAsSequence
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.module.ModuleWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
@@ -8,7 +9,7 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
-class LoopNode(val child: Sequence) : Node() {
+class LoopNode(val child: Node) : Node() {
 
     init {
         require(child.returnType == Void) {
@@ -36,7 +37,7 @@ class LoopNode(val child: Sequence) : Node() {
         writer.write("Loop {")
         val inner = writer.indented()
         inner.newLine()
-        child.toString(inner)
+        child.stringifyAsSequence(inner)
         writer.newLine()
         writer.write("}")
     }

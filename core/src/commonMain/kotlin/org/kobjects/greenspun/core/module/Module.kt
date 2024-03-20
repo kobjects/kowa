@@ -109,7 +109,7 @@ class Module(
                     writer.writeU32(1)
                 } else {
                     writer.writeU32(0)
-                    I32.Const(data.offset).toWasm(writer)
+                    data.offset.toWasm(writer)
                     writer.write(WasmOpcode.END)
                 }
                 writer.writeU32(data.data.size)

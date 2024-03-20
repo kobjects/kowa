@@ -6,6 +6,7 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.control.Sequence.Companion.stringifyAsSequence
 import org.kobjects.greenspun.core.module.ModuleWriter
 
 class If(
@@ -22,11 +23,24 @@ class If(
         If(newChildren[0], newChildren[1], if (newChildren.size > 2) newChildren[2] else null)
 
     override fun toString(writer: CodeWriter) {
-        writer.write("If(", condition, ", ", then)
-        if (otherwise != null) {
-            writer.write(", ", otherwise)
+        writer.write("If(", condition)
+
+        if (otherwise == null || condition is Sequence || otherwise is Sequence) {
+            writer.write(") {")
+            val inner = writer.indented()
+            inner.newLine()
+            then.stringifyAsSequence(writer)
+            if (otherwise != null) {
+                writer.newLine()
+                writer.write("}.Else {")
+                inner.newLine()
+                otherwise.stringifyAsSequence(writer)
+            }
+            writer.newLine()
+            writer.write("}")
+        } else {
+            writer.write(", ", then, ", ", otherwise, ")")
         }
-        writer.write(")")
     }
 
     override fun toWasm(writer: ModuleWriter) {

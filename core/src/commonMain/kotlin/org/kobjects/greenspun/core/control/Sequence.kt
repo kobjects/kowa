@@ -37,6 +37,7 @@ class Sequence(
     override val returnType: Type
         get() = if (statements.isEmpty()) Void else statements.last().returnType
 
+
     override fun toString(writer: CodeWriter) {
         for (statement in statements) {
             writer.newLine()
@@ -49,4 +50,10 @@ class Sequence(
 
     override fun toWasm(writer: ModuleWriter) =
         statements.forEach { it.toWasm(writer) }
+
+    companion object {
+        fun Node.stringifyAsSequence(writer: CodeWriter) =
+            (if (this is Sequence) this else Sequence(this)).toString(writer)
+    }
+
 }

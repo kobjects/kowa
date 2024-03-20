@@ -56,15 +56,19 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
     }
 
 
-    fun Else(init: SequenceBuilder.() -> Unit) {
-        val last = statements.lastOrNull()
+    fun If.Else(init: SequenceBuilder.() -> Unit): If {
+        /*val last = statements.lastOrNull()
         if (last !is If) {
             throw IllegalStateException("If required for Else")
-        }
+        }*/
         val builder = SequenceBuilder(variables)
         builder.init()
+        /*
         val ifChildren = last.children()
         statements[statements.size] = last.reconstruct(listOf(ifChildren[0], ifChildren[1], builder.build()))
+         */
+        val children = children()
+        return reconstruct(listOf(children[0], children[1], builder.build()))
     }
 
 

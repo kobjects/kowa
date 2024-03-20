@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.control
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.control.Sequence.Companion.stringifyAsSequence
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.module.ModuleWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
@@ -8,7 +9,7 @@ import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
-class BlockNode(val child: Sequence) : Node() {
+class BlockNode(val child: Node) : Node() {
 
     override fun eval(context: LocalRuntimeContext): Any {
         while (true) {
@@ -30,7 +31,7 @@ class BlockNode(val child: Sequence) : Node() {
         writer.write("Block {")
         val inner = writer.indented()
         inner.newLine()
-        child.toString(inner)
+        child.stringifyAsSequence(inner)
         writer.newLine()
         writer.write("}")
     }
