@@ -14,7 +14,9 @@ import org.kobjects.greenspun.core.type.Void
 open class SequenceBuilder(val variables: MutableList<Type>) {
     val statements = mutableListOf<Node>()
 
-    operator fun Node.unaryPlus() = statements.add(this)
+    operator fun Node.unaryPlus() {
+        statements.add(this)
+    }
 
     fun Local(initializerOrValue: Any): LocalReference {
         val initializer = Node.of(initializerOrValue)
