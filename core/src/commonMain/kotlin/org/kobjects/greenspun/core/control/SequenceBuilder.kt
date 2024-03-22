@@ -5,9 +5,12 @@ import org.kobjects.greenspun.core.func.LocalDefinition
 import org.kobjects.greenspun.core.func.LocalReference
 import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
+import org.kobjects.greenspun.core.tree.BinaryOperator
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.Node.Companion.Not
+import org.kobjects.greenspun.core.tree.RelationalOperator
 import org.kobjects.greenspun.core.type.Bool
+import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
@@ -47,6 +50,27 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
         builder.init()
         return LoopNode(builder.build())
     }
+
+    fun For(initialValue: Node, targetValue: Node, step: Node = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): LoopNode {
+        require(initialValue.returnType == I32) {
+            "I32 expected for initial value."
+        }
+        require(targetValue.returnType == I32) {
+            "I32 expected for target value."
+        }
+        require(step.returnType == I32) {
+            "I32 expected for step value."
+        }
+        val loopVar = Local(initialValue)
+        val builder = SequenceBuilder(variables)
+
+        builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.EQ, targetValue, loopVar)))
+        builder.init(loopVar)
+        builder.statements.add(Set(loopVar, I32.BinaryOperation(BinaryOperator.ADD, loopVar, step)))
+
+        return LoopNode(builder.build())
+    }
+
 
     fun If(condition: Node, init: SequenceBuilder.() -> Unit): If {
         require(condition.returnType == Bool) {
