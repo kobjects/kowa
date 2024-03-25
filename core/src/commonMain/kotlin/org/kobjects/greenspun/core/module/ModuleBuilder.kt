@@ -12,6 +12,9 @@ import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.memory.MemoryInterface
+import org.kobjects.greenspun.core.table.TableImpl
+import org.kobjects.greenspun.core.table.TableImport
+import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
@@ -25,19 +28,14 @@ class ModuleBuilder {
     var globals = mutableListOf<GlobalInterface>()
     val exports = mutableMapOf<String, Export>()
     var memory: MemoryInterface? = null
+    var tables = mutableListOf<TableInterface>()
 
     private var memoryImplied = false
     private var activeDataAddress = 0
 
 
-    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): FuncImport {
-        require (funcs.lastOrNull() !is FuncImpl) {
-            "All func imports need to be declared before any function declaration."
-        }
-        val i = FuncImport(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
-        funcs.add(i)
-        return i
-    }
+    fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
+
 
     /**
      * Defines an active data block at the 'current' address, starting with 0, incrementing the current address
@@ -89,20 +87,6 @@ class ModuleBuilder {
         return globalReference
     }
 
-    fun Memory(min: Int, max: Int? = null) {
-        if (memory != null) {
-            throw IllegalStateException("multiple memories")
-        }
-        memory = MemoryImpl(min, max)
-    }
-
-    fun ImportMemory(module: String, name: String, min: Int, max: Int? = null) {
-        if (memory != null) {
-            throw IllegalStateException("multiple memories")
-        }
-        memory = MemoryImport(module, name, min, max)
-    }
-
     fun Func(returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl.Const {
         val builder = FuncBuilder(this, returnType)
         builder.init()
@@ -111,18 +95,68 @@ class ModuleBuilder {
         return FuncImpl.Const(f)
     }
 
-    fun Start(func: FuncImpl.Const) {
-        start = func.func.index
-    }
-
     fun Global(initializerOrValue: Any) = global(null, true, initializerOrValue)
-
-    fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
 
     fun ImportGlobal(module: String, name: String, type: Type) = importGlobal(module, name, true, type)
 
     fun ImportConst(module: String, name : String, type: Type) = importGlobal(module, name, false, type)
 
+    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): FuncImport {
+        require (funcs.lastOrNull() !is FuncImpl) {
+            "All func imports need to be declared before any function declaration."
+        }
+        val i = FuncImport(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
+        funcs.add(i)
+        return i
+    }
+
+    fun ImportTable(module: String, name: String, type: Type, min: Int, max: Int?): Int {
+        require (tables.lastOrNull() !is TableImpl) {
+            "Import tables before table declarations."
+        }
+        val index = tables.size
+        val table = TableImport(index, module, name, type, min, max)
+        tables.add(table)
+        return index
+    }
+
+    fun ImportMemory(module: String, name: String, min: Int, max: Int? = null) {
+        if (memory != null) {
+            throw IllegalStateException("multiple memories")
+        }
+        memory = MemoryImport(module, name, min, max)
+    }
+    fun Memory(min: Int, max: Int? = null) {
+        if (memory != null) {
+            throw IllegalStateException("multiple memories")
+        }
+        memory = MemoryImpl(min, max)
+    }
+
+
+    fun Start(func: FuncImpl.Const) {
+        start = func.func.index
+    }
+
+
+    fun Table(type: Type, min: Int, max: Int? = null): Int {
+        val index = tables.size
+        val table = TableImpl(index, type, min, max)
+        tables.add(table)
+        return index
+    }
+
+
+    fun build() = Module(
+        types.toList(),
+        funcs.toList(),
+        tables.toList(),
+        memory,
+        globals.toList(),
+        exports.values.toList(),
+        start,
+        datas.toList(),
+    )
 
    fun export(name: String, exportable: Exportable) {
         require(!exports.containsKey(name)) {
@@ -150,17 +184,6 @@ class ModuleBuilder {
         return(GlobalReference(global))
     }
 
-    fun build() = Module(
-        types.toList(),
-        funcs.toList(),
-        // Tables
-        memory,
-        globals.toList(),
-        exports.values.toList(),
-        start,
-        // code
-        datas.toList(),
-        )
 
     internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {
         for (candidate in types) {

@@ -16,7 +16,7 @@ class MemoryImport(
     }
 
     override fun writeImport(writer: CodeWriter) {
-        writer.write("val memory = ImportMemory($min")
+        writer.write("val memory = ImportMemory(\"$module\", \"$name\", $min")
         if (max != null) {
             writer.write(", $max")
         }

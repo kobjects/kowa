@@ -6,9 +6,9 @@ import org.kobjects.greenspun.core.control.SequenceBuilder
 import org.kobjects.greenspun.core.module.ModuleBuilder
 
 class FuncBuilder(
-    val moduleBuilder: ModuleBuilder,
+    moduleBuilder: ModuleBuilder,
     val returnType: Type
-) : SequenceBuilder(mutableListOf()) {
+) : SequenceBuilder(moduleBuilder, mutableListOf()) {
 
     internal var paramCount = 0
 

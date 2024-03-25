@@ -13,6 +13,8 @@ import org.kobjects.greenspun.core.instance.Instance
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.memory.MemoryInterface
+import org.kobjects.greenspun.core.table.TableImport
+import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
@@ -20,7 +22,7 @@ import org.kobjects.greenspun.core.type.I32
 class Module(
     val types: List<FuncType>,
     val funcs: List<FuncInterface>,
-    // tables
+    val tables: List<TableInterface>,
     val memory: MemoryInterface?,
     val globals: List<GlobalInterface>,
     val exports: List<Export>,
@@ -32,7 +34,8 @@ class Module(
     fun imports() = (
             funcs.filterIsInstance<FuncImport>() +
                     globals.filterIsInstance<MemoryImport>() +
-                    (if (memory == null) emptyList() else listOf(memory))
+                    (if (memory == null) emptyList() else listOf(memory)) +
+                            tables.filterIsInstance<TableImport>()
             ) as List<Imported>
 
 
@@ -88,6 +91,19 @@ class Module(
         }
     }
 
+    private fun writeGlobals(writer: ModuleWriter) {
+        val globals = globals.filterIsInstance<GlobalImpl>()
+        if (globals.isNotEmpty()) {
+            writer.writeU32(globals.size)
+            for (global in globals) {
+                global.type.toWasm(writer)
+                writer.writeByte(if (global.mutable) 1 else 0)
+                global.initializer.toWasm(writer)
+                writer.write(WasmOpcode.END)
+            }
+        }
+    }
+
     private fun writeMemory(writer: ModuleWriter) {
         if (memory is MemoryImpl) {
             writer.writeU32(1)
@@ -114,6 +130,25 @@ class Module(
                 }
                 writer.writeU32(data.data.size)
                 writer.writeBytes(data.data)
+            }
+        }
+    }
+
+    private fun writeTables(writer: ModuleWriter) {
+        val tables = tables.filterIsInstance<TableInterface>()
+        if (tables.isNotEmpty()) {
+            writer.writeU32(tables.size)
+            for (table in tables) {
+                table.type.toWasm(writer)
+                val max = table.max
+                if (max == null) {
+                    writer.writeByte(0)
+                    writer.writeU32(table.min)
+                } else {
+                    writer.writeByte(1)
+                    writer.writeU32(table.min)
+                    writer.writeU32(max)
+                }
             }
         }
     }
@@ -147,9 +182,9 @@ class Module(
         writeSection(writer, WasmSection.TYPE, ::writeTypes)
         writeSection(writer, WasmSection.IMPORT, ::writeImports)
         writeSection(writer, WasmSection.FUNCTION, ::writeFunctions)
-        // Table
+        writeSection(writer, WasmSection.TABLE, ::writeTables)
         writeSection(writer, WasmSection.MEMORY, ::writeMemory)
-        // Global
+        writeSection(writer, WasmSection.GLOBAL, ::writeGlobals)
         writeSection(writer, WasmSection.EXPORT, ::writeExports)
         // Start
         // Elements

@@ -5,7 +5,9 @@ import org.kobjects.greenspun.core.func.LocalDefinition
 import org.kobjects.greenspun.core.func.LocalReference
 import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
+import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.tree.BinaryOperator
+import org.kobjects.greenspun.core.tree.IndirectCallNode
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.Node.Companion.Not
 import org.kobjects.greenspun.core.tree.RelationalOperator
@@ -14,7 +16,7 @@ import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
-open class SequenceBuilder(val variables: MutableList<Type>) {
+open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: MutableList<Type>) {
     val statements = mutableListOf<Node>()
 
     operator fun Node.unaryPlus() {
@@ -30,13 +32,19 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
     }
 
     fun Block(init: SequenceBuilder.() -> Unit): BlockNode {
-        val builder = SequenceBuilder(variables)
+        val builder = SequenceBuilder(moduleBuilder, variables)
         builder.init()
         return BlockNode(builder.build())
     }
 
+    fun CallIndirect(table: Int, index: Node, returnType: Type, vararg parameter: Node): IndirectCallNode {
+        val funcType = moduleBuilder.getFuncType(returnType, parameter.toList().map { it.returnType })
+        return IndirectCallNode(table, index, funcType, *parameter)
+    }
+
+
     fun Loop(init: SequenceBuilder.() -> Unit): LoopNode {
-        val builder = SequenceBuilder(variables)
+        val builder = SequenceBuilder(moduleBuilder, variables)
         builder.init()
         return LoopNode(builder.build())
     }
@@ -45,7 +53,7 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
         require(condition.returnType == Bool) {
             "While condition must be boolean"
         }
-        val builder = SequenceBuilder(variables)
+        val builder = SequenceBuilder(moduleBuilder, variables)
         builder.statements.add(BranchIf(Not(condition)))
         builder.init()
         return LoopNode(builder.build())
@@ -62,7 +70,7 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
             "I32 expected for step value."
         }
         val loopVar = Local(initialValue)
-        val builder = SequenceBuilder(variables)
+        val builder = SequenceBuilder(moduleBuilder, variables)
 
         builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.EQ, targetValue, loopVar)))
         builder.init(loopVar)
@@ -76,7 +84,7 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
         require(condition.returnType == Bool) {
             "If condition must be boolean"
         }
-        val builder = SequenceBuilder(variables)
+        val builder = SequenceBuilder(moduleBuilder, variables)
         builder.init()
         return If(condition, builder.build(), Void.None)
     }
@@ -87,7 +95,7 @@ open class SequenceBuilder(val variables: MutableList<Type>) {
         if (last !is If) {
             throw IllegalStateException("If required for Else")
         }*/
-        val builder = SequenceBuilder(variables)
+        val builder = SequenceBuilder(moduleBuilder, variables)
         builder.init()
         /*
         val ifChildren = last.children()
