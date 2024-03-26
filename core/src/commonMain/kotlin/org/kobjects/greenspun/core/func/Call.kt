@@ -26,11 +26,7 @@ class Call(
     }
 
     override fun eval(context: LocalRuntimeContext): Any {
-        val childContext = context.createChild(callable.localContextSize)
-        for (i in 0 until parameters.size) {
-            childContext.setLocal(i, parameters[i].eval(context))
-        }
-        return callable.call(childContext)
+        return callable.call(context, *parameters)
     }
 
     override fun children(): List<Node> = parameters.toList()

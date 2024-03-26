@@ -8,6 +8,7 @@ import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.module.Module
+import org.kobjects.greenspun.core.type.Type
 
 class Instance(
     val module: Module,
@@ -95,11 +96,7 @@ class Instance(
     inner class FuncExport(val func: FuncInterface) : Func {
 
         override operator fun invoke(vararg param: Any): Any {
-            val context = rootContext.createChild(func.localContextSize)
-            for (i in 0 until param.size) {
-                context.setLocal(i, param[i])
-            }
-            return func.call(context)
+            return func.call(rootContext, *Array(param.size) { Type.of(param[it]).createConstant(param[it]) })
         }
     }
 }

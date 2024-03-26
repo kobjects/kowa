@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Imported
 import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 
 class FuncImport(
@@ -12,11 +13,9 @@ class FuncImport(
     override val type: FuncType
 ) : FuncInterface, Imported {
 
-    override val localContextSize: Int
-        get() = type.parameterTypes.size
 
-    override fun call(context: LocalRuntimeContext) =
-        context.instance.funcImports[index](*context.variables)
+    override fun call(context: LocalRuntimeContext, vararg params: Node) =
+        context.instance.funcImports[index](*Array(params.size) { params[it].eval(context) })
 
     override fun writeImport(writer: CodeWriter) {
         writer.newLine()

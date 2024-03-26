@@ -1,14 +1,12 @@
 package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.func.FuncInterface
-import org.kobjects.greenspun.core.func.FuncBuilder
-import org.kobjects.greenspun.core.func.FuncImpl
-import org.kobjects.greenspun.core.func.FuncImport
+import org.kobjects.greenspun.core.func.*
 import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.global.GlobalImport
+import org.kobjects.greenspun.core.instance.Func
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.memory.MemoryInterface
@@ -71,14 +69,14 @@ class ModuleBuilder {
         return result
     }
 
-    fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl.Const {
+    fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
         val result = Func(returnType, init)
-        export(name, result.func)
+        export(name, result)
         return result
     }
 
-    fun Export(name: String, funcReference: FuncImpl.Const): FuncImpl.Const {
-        export(name, funcReference.func)
+    fun Export(name: String, funcReference: FuncImpl): FuncImpl {
+        export(name, funcReference)
         return funcReference
     }
 
@@ -87,12 +85,33 @@ class ModuleBuilder {
         return globalReference
     }
 
-    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl.Const {
+    fun Func(returnType: Type, vararg paramTypes: Type): ForwardDeclaration {
+        val f = ForwardDeclaration(funcs.size, getFuncType(returnType, paramTypes.toList()))
+        funcs.add(f)
+        return f
+    }
+
+    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
         val builder = FuncBuilder(this, returnType)
         builder.init()
         val f = builder.build()
         funcs.add(f)
-        return FuncImpl.Const(f)
+        return f
+    }
+
+    fun Implementation(forwardDeclaration: ForwardDeclaration, init: FuncBuilder.() -> Unit): FuncImpl {
+        require(funcs[forwardDeclaration.index] == forwardDeclaration) {
+            "Function seems to be implemented already."
+        }
+        val builder = FuncBuilder(this, forwardDeclaration.type.returnType)
+        builder.init()
+        val f = builder.build()
+        require(f.type == forwardDeclaration.type) {
+            "Implementation parameter types don't match forward declaration."
+        }
+
+        funcs[forwardDeclaration.index] = f
+        return f
     }
 
     fun Global(initializerOrValue: Any) = global(null, true, initializerOrValue)
@@ -134,8 +153,8 @@ class ModuleBuilder {
     }
 
 
-    fun Start(func: FuncImpl.Const) {
-        start = func.func.index
+    fun Start(func: FuncInterface) {
+        start = func.index
     }
 
 

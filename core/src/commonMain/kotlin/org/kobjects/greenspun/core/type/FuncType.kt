@@ -13,7 +13,7 @@ data class FuncType(
 ) : Type {
 
     override fun createConstant(value: Any): Node {
-        return FuncImpl.Const(value as FuncImpl)
+        throw UnsupportedOperationException("TODO: Re-Implement when FuncInterface is a node")
     }
 
     override fun toWasm(writer: WasmWriter) {

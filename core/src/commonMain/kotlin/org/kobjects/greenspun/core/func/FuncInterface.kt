@@ -9,9 +9,8 @@ import org.kobjects.greenspun.core.type.FuncType
 interface FuncInterface : Exportable {
     val index: Int
     val type: FuncType
-    val localContextSize: Int
 
-    fun call(context: LocalRuntimeContext): Any
+    fun call(context: LocalRuntimeContext, vararg params: Node): Any
 
     operator fun invoke(vararg node: Any) =
         Call(this, *node.map { Node.of(it) }.toTypedArray())
