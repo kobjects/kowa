@@ -3,11 +3,12 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.tree.Idx
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 
-interface FuncInterface : Exportable {
-    val index: Int
+interface FuncInterface : Exportable, Idx {
+    override val index: Int
     val type: FuncType
 
     fun call(context: LocalRuntimeContext, vararg params: Node): Any

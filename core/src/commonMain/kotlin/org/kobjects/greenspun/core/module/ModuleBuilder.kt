@@ -166,11 +166,11 @@ class ModuleBuilder {
     }
 
 
-    fun Table(type: Type, min: Int, max: Int? = null): TableIdx {
+    fun Table(type: Type, min: Int, max: Int? = null): TableImpl {
         val index = tables.size
         val table = TableImpl(index, type, min, max)
         tables.add(table)
-        return TableIdx(index)
+        return table
     }
 
 
