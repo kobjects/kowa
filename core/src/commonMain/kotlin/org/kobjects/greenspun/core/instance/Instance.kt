@@ -8,6 +8,7 @@ import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.module.Module
+import org.kobjects.greenspun.core.table.TableImport
 import org.kobjects.greenspun.core.type.Type
 
 class Instance(
@@ -15,6 +16,12 @@ class Instance(
     val importObject: ImportObject
 ) {
     val rootContext = LocalRuntimeContext(this)
+
+    val tables = Array<Table>(module.tables.size) {
+        val table = module.tables[it]
+        if (table is TableImport) importObject.tables[table.module to table.name]!!
+        else Table(table.min)
+    }
 
     val memory = if (module.memory is MemoryImport)
             importObject.memories[module.memory.module to module.memory.name]!!
@@ -54,6 +61,10 @@ class Instance(
             val globalImport = moduleGlobalImports[it]
             importObject.globals[globalImport.module to globalImport.name] ?: throw IllegalStateException(
                 "Import global ${globalImport.module}.${globalImport.name} not found.")
+        }
+
+        for (element in module.elements) {
+            element.funcs.copyInto(tables[element.tableIdx].elements, element.offset.evalI32(rootContext))
         }
 
         for (data in module.datas) {

@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.memory
 
 import org.kobjects.greenspun.core.tree.Node
 

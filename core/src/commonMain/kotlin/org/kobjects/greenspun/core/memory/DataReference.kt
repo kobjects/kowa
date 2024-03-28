@@ -1,7 +1,8 @@
-package org.kobjects.greenspun.core.module
+package org.kobjects.greenspun.core.memory
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.global.GlobalReference
+import org.kobjects.greenspun.core.module.ModuleWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.I32

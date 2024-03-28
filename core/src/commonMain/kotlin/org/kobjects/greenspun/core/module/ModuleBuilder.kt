@@ -6,13 +6,8 @@ import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.global.GlobalImport
-import org.kobjects.greenspun.core.instance.Func
-import org.kobjects.greenspun.core.memory.MemoryImpl
-import org.kobjects.greenspun.core.memory.MemoryImport
-import org.kobjects.greenspun.core.memory.MemoryInterface
-import org.kobjects.greenspun.core.table.TableImpl
-import org.kobjects.greenspun.core.table.TableImport
-import org.kobjects.greenspun.core.table.TableInterface
+import org.kobjects.greenspun.core.memory.*
+import org.kobjects.greenspun.core.table.*
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
@@ -25,6 +20,7 @@ class ModuleBuilder {
     var start: Int? = null
     var globals = mutableListOf<GlobalInterface>()
     val exports = mutableMapOf<String, Export>()
+    var elements = mutableListOf<ElementImpl>()
     var memory: MemoryInterface? = null
     var tables = mutableListOf<TableInterface>()
 
@@ -69,6 +65,12 @@ class ModuleBuilder {
         return result
     }
 
+    fun Element(table: TableInterface, offset: Node, vararg funcs: FuncInterface): ElementImpl {
+        val result = ElementImpl(table.index, offset, *funcs)
+        elements.add(result)
+        return result
+    }
+
     fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
         val result = Func(returnType, init)
         export(name, result)
@@ -99,6 +101,9 @@ class ModuleBuilder {
         return f
     }
 
+    fun Global(initializerOrValue: Any) = global(null, true, initializerOrValue)
+
+
     fun Implementation(forwardDeclaration: ForwardDeclaration, init: FuncBuilder.() -> Unit): FuncImpl {
         require(funcs[forwardDeclaration.index] == forwardDeclaration) {
             "Function seems to be implemented already."
@@ -114,7 +119,6 @@ class ModuleBuilder {
         return f
     }
 
-    fun Global(initializerOrValue: Any) = global(null, true, initializerOrValue)
 
     fun ImportGlobal(module: String, name: String, type: Type) = importGlobal(module, name, true, type)
 
@@ -129,27 +133,31 @@ class ModuleBuilder {
         return i
     }
 
-    fun ImportTable(module: String, name: String, type: Type, min: Int, max: Int?): Int {
+    fun ImportTable(module: String, name: String, type: Type, min: Int, max: Int?): TableImport {
         require (tables.lastOrNull() !is TableImpl) {
             "Import tables before table declarations."
         }
         val index = tables.size
         val table = TableImport(index, module, name, type, min, max)
         tables.add(table)
-        return index
+        return table
     }
 
-    fun ImportMemory(module: String, name: String, min: Int, max: Int? = null) {
+    fun ImportMemory(module: String, name: String, min: Int, max: Int? = null): MemoryImport {
         if (memory != null) {
             throw IllegalStateException("multiple memories")
         }
-        memory = MemoryImport(module, name, min, max)
+        val result = MemoryImport(module, name, min, max)
+        memory = result
+        return result
     }
-    fun Memory(min: Int, max: Int? = null) {
+    fun Memory(min: Int, max: Int? = null): MemoryImpl {
         if (memory != null) {
             throw IllegalStateException("multiple memories")
         }
-        memory = MemoryImpl(min, max)
+        val result = MemoryImpl(min, max)
+        memory = result
+        return result
     }
 
 
@@ -158,11 +166,11 @@ class ModuleBuilder {
     }
 
 
-    fun Table(type: Type, min: Int, max: Int? = null): Int {
+    fun Table(type: Type, min: Int, max: Int? = null): TableIdx {
         val index = tables.size
         val table = TableImpl(index, type, min, max)
         tables.add(table)
-        return index
+        return TableIdx(index)
     }
 
 
@@ -174,6 +182,7 @@ class ModuleBuilder {
         globals.toList(),
         exports.values.toList(),
         start,
+        elements.toList(),
         datas.toList(),
     )
 

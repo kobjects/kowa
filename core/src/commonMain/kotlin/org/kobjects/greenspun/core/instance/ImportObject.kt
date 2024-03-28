@@ -2,8 +2,9 @@ package org.kobjects.greenspun.core.instance
 
 class ImportObject {
     val funcs = mutableMapOf<Pair<String, String>, Func>()
-    var memories = mutableMapOf<Pair<String, String>, Memory>()
+    val memories = mutableMapOf<Pair<String, String>, Memory>()
     val globals = mutableMapOf<Pair<String, String>, Global>()
+    val tables = mutableMapOf<Pair<String, String>, Table>()
 
     fun addFunc(module: String, name: String, func: Func) {
         funcs[module to name] = func
@@ -15,6 +16,10 @@ class ImportObject {
 
     fun addGlobal(module: String, name: String, global: Global) {
         globals[module to name] = global
+    }
+
+    fun addTable(module: String, name: String, table: Table) {
+        tables[module to name] = table
     }
 
     // fun addGlobal(module: String, name: String, )

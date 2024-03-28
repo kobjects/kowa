@@ -10,14 +10,15 @@ import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.instance.ImportObject
 import org.kobjects.greenspun.core.instance.Instance
+import org.kobjects.greenspun.core.memory.DataImpl
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.memory.MemoryInterface
+import org.kobjects.greenspun.core.table.ElementImpl
 import org.kobjects.greenspun.core.table.TableImport
 import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
-import org.kobjects.greenspun.core.type.I32
 
 class Module(
     val types: List<FuncType>,
@@ -27,15 +28,15 @@ class Module(
     val globals: List<GlobalInterface>,
     val exports: List<Export>,
     val start: Int?,
-    // elements
+    val elements: List<ElementImpl>,
     val datas: List<DataImpl>,
 ) {
 
     fun imports() = (
             funcs.filterIsInstance<FuncImport>() +
                     globals.filterIsInstance<MemoryImport>() +
-                    (if (memory == null) emptyList() else listOf(memory)) +
-                            tables.filterIsInstance<TableImport>()
+                    tables.filterIsInstance<TableImport>() +
+                    (if (memory == null) emptyList() else listOf(memory))
             ) as List<Imported>
 
 
@@ -114,6 +115,21 @@ class Module(
     private fun writeDataCount(writer: ModuleWriter) {
         if (datas.isNotEmpty()) {
             writer.writeU32(datas.size)
+        }
+    }
+
+    private fun writeElements(writer: ModuleWriter) {
+        if (elements.isNotEmpty()) {
+            writer.writeU32(elements.size)
+            for (element in elements) {
+                writer.writeU32(element.tableIdx)
+                element.offset.toWasm(writer)
+                writer.write(WasmOpcode.END)
+                writer.writeU32(element.funcs.size)
+                for (func in element.funcs) {
+                    writer.writeU32(func.index)
+                }
+            }
         }
     }
 
