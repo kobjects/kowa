@@ -1,8 +1,9 @@
-package org.kobjects.greenspun.core.tree
+package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.Type
 
@@ -10,11 +11,13 @@ class IndirectCallNode(
     val table: Int,
     val index: Node,
     val funcType: FuncType,
-    vararg val parameter: Node) : Node() {
+    vararg val parameter: Node
+) : Node() {
     override fun eval(context: LocalRuntimeContext): Any {
         val i = index.evalI32(context)
-        // TODO: context.instance.tables...
-        throw UnsupportedOperationException()
+        val table = context.instance.tables[table]
+        val f = table.elements[i] as FuncInterface
+        return f.call(context, *parameter)
     }
 
     override fun children() =

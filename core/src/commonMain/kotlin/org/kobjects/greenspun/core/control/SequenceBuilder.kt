@@ -7,7 +7,7 @@ import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.tree.BinaryOperator
-import org.kobjects.greenspun.core.tree.IndirectCallNode
+import org.kobjects.greenspun.core.func.IndirectCallNode
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.Node.Companion.Not
 import org.kobjects.greenspun.core.tree.RelationalOperator
