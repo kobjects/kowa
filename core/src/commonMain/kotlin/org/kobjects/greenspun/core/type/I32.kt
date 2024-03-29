@@ -84,8 +84,8 @@ object I32 : Type {
                 BinaryOperator.OR -> leftValue or rightValue
                 BinaryOperator.XOR -> leftValue xor rightValue
 
-                BinaryOperator.SHL -> leftValue shl leftValue.toInt()
-                BinaryOperator.SHR -> leftValue shr rightValue.toInt()
+                BinaryOperator.SHL -> leftValue shl leftValue
+                BinaryOperator.SHR -> leftValue shr rightValue
 
                 BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31).toInt())
                 BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31).toInt())

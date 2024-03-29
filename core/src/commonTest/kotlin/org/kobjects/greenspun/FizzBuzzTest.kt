@@ -23,8 +23,7 @@ class FizzBuzzTest {
         val LogI32 = ImportFunc("console", "logI32", Void, I32)
 
         ExportFunc("fizzBuzz", Void) {
-            val count = Var(1)
-            +While(count Le 20) {
+            +For(1, 21) { count ->
                 +If(count % 3 Eq 0) {
                     +If(count % 5 Eq 0) {
                         +LogStr(fizzBuzz, fizzBuzz.len)
@@ -38,7 +37,6 @@ class FizzBuzzTest {
                         +LogI32(count)
                     }
                 }
-                +Set(count, count + 1)
             }
         }
     }
@@ -91,7 +89,7 @@ class FizzBuzzTest {
               val func2 = Func(Void) {
                 val local0 = Local(I32(1))
                 +Loop {
-                  +BranchIf(Not((local0 Le I32(20))))
+                  +BranchIf((local0 Ge I32(21)))
                   +If(((local0 % I32(3)) Eq I32(0))) {
                     +If(((local0 % I32(5)) Eq I32(0))) {
                       +func0(I32(8), I32(8))

@@ -8,6 +8,7 @@ import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.tree.BinaryOperator
 import org.kobjects.greenspun.core.func.IndirectCallNode
+import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.Node.Companion.Not
 import org.kobjects.greenspun.core.tree.RelationalOperator
@@ -42,9 +43,9 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         return BlockNode(builder.build())
     }
 
-    fun CallIndirect(table: Int, index: Node, returnType: Type, vararg parameter: Node): IndirectCallNode {
+    fun CallIndirect(table: TableInterface, index: Node, returnType: Type, vararg parameter: Node): IndirectCallNode {
         val funcType = moduleBuilder.getFuncType(returnType, parameter.toList().map { it.returnType })
-        return IndirectCallNode(table, index, funcType, *parameter)
+        return IndirectCallNode(table.index, index, funcType, *parameter)
     }
 
 
@@ -64,7 +65,7 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         return LoopNode(builder.build())
     }
 
-    fun For(initialValue: Any, until: Node, step: Node = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): LoopNode {
+    fun For(initialValue: Any, until: Any, step: Any = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): LoopNode {
         val initialValueNode = Node.of(initialValue)
         val untilNode = Node.of(until)
         val stepNode = Node.of(step)
@@ -72,15 +73,14 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         require(initialValueNode.returnType == I32) {
             "I32 expected for initial value."
         }
-        require(until.returnType == I32) {
+        require(untilNode.returnType == I32) {
             "I32 expected for target value."
         }
-        require(step.returnType == I32) {
+        require(stepNode.returnType == I32) {
             "I32 expected for step value."
         }
         val loopVar = Var(initialValueNode)
         val builder = SequenceBuilder(moduleBuilder, variables)
-
         builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.GE, loopVar, untilNode)))
         builder.init(loopVar)
         builder.statements.add(Set(loopVar, I32.BinaryOperation(BinaryOperator.ADD, loopVar, stepNode)))
