@@ -22,7 +22,7 @@ class FuncBuilder(
             throw IllegalStateException("Parameters can't be declared after statements.")
         }
 
-        val variable = LocalReference(variables.size, type)
+        val variable = LocalReference(variables.size, false, type)
         variables.add(type)
 
         paramCount++

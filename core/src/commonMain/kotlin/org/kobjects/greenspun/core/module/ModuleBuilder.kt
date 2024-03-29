@@ -151,6 +151,9 @@ class ModuleBuilder {
         memory = result
         return result
     }
+
+    fun ImportVar(module: String, name : String, type: Type) = importGlobal(module, name, true, type)
+
     fun Memory(min: Int, max: Int? = null): MemoryImpl {
         if (memory != null) {
             throw IllegalStateException("multiple memories")
@@ -172,6 +175,8 @@ class ModuleBuilder {
         tables.add(table)
         return table
     }
+
+    fun Var(initializerOrValue: Any) = global(null, true, initializerOrValue)
 
 
     fun build() = Module(

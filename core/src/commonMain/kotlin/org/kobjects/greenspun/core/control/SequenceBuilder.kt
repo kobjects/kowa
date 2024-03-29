@@ -23,13 +23,18 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         statements.add(this)
     }
 
-    fun Local(initializerOrValue: Any): LocalReference {
+    fun local(mutable: Boolean, initializerOrValue: Any): LocalReference {
         val initializer = Node.of(initializerOrValue)
         statements.add(LocalDefinition(variables.size, initializer))
-        val variable = LocalReference(variables.size, initializer.returnType)
+        val variable = LocalReference(variables.size, mutable, initializer.returnType)
         variables.add(initializer.returnType)
         return variable
     }
+
+    fun Var(initializerOrValue: Any) = local(true, initializerOrValue)
+
+    fun Const(initializerOrValue: Any) = local(true, initializerOrValue)
+
 
     fun Block(init: SequenceBuilder.() -> Unit): BlockNode {
         val builder = SequenceBuilder(moduleBuilder, variables)
@@ -59,22 +64,26 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         return LoopNode(builder.build())
     }
 
-    fun For(initialValue: Node, targetValue: Node, step: Node = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): LoopNode {
-        require(initialValue.returnType == I32) {
+    fun For(initialValue: Any, until: Node, step: Node = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): LoopNode {
+        val initialValueNode = Node.of(initialValue)
+        val untilNode = Node.of(until)
+        val stepNode = Node.of(step)
+
+        require(initialValueNode.returnType == I32) {
             "I32 expected for initial value."
         }
-        require(targetValue.returnType == I32) {
+        require(until.returnType == I32) {
             "I32 expected for target value."
         }
         require(step.returnType == I32) {
             "I32 expected for step value."
         }
-        val loopVar = Local(initialValue)
+        val loopVar = Var(initialValueNode)
         val builder = SequenceBuilder(moduleBuilder, variables)
 
-        builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.EQ, targetValue, loopVar)))
+        builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.GE, loopVar, untilNode)))
         builder.init(loopVar)
-        builder.statements.add(Set(loopVar, I32.BinaryOperation(BinaryOperator.ADD, loopVar, step)))
+        builder.statements.add(Set(loopVar, I32.BinaryOperation(BinaryOperator.ADD, loopVar, stepNode)))
 
         return LoopNode(builder.build())
     }

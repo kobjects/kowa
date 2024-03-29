@@ -9,6 +9,7 @@ import org.kobjects.greenspun.core.type.I32
 
 class LocalReference(
     val index: Int,
+    val mutable: Boolean,
     override val returnType: Type
 ) : Node() {
     override fun eval(context: LocalRuntimeContext) = context.getLocal(index)

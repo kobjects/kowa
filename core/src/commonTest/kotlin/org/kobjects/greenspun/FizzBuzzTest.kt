@@ -23,7 +23,7 @@ class FizzBuzzTest {
         val LogI32 = ImportFunc("console", "logI32", Void, I32)
 
         ExportFunc("fizzBuzz", Void) {
-            val count = Local(1)
+            val count = Var(1)
             +While(count Le 20) {
                 +If(count % 3 Eq 0) {
                     +If(count % 5 Eq 0) {

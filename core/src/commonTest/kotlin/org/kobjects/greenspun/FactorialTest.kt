@@ -14,7 +14,7 @@ class FactorialTest {
         ExportFunc("factorial", I64) {
             val value = Param(I64)
 
-            val result = Local(1L)
+            val result = Var(1L)
 
             +While(value Gt 1L) {
                 +Set(result, result * value)
