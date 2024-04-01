@@ -11,13 +11,13 @@ import kotlin.math.min
 import kotlin.math.sign
 
 /**
- *  I64 type & builtin operations.
+ *  U64 type & builtin operations.
  */
-object I64 : Type {
+object U64 : Type {
 
-    operator fun invoke(value: Long) = Const(value)
+    operator fun invoke(value: ULong) = Const(value)
 
-    override fun createConstant(value: Any) = Const(value as Long)
+    override fun createConstant(value: Any) = Const(value as ULong)
 
     override fun createUnaryOperation(operator: UnaryOperator, operand: Node) = UnaryOperation(operator, operand)
 
@@ -33,28 +33,28 @@ object I64 : Type {
         rightOperand: Node
     ) = RelationalOperation(operator, leftOperand, rightOperand)
 
-    override fun toString() = "I64"
+    override fun toString() = "U64"
 
     override fun toWasm(writer: WasmWriter) =
         writer.write(WasmType.I64)
 
     class Const(
-        val value: Long
+        val value: ULong
     ): AbstractLeafNode() {
         override fun eval(context: LocalRuntimeContext) = value
 
-        override fun evalI64(context: LocalRuntimeContext) = value
+        override fun evalU64(context: LocalRuntimeContext) = value
 
         override fun toString(writer: CodeWriter) =
-            writer.write("I64($value)")
+            writer.write("U64($value)")
 
         override fun toWasm(writer: ModuleWriter) {
             writer.write(WasmOpcode.I64_CONST)
-            writer.writeI64(value)
+            writer.writeI64(value as Long)
         }
 
         override val returnType: Type
-            get() = I64
+            get() = U64
     }
 
     class BinaryOperation(
@@ -69,11 +69,11 @@ object I64 : Type {
             }
         }
 
-        override fun eval(context: LocalRuntimeContext) = evalI64(context)
+        override fun eval(context: LocalRuntimeContext) = evalU64(context)
 
-        override fun evalI64(context: LocalRuntimeContext): Long {
-            val leftValue = leftOperand.evalI64(context)
-            val rightValue = rightOperand.evalI64(context)
+        override fun evalU64(context: LocalRuntimeContext): ULong {
+            val leftValue = leftOperand.evalU64(context)
+            val rightValue = rightOperand.evalU64(context)
             return when (operator) {
                 BinaryOperator.ADD -> leftValue + rightValue
                 BinaryOperator.DIV -> leftValue / rightValue
@@ -87,10 +87,10 @@ object I64 : Type {
                 BinaryOperator.SHL -> leftValue shl leftValue.toInt()
                 BinaryOperator.SHR -> leftValue shr rightValue.toInt()
 
-                BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31).toInt())
-                BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31).toInt())
+                BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31u).toInt())
+                BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31u).toInt())
 
-                BinaryOperator.COPYSIGN -> if (leftValue.sign == rightValue.sign) leftValue else -leftValue
+                BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
                 BinaryOperator.MIN -> min(leftValue, rightValue)
                 BinaryOperator.MAX -> max(leftValue, rightValue)
             }
@@ -100,7 +100,7 @@ object I64 : Type {
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override val returnType: Type
-            get() = I64
+            get() = U64
 
         override fun toWasm(writer: ModuleWriter) {
             leftOperand.toWasm(writer)
@@ -130,10 +130,10 @@ object I64 : Type {
         val operand: Node,
     ) : Node() {
         override fun eval(context: LocalRuntimeContext): Any {
-            val value = operand.evalI64(context)
+            val value = operand.evalU64(context)
             return when (operator) {
                 UnaryOperator.ABS -> throw UnsupportedOperationException()
-                UnaryOperator.NEG -> -value
+                UnaryOperator.NEG -> throw UnsupportedOperationException()
                 UnaryOperator.CLZ -> value.countLeadingZeroBits()
                 UnaryOperator.CTZ -> value.countTrailingZeroBits()
                 UnaryOperator.POPCNT -> value.countOneBits()
@@ -145,9 +145,9 @@ object I64 : Type {
                 UnaryOperator.TO_F32 -> value.toFloat()
                 UnaryOperator.TO_F64 -> value.toDouble()
                 UnaryOperator.TO_I32 -> value.toInt()
-                UnaryOperator.TO_I64 -> value
+                UnaryOperator.TO_I64 -> value.toLong()
                 UnaryOperator.TO_U32 -> value.toUInt()
-                UnaryOperator.TO_U64 -> value.toULong()
+                UnaryOperator.TO_U64 -> value
                 UnaryOperator.NOT -> value.inv()
             }
         }
@@ -180,8 +180,8 @@ object I64 : Type {
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.NOT -> WasmOpcode.I64_XOR
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I64_S
-                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I64_S
+                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I64_U
+                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I64_U
                 UnaryOperator.TO_I32 -> WasmOpcode.I32_WRAP_I64
                 UnaryOperator.TO_I64 -> WasmOpcode.NOP
                 UnaryOperator.TO_U32 -> WasmOpcode.I32_WRAP_I64
@@ -191,7 +191,7 @@ object I64 : Type {
         }
 
         override val returnType: Type
-            get() = operator.deviantResultType ?: I64
+            get() = operator.deviantResultType ?: U64
     }
 
     class RelationalOperation(
@@ -200,8 +200,8 @@ object I64 : Type {
         rightOperand: Node,
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext): Boolean {
-            val leftValue = leftOperand.evalI64(context)
-            val rightValue = rightOperand.evalI64(context)
+            val leftValue = leftOperand.evalU64(context)
+            val rightValue = rightOperand.evalU64(context)
             return when (operator) {
                 RelationalOperator.EQ -> leftValue == rightValue
                 RelationalOperator.NE -> leftValue != rightValue
@@ -220,10 +220,10 @@ object I64 : Type {
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
                 RelationalOperator.EQ -> WasmOpcode.I64_EQ
-                RelationalOperator.GE -> WasmOpcode.I64_GE_S
-                RelationalOperator.GT -> WasmOpcode.I64_GT_S
-                RelationalOperator.LE -> WasmOpcode.I64_LE_S
-                RelationalOperator.LT -> WasmOpcode.I64_LT_S
+                RelationalOperator.GE -> WasmOpcode.I64_GE_U
+                RelationalOperator.GT -> WasmOpcode.I64_GT_U
+                RelationalOperator.LE -> WasmOpcode.I64_LE_U
+                RelationalOperator.LT -> WasmOpcode.I64_LT_U
                 RelationalOperator.NE -> WasmOpcode.I64_NE
             })
         }

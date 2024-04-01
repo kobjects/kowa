@@ -12,13 +12,13 @@ import kotlin.math.sqrt
 import kotlin.math.truncate
 
 /**
- * F64 type & builtin operations.
+ * F32 type & builtin operations.
  */
-object F64 : Type {
+object F32 : Type {
 
-    operator fun invoke(value: Double) = Const(value)
+    operator fun invoke(value: Float) = Const(value)
 
-    override fun createConstant(value: Any) = Const(value as Double)
+    override fun createConstant(value: Any) = Const(value as Float)
 
     override fun createBinaryOperation(
         operator: BinaryOperator,
@@ -37,31 +37,31 @@ object F64 : Type {
     }
 
     override fun toWasm(writer: WasmWriter) {
-        writer.write(WasmType.F64)
+        writer.write(WasmType.F32)
     }
 
-    override fun toString() = "F64"
+    override fun toString() = "F32"
 
     class Const(
-        val value: Double
+        val value: Float
     ): AbstractLeafNode() {
         override fun eval(context: LocalRuntimeContext) = value
 
-        override fun evalF64(context: LocalRuntimeContext) = value
+        override fun evalF32(context: LocalRuntimeContext) = value
 
         override fun toString(writer: CodeWriter) {
-            writer.write("F64(")
+            writer.write("F32(")
             writer.write(value.toString())
             writer.write(')')
         }
 
         override fun toWasm(writer: ModuleWriter) {
-            writer.write(WasmOpcode.F64_CONST)
-            writer.writeF64(value)
+            writer.write(WasmOpcode.F32_CONST)
+            writer.writeF32(value)
         }
 
         override val returnType: Type
-            get() = F64
+            get() = F32
     }
 
     class BinaryOperation(
@@ -71,18 +71,18 @@ object F64 : Type {
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
 
         init {
-            require(leftOperand.returnType == F64) { "Left operand type must be F64."}
-            require(rightOperand.returnType == F64) { "Right operand type must be F64."}
+            require(leftOperand.returnType == F32) { "Left operand type must be F32."}
+            require(rightOperand.returnType == F32) { "Right operand type must be F32."}
         }
 
         override val returnType: Type
-            get() = F64
+            get() = F32
 
-        override fun eval(context: LocalRuntimeContext) = evalF64(context)
+        override fun eval(context: LocalRuntimeContext) = evalF32(context)
 
-        override fun evalF64(context: LocalRuntimeContext): Double {
-            val leftValue = leftOperand.evalF64(context)
-            val rightValue = rightOperand.evalF64(context)
+        override fun evalF32(context: LocalRuntimeContext): Float {
+            val leftValue = leftOperand.evalF32(context)
+            val rightValue = rightOperand.evalF32(context)
             return when (operator) {
                 BinaryOperator.ADD -> leftValue + rightValue
                 BinaryOperator.DIV -> leftValue / rightValue
@@ -99,14 +99,14 @@ object F64 : Type {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
-                BinaryOperator.ADD -> WasmOpcode.F64_ADD
-                BinaryOperator.SUB -> WasmOpcode.F64_SUB
-                BinaryOperator.MUL -> WasmOpcode.F64_MUL
-                BinaryOperator.DIV -> WasmOpcode.F64_DIV
+                BinaryOperator.ADD -> WasmOpcode.F32_ADD
+                BinaryOperator.SUB -> WasmOpcode.F32_SUB
+                BinaryOperator.MUL -> WasmOpcode.F32_MUL
+                BinaryOperator.DIV -> WasmOpcode.F32_DIV
                 BinaryOperator.REM -> throw UnsupportedOperationException()
-                BinaryOperator.COPYSIGN -> WasmOpcode.F64_COPYSIGN
-                BinaryOperator.MIN -> WasmOpcode.F64_MIN
-                BinaryOperator.MAX -> WasmOpcode.F64_MAX
+                BinaryOperator.COPYSIGN -> WasmOpcode.F32_COPYSIGN
+                BinaryOperator.MIN -> WasmOpcode.F32_MIN
+                BinaryOperator.MAX -> WasmOpcode.F32_MAX
                 BinaryOperator.AND -> throw UnsupportedOperationException()
                 BinaryOperator.OR -> throw UnsupportedOperationException()
                 BinaryOperator.XOR -> throw UnsupportedOperationException()
@@ -125,11 +125,11 @@ object F64 : Type {
     ) : AbstractUnaryOperation(operator, operand) {
 
         init {
-            require(operand.returnType == F64) { "Operand type must be F64."}
+            require(operand.returnType == F32) { "Operand type must be F32."}
         }
 
         override fun eval(context: LocalRuntimeContext): Any {
-            val value = operand.evalF64(context)
+            val value = operand.evalF32(context)
             return when (operator) {
                 UnaryOperator.ABS -> throw UnsupportedOperationException()
                 UnaryOperator.CEIL -> ceil(value)
@@ -140,12 +140,12 @@ object F64 : Type {
                 UnaryOperator.NEG -> -value
                 UnaryOperator.POPCNT -> throw UnsupportedOperationException()
                 UnaryOperator.SQRT -> sqrt(value)
-                UnaryOperator.TO_F32 -> value.toFloat()
-                UnaryOperator.TO_F64 -> value
+                UnaryOperator.TO_F32 -> value
+                UnaryOperator.TO_F64 -> value.toDouble()
                 UnaryOperator.TO_I32 -> value.toInt()
                 UnaryOperator.TO_I64 -> value.toLong()
                 UnaryOperator.TO_U32 -> value.toUInt()
-                UnaryOperator.TO_U64 -> value.toUInt()
+                UnaryOperator.TO_U64 -> value.toULong()
                 UnaryOperator.TRUNC -> truncate(value)
                 UnaryOperator.NOT -> throw UnsupportedOperationException()
             }
@@ -155,27 +155,27 @@ object F64 : Type {
         override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(operator, newChildren[0])
 
         override val returnType: Type
-            get() = F64
+            get() = F32
 
         override fun toWasm(writer: ModuleWriter) {
             writer.write(when (operator) {
-                UnaryOperator.ABS -> WasmOpcode.F64_ABS
-                UnaryOperator.CEIL -> WasmOpcode.F64_CEIL
+                UnaryOperator.ABS -> WasmOpcode.F32_ABS
+                UnaryOperator.CEIL -> WasmOpcode.F32_CEIL
                 UnaryOperator.CLZ -> throw UnsupportedOperationException()
                 UnaryOperator.CTZ -> throw UnsupportedOperationException()
-                UnaryOperator.FLOOR -> WasmOpcode.F64_FLOOR
-                UnaryOperator.NEAREST -> WasmOpcode.F64_NEAREST
-                UnaryOperator.NEG -> WasmOpcode.F64_NEG
+                UnaryOperator.FLOOR -> WasmOpcode.F32_FLOOR
+                UnaryOperator.NEAREST -> WasmOpcode.F32_NEAREST
+                UnaryOperator.NEG -> WasmOpcode.F32_NEG
                 UnaryOperator.NOT -> throw UnsupportedOperationException()
                 UnaryOperator.POPCNT -> throw UnsupportedOperationException()
-                UnaryOperator.SQRT -> WasmOpcode.F64_SQRT
+                UnaryOperator.SQRT -> WasmOpcode.F32_SQRT
                 UnaryOperator.TO_F32 -> WasmOpcode.NOP
-                UnaryOperator.TO_F64 -> WasmOpcode.NOP
-                UnaryOperator.TO_I32 -> WasmOpcode.I32_TRUNC_F64_S
-                UnaryOperator.TO_I64 -> WasmOpcode.I64_TRUNC_F64_S
-                UnaryOperator.TO_U32 -> WasmOpcode.I32_TRUNC_F64_U
-                UnaryOperator.TO_U64 -> WasmOpcode.I64_TRUNC_F64_U
-                UnaryOperator.TRUNC -> WasmOpcode.F64_TRUNC
+                UnaryOperator.TO_F64 -> WasmOpcode.F64_PROMOTE_F32
+                UnaryOperator.TO_I32 -> WasmOpcode.I32_TRUNC_F32_S
+                UnaryOperator.TO_I64 -> WasmOpcode.I64_TRUNC_F32_S
+                UnaryOperator.TO_U32 -> WasmOpcode.I32_TRUNC_F32_U
+                UnaryOperator.TO_U64 -> WasmOpcode.I64_TRUNC_F32_U
+                UnaryOperator.TRUNC -> WasmOpcode.F32_TRUNC
             })
         }
     }
@@ -187,13 +187,13 @@ object F64 : Type {
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
 
         init {
-            require(leftOperand.returnType == F64) { "Left operand type must be F64" }
-            require(rightOperand.returnType == F64) { "Right operand type must be F64" }
+            require(leftOperand.returnType == F32) { "Left operand type must be F32" }
+            require(rightOperand.returnType == F32) { "Right operand type must be F32" }
         }
 
         override fun eval(context: LocalRuntimeContext): Boolean {
-            val leftValue = leftOperand.evalF64(context)
-            val rightValue = rightOperand.evalF64(context)
+            val leftValue = leftOperand.evalF32(context)
+            val rightValue = rightOperand.evalF32(context)
             return when (operator) {
                 RelationalOperator.EQ -> leftValue == rightValue
                 RelationalOperator.GE -> leftValue >= rightValue
@@ -212,12 +212,12 @@ object F64 : Type {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
-                RelationalOperator.EQ -> WasmOpcode.F64_EQ
-                RelationalOperator.GE -> WasmOpcode.F64_GE
-                RelationalOperator.GT -> WasmOpcode.F64_GT
-                RelationalOperator.LE -> WasmOpcode.F64_LE
-                RelationalOperator.LT -> WasmOpcode.F64_LT
-                RelationalOperator.NE -> WasmOpcode.F64_NE
+                RelationalOperator.EQ -> WasmOpcode.F32_EQ
+                RelationalOperator.GE -> WasmOpcode.F32_GE
+                RelationalOperator.GT -> WasmOpcode.F32_GT
+                RelationalOperator.LE -> WasmOpcode.F32_LE
+                RelationalOperator.LT -> WasmOpcode.F32_LT
+                RelationalOperator.NE -> WasmOpcode.F32_NE
             })
         }
     }

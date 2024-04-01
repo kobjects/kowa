@@ -130,10 +130,10 @@ object I32 : Type {
         val operand: Node,
     ) : Node() {
         override fun eval(context: LocalRuntimeContext): Any {
-            val value = operand.evalI32(context)
+            val value = operand.evalU32(context)
             return when (operator) {
                 UnaryOperator.ABS -> throw UnsupportedOperationException()
-                UnaryOperator.NEG -> -value
+                UnaryOperator.NEG -> throw UnsupportedOperationException()
                 UnaryOperator.CLZ -> value.countLeadingZeroBits()
                 UnaryOperator.CTZ -> value.countTrailingZeroBits()
                 UnaryOperator.POPCNT -> value.countOneBits()
@@ -142,9 +142,12 @@ object I32 : Type {
                 UnaryOperator.TRUNC -> throw UnsupportedOperationException()
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_I32 -> value
-                UnaryOperator.TO_I64 -> value.toLong()
+                UnaryOperator.TO_F32 -> value.toFloat()
                 UnaryOperator.TO_F64 -> value.toDouble()
+                UnaryOperator.TO_I32 -> value.toInt()
+                UnaryOperator.TO_I64 -> value.toLong()
+                UnaryOperator.TO_U32 -> value
+                UnaryOperator.TO_U64 -> value.toULong()
                 UnaryOperator.NOT -> value.inv()
             }
         }
@@ -177,9 +180,12 @@ object I32 : Type {
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.NOT -> WasmOpcode.I32_XOR
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
+                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I32_U
+                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I32_U
                 UnaryOperator.TO_I32 -> WasmOpcode.NOP
-                UnaryOperator.TO_I64 -> WasmOpcode.I64_EXTEND_I32_S
-                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I32_S
+                UnaryOperator.TO_I64 -> WasmOpcode.I64_EXTEND_I32_U
+                UnaryOperator.TO_U32 -> WasmOpcode.NOP
+                UnaryOperator.TO_U64 -> WasmOpcode.I64_EXTEND_I32_U
                 UnaryOperator.TRUNC -> throw UnsupportedOperationException()
             })
         }

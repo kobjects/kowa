@@ -5,19 +5,20 @@ import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.binary.loadI32
 import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
 
 /**
- *  I64 type & builtin operations.
+ *  U32 type & builtin operations.
  */
-object I64 : Type {
+object U32 : Type {
 
-    operator fun invoke(value: Long) = Const(value)
+    operator fun invoke(value: UInt) = Const(value)
 
-    override fun createConstant(value: Any) = Const(value as Long)
+    override fun createConstant(value: Any) = Const(value as UInt)
 
     override fun createUnaryOperation(operator: UnaryOperator, operand: Node) = UnaryOperation(operator, operand)
 
@@ -33,28 +34,27 @@ object I64 : Type {
         rightOperand: Node
     ) = RelationalOperation(operator, leftOperand, rightOperand)
 
-    override fun toString() = "I64"
+    override fun toString() = "U32"
 
-    override fun toWasm(writer: WasmWriter) =
-        writer.write(WasmType.I64)
+    override fun toWasm(writer: WasmWriter) = writer.write(WasmType.I32)
 
     class Const(
-        val value: Long
+        val value: UInt
     ): AbstractLeafNode() {
         override fun eval(context: LocalRuntimeContext) = value
 
-        override fun evalI64(context: LocalRuntimeContext) = value
+        override fun evalU32(context: LocalRuntimeContext) = value
 
         override fun toString(writer: CodeWriter) =
-            writer.write("I64($value)")
+            writer.write("U32($value)")
 
         override fun toWasm(writer: ModuleWriter) {
-            writer.write(WasmOpcode.I64_CONST)
-            writer.writeI64(value)
+            writer.write(WasmOpcode.I32_CONST)
+            writer.writeI32(value.toInt())
         }
 
         override val returnType: Type
-            get() = I64
+            get() = U32
     }
 
     class BinaryOperation(
@@ -69,11 +69,11 @@ object I64 : Type {
             }
         }
 
-        override fun eval(context: LocalRuntimeContext) = evalI64(context)
+        override fun eval(context: LocalRuntimeContext) = evalU32(context)
 
-        override fun evalI64(context: LocalRuntimeContext): Long {
-            val leftValue = leftOperand.evalI64(context)
-            val rightValue = rightOperand.evalI64(context)
+        override fun evalU32(context: LocalRuntimeContext): UInt {
+            val leftValue = leftOperand.evalU32(context)
+            val rightValue = rightOperand.evalU32(context)
             return when (operator) {
                 BinaryOperator.ADD -> leftValue + rightValue
                 BinaryOperator.DIV -> leftValue / rightValue
@@ -87,10 +87,10 @@ object I64 : Type {
                 BinaryOperator.SHL -> leftValue shl leftValue.toInt()
                 BinaryOperator.SHR -> leftValue shr rightValue.toInt()
 
-                BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31).toInt())
-                BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31).toInt())
+                BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31u).toInt())
+                BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31u).toInt())
 
-                BinaryOperator.COPYSIGN -> if (leftValue.sign == rightValue.sign) leftValue else -leftValue
+                BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
                 BinaryOperator.MIN -> min(leftValue, rightValue)
                 BinaryOperator.MAX -> max(leftValue, rightValue)
             }
@@ -100,24 +100,24 @@ object I64 : Type {
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override val returnType: Type
-            get() = I64
+            get() = U32
 
         override fun toWasm(writer: ModuleWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when (operator) {
-                BinaryOperator.ADD -> WasmOpcode.I64_ADD
-                BinaryOperator.SUB -> WasmOpcode.I64_SUB
-                BinaryOperator.MUL -> WasmOpcode.I64_MUL
-                BinaryOperator.DIV -> WasmOpcode.I64_DIV_S
-                BinaryOperator.REM -> WasmOpcode.I64_REM_S
-                BinaryOperator.AND -> WasmOpcode.I64_AND
-                BinaryOperator.OR -> WasmOpcode.I64_OR
-                BinaryOperator.XOR -> WasmOpcode.I64_XOR
-                BinaryOperator.SHL -> WasmOpcode.I64_SHL
-                BinaryOperator.SHR -> WasmOpcode.I64_SHR_S
-                BinaryOperator.ROTR -> WasmOpcode.I64_ROTR
-                BinaryOperator.ROTL -> WasmOpcode.I64_ROTL
+                BinaryOperator.ADD -> WasmOpcode.I32_ADD
+                BinaryOperator.SUB -> WasmOpcode.I32_SUB
+                BinaryOperator.MUL -> WasmOpcode.I32_MUL
+                BinaryOperator.DIV -> WasmOpcode.I32_DIV_U
+                BinaryOperator.REM -> WasmOpcode.I32_REM_U
+                BinaryOperator.AND -> WasmOpcode.I32_AND
+                BinaryOperator.OR -> WasmOpcode.I32_OR
+                BinaryOperator.XOR -> WasmOpcode.I32_XOR
+                BinaryOperator.SHL -> WasmOpcode.I32_SHL
+                BinaryOperator.SHR -> WasmOpcode.I32_SHR_U
+                BinaryOperator.ROTR -> WasmOpcode.I32_ROTR
+                BinaryOperator.ROTL -> WasmOpcode.I32_ROTL
                 BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
                 BinaryOperator.MIN -> throw UnsupportedOperationException()
                 BinaryOperator.MAX -> throw UnsupportedOperationException()
@@ -130,10 +130,10 @@ object I64 : Type {
         val operand: Node,
     ) : Node() {
         override fun eval(context: LocalRuntimeContext): Any {
-            val value = operand.evalI64(context)
+            val value = operand.evalU32(context)
             return when (operator) {
                 UnaryOperator.ABS -> throw UnsupportedOperationException()
-                UnaryOperator.NEG -> -value
+                UnaryOperator.NEG -> throw UnsupportedOperationException()
                 UnaryOperator.CLZ -> value.countLeadingZeroBits()
                 UnaryOperator.CTZ -> value.countTrailingZeroBits()
                 UnaryOperator.POPCNT -> value.countOneBits()
@@ -145,8 +145,8 @@ object I64 : Type {
                 UnaryOperator.TO_F32 -> value.toFloat()
                 UnaryOperator.TO_F64 -> value.toDouble()
                 UnaryOperator.TO_I32 -> value.toInt()
-                UnaryOperator.TO_I64 -> value
-                UnaryOperator.TO_U32 -> value.toUInt()
+                UnaryOperator.TO_I64 -> value.toLong()
+                UnaryOperator.TO_U32 -> value
                 UnaryOperator.TO_U64 -> value.toULong()
                 UnaryOperator.NOT -> value.inv()
             }
@@ -162,36 +162,36 @@ object I64 : Type {
 
         override fun toWasm(writer: ModuleWriter) {
             if (operator == UnaryOperator.NEG) {
-                writer.write(WasmOpcode.I64_CONST)
-                writer.writeI64(0)
+                writer.write(WasmOpcode.I32_CONST)
+                writer.writeI32(0)
             } else if (operator == UnaryOperator.NOT) {
-                writer.write(WasmOpcode.I64_CONST)
-                writer.writeI64(-1)
+                writer.write(WasmOpcode.I32_CONST)
+                writer.writeI32(-1)
             }
             operand.toWasm(writer)
             writer.write(when (operator) {
                 UnaryOperator.ABS -> throw UnsupportedOperationException()
                 UnaryOperator.CEIL -> throw UnsupportedOperationException()
-                UnaryOperator.CLZ -> WasmOpcode.I64_CLZ
-                UnaryOperator.CTZ -> WasmOpcode.I64_CTZ
+                UnaryOperator.CLZ -> WasmOpcode.I32_CLZ
+                UnaryOperator.CTZ -> WasmOpcode.I32_CTZ
                 UnaryOperator.FLOOR -> throw UnsupportedOperationException()
-                UnaryOperator.POPCNT -> WasmOpcode.I64_POPCNT
-                UnaryOperator.NEG -> WasmOpcode.I64_SUB
+                UnaryOperator.POPCNT -> WasmOpcode.I32_POPCNT
+                UnaryOperator.NEG -> WasmOpcode.I32_SUB
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
-                UnaryOperator.NOT -> WasmOpcode.I64_XOR
+                UnaryOperator.NOT -> WasmOpcode.I32_XOR
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I64_S
-                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I64_S
-                UnaryOperator.TO_I32 -> WasmOpcode.I32_WRAP_I64
-                UnaryOperator.TO_I64 -> WasmOpcode.NOP
-                UnaryOperator.TO_U32 -> WasmOpcode.I32_WRAP_I64
-                UnaryOperator.TO_U64 -> WasmOpcode.NOP
+                UnaryOperator.TO_I32 -> WasmOpcode.NOP
+                UnaryOperator.TO_I64 -> WasmOpcode.I64_EXTEND_I32_U
+                UnaryOperator.TO_U32 -> WasmOpcode.NOP
+                UnaryOperator.TO_U64 -> WasmOpcode.I64_EXTEND_I32_U
+                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I32_U
+                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I32_U
                 UnaryOperator.TRUNC -> throw UnsupportedOperationException()
             })
         }
 
         override val returnType: Type
-            get() = operator.deviantResultType ?: I64
+            get() = operator.deviantResultType ?: U32
     }
 
     class RelationalOperation(
@@ -200,8 +200,8 @@ object I64 : Type {
         rightOperand: Node,
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext): Boolean {
-            val leftValue = leftOperand.evalI64(context)
-            val rightValue = rightOperand.evalI64(context)
+            val leftValue = leftOperand.evalU32(context)
+            val rightValue = rightOperand.evalU32(context)
             return when (operator) {
                 RelationalOperator.EQ -> leftValue == rightValue
                 RelationalOperator.NE -> leftValue != rightValue
@@ -219,15 +219,34 @@ object I64 : Type {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
-                RelationalOperator.EQ -> WasmOpcode.I64_EQ
-                RelationalOperator.GE -> WasmOpcode.I64_GE_S
-                RelationalOperator.GT -> WasmOpcode.I64_GT_S
-                RelationalOperator.LE -> WasmOpcode.I64_LE_S
-                RelationalOperator.LT -> WasmOpcode.I64_LT_S
-                RelationalOperator.NE -> WasmOpcode.I64_NE
+                RelationalOperator.EQ -> WasmOpcode.I32_EQ
+                RelationalOperator.GE -> WasmOpcode.I32_GE_U
+                RelationalOperator.GT -> WasmOpcode.I32_GT_U
+                RelationalOperator.LE -> WasmOpcode.I32_LE_U
+                RelationalOperator.LT -> WasmOpcode.I32_LT_U
+                RelationalOperator.NE -> WasmOpcode.I32_NE
             })
         }
     }
 
+
+    class Load(val address: Node) : Node() {
+        override fun eval(context: LocalRuntimeContext) = context.instance.memory.buffer.loadI32(address.evalI32(context)).toUInt()
+
+        override fun children(): List<Node> = listOf(address)
+
+        override fun reconstruct(newChildren: List<Node>) = Load(newChildren[0])
+
+        override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
+
+        override fun toWasm(writer: ModuleWriter) {
+            writer.write(WasmOpcode.I32_LOAD)
+            writer.writeU32(0)
+            writer.writeU32(0)
+        }
+
+        override val returnType: Type
+            get() = U32
+    }
 
 }

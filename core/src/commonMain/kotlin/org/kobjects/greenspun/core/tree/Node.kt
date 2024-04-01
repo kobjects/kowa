@@ -8,22 +8,29 @@ import org.kobjects.greenspun.core.module.ModuleWriter
 abstract class Node {
     abstract fun eval(context: LocalRuntimeContext): Any
 
-    // Override to avoid boxing; use to avoid type casts.
-    open fun evalF64(context: LocalRuntimeContext): Double {
-        return eval(context) as Double
-    }
-
+    // Overrides to avoid boxing; use to avoid type casts.
     open fun evalF32(context: LocalRuntimeContext): Float {
         return eval(context) as Float
     }
 
-    // Override to avoid boxing; use to avoid type casts.
-    open fun evalI64(context: LocalRuntimeContext): Long {
-        return eval(context) as Long
+    open fun evalF64(context: LocalRuntimeContext): Double {
+        return eval(context) as Double
     }
 
     open fun evalI32(context: LocalRuntimeContext): Int {
         return eval(context) as Int
+    }
+
+    open fun evalI64(context: LocalRuntimeContext): Long {
+        return eval(context) as Long
+    }
+
+    open fun evalU32(context: LocalRuntimeContext): UInt {
+        return eval(context) as UInt
+    }
+
+    open fun evalU64(context: LocalRuntimeContext): ULong {
+        return eval(context) as ULong
     }
 
     open fun evalBool(context: LocalRuntimeContext): Boolean {
