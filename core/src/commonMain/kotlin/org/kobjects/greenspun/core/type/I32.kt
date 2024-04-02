@@ -76,23 +76,27 @@ object I32 : Type {
             val rightValue = rightOperand.evalI32(context)
             return when (operator) {
                 BinaryOperator.ADD -> leftValue + rightValue
-                BinaryOperator.DIV -> leftValue / rightValue
+                BinaryOperator.DIV_S -> leftValue / rightValue
                 BinaryOperator.MUL -> leftValue * rightValue
                 BinaryOperator.SUB -> leftValue - rightValue
-                BinaryOperator.REM -> leftValue % rightValue
+                BinaryOperator.REM_S -> leftValue % rightValue
                 BinaryOperator.AND -> leftValue and rightValue
                 BinaryOperator.OR -> leftValue or rightValue
                 BinaryOperator.XOR -> leftValue xor rightValue
 
                 BinaryOperator.SHL -> leftValue shl leftValue
-                BinaryOperator.SHR -> leftValue shr rightValue
+                BinaryOperator.SHR_S -> leftValue shr rightValue
 
                 BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31).toInt())
                 BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31).toInt())
 
-                BinaryOperator.COPYSIGN -> if (leftValue.sign == rightValue.sign) leftValue else -leftValue
                 BinaryOperator.MIN -> min(leftValue, rightValue)
                 BinaryOperator.MAX -> max(leftValue, rightValue)
+                BinaryOperator.COPYSIGN -> if (leftValue.sign == rightValue.sign) leftValue else -leftValue
+
+                BinaryOperator.DIV_U -> (leftValue.toUInt() / rightValue.toUInt()).toInt()
+                BinaryOperator.REM_U -> (leftValue.toUInt() % rightValue.toUInt()).toInt()
+                BinaryOperator.SHR_U -> leftValue ushr rightValue
             }
         }
 
@@ -109,15 +113,18 @@ object I32 : Type {
                 BinaryOperator.ADD -> WasmOpcode.I32_ADD
                 BinaryOperator.SUB -> WasmOpcode.I32_SUB
                 BinaryOperator.MUL -> WasmOpcode.I32_MUL
-                BinaryOperator.DIV -> WasmOpcode.I32_DIV_S
-                BinaryOperator.REM -> WasmOpcode.I32_REM_S
+                BinaryOperator.DIV_S -> WasmOpcode.I32_DIV_S
+                BinaryOperator.REM_S -> WasmOpcode.I32_REM_S
                 BinaryOperator.AND -> WasmOpcode.I32_AND
                 BinaryOperator.OR -> WasmOpcode.I32_OR
                 BinaryOperator.XOR -> WasmOpcode.I32_XOR
                 BinaryOperator.SHL -> WasmOpcode.I32_SHL
-                BinaryOperator.SHR -> WasmOpcode.I32_SHR_S
+                BinaryOperator.SHR_S -> WasmOpcode.I32_SHR_S
                 BinaryOperator.ROTR -> WasmOpcode.I32_ROTR
                 BinaryOperator.ROTL -> WasmOpcode.I32_ROTL
+                BinaryOperator.SHR_U -> WasmOpcode.I32_SHR_U
+                BinaryOperator.DIV_U -> WasmOpcode.I32_DIV_U
+                BinaryOperator.REM_U -> WasmOpcode.I32_REM_U
                 BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
                 BinaryOperator.MIN -> throw UnsupportedOperationException()
                 BinaryOperator.MAX -> throw UnsupportedOperationException()
@@ -130,25 +137,34 @@ object I32 : Type {
         val operand: Node,
     ) : Node() {
         override fun eval(context: LocalRuntimeContext): Any {
-            val value = operand.evalU32(context)
+            val value = operand.evalI32(context)
             return when (operator) {
-                UnaryOperator.ABS -> throw UnsupportedOperationException()
-                UnaryOperator.NEG -> throw UnsupportedOperationException()
                 UnaryOperator.CLZ -> value.countLeadingZeroBits()
                 UnaryOperator.CTZ -> value.countTrailingZeroBits()
                 UnaryOperator.POPCNT -> value.countOneBits()
-                UnaryOperator.CEIL -> throw UnsupportedOperationException()
-                UnaryOperator.FLOOR -> throw UnsupportedOperationException()
-                UnaryOperator.TRUNC -> throw UnsupportedOperationException()
-                UnaryOperator.NEAREST -> throw UnsupportedOperationException()
-                UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_F32 -> value.toFloat()
-                UnaryOperator.TO_F64 -> value.toDouble()
-                UnaryOperator.TO_I32 -> value.toInt()
-                UnaryOperator.TO_I64 -> value.toLong()
-                UnaryOperator.TO_U32 -> value
-                UnaryOperator.TO_U64 -> value.toULong()
+                UnaryOperator.CONVERT_TO_F64_S -> value.toDouble()
+                UnaryOperator.CONVERT_TO_F32_S -> value.toDouble()
+                UnaryOperator.CONVERT_TO_F32_U -> value.toUInt().toDouble()
+                UnaryOperator.CONVERT_TO_F64_U -> value.toUInt().toDouble()
                 UnaryOperator.NOT -> value.inv()
+                UnaryOperator.EXTEND_S -> value.toLong()
+                UnaryOperator.EXTEND_U -> value.toUInt().toLong()
+                UnaryOperator.REINTERPRET -> Float.fromBits(value)
+
+                UnaryOperator.ABS,
+                UnaryOperator.NEG,
+                UnaryOperator.CEIL,
+                UnaryOperator.FLOOR,
+                UnaryOperator.TRUNC,
+                UnaryOperator.NEAREST,
+                UnaryOperator.SQRT,
+                UnaryOperator.TRUNC_TO_I32_S,
+                UnaryOperator.TRUNC_TO_I64_S,
+                UnaryOperator.PROMOTE,
+                UnaryOperator.DEMOTE,
+                UnaryOperator.TRUNC_TO_I32_U,
+                UnaryOperator.TRUNC_TO_I64_U,
+                UnaryOperator.WRAP -> throw UnsupportedOperationException()
             }
         }
 
@@ -180,13 +196,25 @@ object I32 : Type {
                 UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.NOT -> WasmOpcode.I32_XOR
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I32_U
-                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I32_U
-                UnaryOperator.TO_I32 -> WasmOpcode.NOP
-                UnaryOperator.TO_I64 -> WasmOpcode.I64_EXTEND_I32_U
-                UnaryOperator.TO_U32 -> WasmOpcode.NOP
-                UnaryOperator.TO_U64 -> WasmOpcode.I64_EXTEND_I32_U
-                UnaryOperator.TRUNC -> throw UnsupportedOperationException()
+
+                UnaryOperator.CONVERT_TO_F64_S -> WasmOpcode.F64_CONVERT_I32_S
+                UnaryOperator.CONVERT_TO_F32_S -> WasmOpcode.F32_CONVERT_I32_S
+                UnaryOperator.CONVERT_TO_F32_U -> WasmOpcode.F32_CONVERT_I32_U
+                UnaryOperator.CONVERT_TO_F64_U -> WasmOpcode.F64_CONVERT_I32_U
+
+                UnaryOperator.EXTEND_S -> WasmOpcode.I64_EXTEND_I32_S
+                UnaryOperator.EXTEND_U -> WasmOpcode.I64_EXTEND_I32_U
+                UnaryOperator.REINTERPRET -> WasmOpcode.F32_REINTERPRET_I32
+
+                UnaryOperator.TRUNC,
+                UnaryOperator.TRUNC_TO_I32_S,
+                UnaryOperator.TRUNC_TO_I64_S,
+                UnaryOperator.WRAP,
+                UnaryOperator.PROMOTE,
+                UnaryOperator.DEMOTE,
+                UnaryOperator.TRUNC_TO_I32_U,
+                UnaryOperator.TRUNC_TO_I64_U ->
+                    throw UnsupportedOperationException("$operator is unsupported for ${operand.returnType}")
             })
         }
 

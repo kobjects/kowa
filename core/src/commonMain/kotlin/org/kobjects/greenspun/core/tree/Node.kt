@@ -25,14 +25,6 @@ abstract class Node {
         return eval(context) as Long
     }
 
-    open fun evalU32(context: LocalRuntimeContext): UInt {
-        return eval(context) as UInt
-    }
-
-    open fun evalU64(context: LocalRuntimeContext): ULong {
-        return eval(context) as ULong
-    }
-
     open fun evalBool(context: LocalRuntimeContext): Boolean {
         return eval(context) as Boolean
     }
@@ -68,15 +60,18 @@ abstract class Node {
     operator fun plus(other: Any) = returnType.createBinaryOperation(BinaryOperator.ADD, this, of(other))
     operator fun minus(other: Any) = returnType.createBinaryOperation(BinaryOperator.SUB, this, of(other))
     operator fun times(other: Any) = returnType.createBinaryOperation(BinaryOperator.MUL, this, of(other))
-    operator fun div(other: Any) = returnType.createBinaryOperation(BinaryOperator.DIV, this, of(other))
-    operator fun rem(other: Any) = returnType.createBinaryOperation(BinaryOperator.REM, this, of(other))
+    operator fun div(other: Any) = returnType.createBinaryOperation(BinaryOperator.DIV_S, this, of(other))
+    operator fun rem(other: Any) = returnType.createBinaryOperation(BinaryOperator.REM_S, this, of(other))
 
     infix fun And(other: Any) = returnType.createBinaryOperation(BinaryOperator.AND, this, of(other))
     infix fun Or(other: Any) = returnType.createBinaryOperation(BinaryOperator.OR, this, of(other))
     infix fun Xor(other: Any) = returnType.createBinaryOperation(BinaryOperator.XOR, this, of(other))
 
-    infix fun Shl(other: Any) = returnType.createBinaryOperation(BinaryOperator.SHR, this, of(other))
-    infix fun Shr(other: Any) = returnType.createBinaryOperation(BinaryOperator.SHR, this, of(other))
+    infix fun Shl(other: Any) = returnType.createBinaryOperation(BinaryOperator.SHL, this, of(other))
+    infix fun ShrS(other: Any) = returnType.createBinaryOperation(BinaryOperator.SHR_S, this, of(other))
+
+    infix fun ShrU(other: Any) = returnType.createBinaryOperation(BinaryOperator.SHR_U, this, of(other))
+
 
     infix fun Rotr(other: Any) = returnType.createBinaryOperation(BinaryOperator.ROTR, this, of(other))
     infix fun Rotl(other: Any) = returnType.createBinaryOperation(BinaryOperator.ROTR, this, of(other))
@@ -87,6 +82,9 @@ abstract class Node {
     infix fun Gt(other: Any) = returnType.createRelationalOperation(RelationalOperator.GT, this, of(other))
     infix fun Le(other: Any) = returnType.createRelationalOperation(RelationalOperator.LE, this, of(other))
     infix fun Lt(other: Any) = returnType.createRelationalOperation(RelationalOperator.LT, this, of(other))
+
+    fun DivU(other: Any) = returnType.createBinaryOperation(BinaryOperator.DIV_U, this, of(other))
+    fun RemU(other: Any) = returnType.createBinaryOperation(BinaryOperator.REM_U, this, of(other))
 
 
 

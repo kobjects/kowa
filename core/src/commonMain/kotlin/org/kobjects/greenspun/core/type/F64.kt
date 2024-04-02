@@ -85,7 +85,7 @@ object F64 : Type {
             val rightValue = rightOperand.evalF64(context)
             return when (operator) {
                 BinaryOperator.ADD -> leftValue + rightValue
-                BinaryOperator.DIV -> leftValue / rightValue
+                BinaryOperator.DIV_S -> leftValue / rightValue
                 BinaryOperator.MUL -> leftValue * rightValue
                 BinaryOperator.SUB -> leftValue - rightValue
                 else -> throw UnsupportedOperationException()
@@ -102,18 +102,22 @@ object F64 : Type {
                 BinaryOperator.ADD -> WasmOpcode.F64_ADD
                 BinaryOperator.SUB -> WasmOpcode.F64_SUB
                 BinaryOperator.MUL -> WasmOpcode.F64_MUL
-                BinaryOperator.DIV -> WasmOpcode.F64_DIV
-                BinaryOperator.REM -> throw UnsupportedOperationException()
+                BinaryOperator.DIV_S -> WasmOpcode.F64_DIV
                 BinaryOperator.COPYSIGN -> WasmOpcode.F64_COPYSIGN
                 BinaryOperator.MIN -> WasmOpcode.F64_MIN
                 BinaryOperator.MAX -> WasmOpcode.F64_MAX
-                BinaryOperator.AND -> throw UnsupportedOperationException()
-                BinaryOperator.OR -> throw UnsupportedOperationException()
-                BinaryOperator.XOR -> throw UnsupportedOperationException()
-                BinaryOperator.SHL -> throw UnsupportedOperationException()
-                BinaryOperator.SHR -> throw UnsupportedOperationException()
-                BinaryOperator.ROTL -> throw UnsupportedOperationException()
-                BinaryOperator.ROTR -> throw UnsupportedOperationException()
+
+                BinaryOperator.AND,
+                BinaryOperator.OR,
+                BinaryOperator.REM_S,
+                BinaryOperator.ROTL,
+                BinaryOperator.ROTR,
+                BinaryOperator.SHL,
+                BinaryOperator.SHR_S,
+                BinaryOperator.SHR_U,
+                BinaryOperator.REM_U,
+                BinaryOperator.DIV_U,
+                BinaryOperator.XOR  -> throw UnsupportedOperationException()
             })
         }
     }
@@ -131,51 +135,69 @@ object F64 : Type {
         override fun eval(context: LocalRuntimeContext): Any {
             val value = operand.evalF64(context)
             return when (operator) {
-                UnaryOperator.ABS -> throw UnsupportedOperationException()
                 UnaryOperator.CEIL -> ceil(value)
-                UnaryOperator.CLZ -> throw UnsupportedOperationException()
-                UnaryOperator.CTZ -> throw UnsupportedOperationException()
+                UnaryOperator.DEMOTE -> value.toFloat()
                 UnaryOperator.FLOOR -> floor(value)
-                UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.NEG -> -value
-                UnaryOperator.POPCNT -> throw UnsupportedOperationException()
+                UnaryOperator.REINTERPRET -> value.toBits()
                 UnaryOperator.SQRT -> sqrt(value)
-                UnaryOperator.TO_F32 -> value.toFloat()
-                UnaryOperator.TO_F64 -> value
-                UnaryOperator.TO_I32 -> value.toInt()
-                UnaryOperator.TO_I64 -> value.toLong()
-                UnaryOperator.TO_U32 -> value.toUInt()
-                UnaryOperator.TO_U64 -> value.toUInt()
                 UnaryOperator.TRUNC -> truncate(value)
-                UnaryOperator.NOT -> throw UnsupportedOperationException()
+                UnaryOperator.TRUNC_TO_I32_S -> value.toInt()
+                UnaryOperator.TRUNC_TO_I32_U -> value.toUInt().toInt()
+                UnaryOperator.TRUNC_TO_I64_U -> value.toULong().toLong()
+                UnaryOperator.TRUNC_TO_I64_S -> value.toLong()
+
+                UnaryOperator.ABS,
+                UnaryOperator.CLZ,
+                UnaryOperator.CTZ,
+                UnaryOperator.CONVERT_TO_F32_S,
+                UnaryOperator.CONVERT_TO_F32_U,
+                UnaryOperator.CONVERT_TO_F64_S,
+                UnaryOperator.CONVERT_TO_F64_U,
+                UnaryOperator.EXTEND_S,
+                UnaryOperator.EXTEND_U,
+                UnaryOperator.NEAREST,
+                UnaryOperator.NOT,
+                UnaryOperator.POPCNT,
+                UnaryOperator.PROMOTE,
+                UnaryOperator.WRAP -> throw UnsupportedOperationException()
+
             }
         }
 
 
         override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(operator, newChildren[0])
 
-        override val returnType: Type
-            get() = F64
-
         override fun toWasm(writer: ModuleWriter) {
             writer.write(when (operator) {
                 UnaryOperator.ABS -> WasmOpcode.F64_ABS
                 UnaryOperator.CEIL -> WasmOpcode.F64_CEIL
-                UnaryOperator.CLZ -> throw UnsupportedOperationException()
-                UnaryOperator.CTZ -> throw UnsupportedOperationException()
+                UnaryOperator.DEMOTE -> WasmOpcode.F32_DEMOTE_F64
                 UnaryOperator.FLOOR -> WasmOpcode.F64_FLOOR
                 UnaryOperator.NEAREST -> WasmOpcode.F64_NEAREST
                 UnaryOperator.NEG -> WasmOpcode.F64_NEG
-                UnaryOperator.NOT -> throw UnsupportedOperationException()
-                UnaryOperator.POPCNT -> throw UnsupportedOperationException()
+                UnaryOperator.REINTERPRET -> WasmOpcode.F64_REINTERPRET_I64
                 UnaryOperator.SQRT -> WasmOpcode.F64_SQRT
-                UnaryOperator.TO_F32 -> WasmOpcode.NOP
-                UnaryOperator.TO_F64 -> WasmOpcode.NOP
-                UnaryOperator.TO_I32 -> WasmOpcode.I32_TRUNC_F64_S
-                UnaryOperator.TO_I64 -> WasmOpcode.I64_TRUNC_F64_S
-                UnaryOperator.TO_U32 -> WasmOpcode.I32_TRUNC_F64_U
-                UnaryOperator.TO_U64 -> WasmOpcode.I64_TRUNC_F64_U
                 UnaryOperator.TRUNC -> WasmOpcode.F64_TRUNC
+
+                UnaryOperator.TRUNC_TO_I32_S -> WasmOpcode.I32_TRUNC_F64_S
+                UnaryOperator.TRUNC_TO_I64_S -> WasmOpcode.I64_TRUNC_F64_S
+                UnaryOperator.TRUNC_TO_I32_U -> TODO()
+                UnaryOperator.TRUNC_TO_I64_U -> TODO()
+
+                UnaryOperator.CLZ,
+                UnaryOperator.CTZ,
+                UnaryOperator.CONVERT_TO_F32_S,
+                UnaryOperator.CONVERT_TO_F64_S,
+                UnaryOperator.CONVERT_TO_F32_U,
+                UnaryOperator.CONVERT_TO_F64_U,
+                UnaryOperator.EXTEND_S,
+                UnaryOperator.EXTEND_U,
+                UnaryOperator.NOT,
+                UnaryOperator.WRAP,
+                UnaryOperator.PROMOTE,
+                UnaryOperator.POPCNT -> throw UnsupportedOperationException()
+
             })
         }
     }

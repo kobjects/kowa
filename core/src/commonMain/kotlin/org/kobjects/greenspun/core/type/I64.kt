@@ -76,16 +76,19 @@ object I64 : Type {
             val rightValue = rightOperand.evalI64(context)
             return when (operator) {
                 BinaryOperator.ADD -> leftValue + rightValue
-                BinaryOperator.DIV -> leftValue / rightValue
+                BinaryOperator.DIV_S -> leftValue / rightValue
+                BinaryOperator.DIV_U -> TODO()
                 BinaryOperator.MUL -> leftValue * rightValue
                 BinaryOperator.SUB -> leftValue - rightValue
-                BinaryOperator.REM -> leftValue % rightValue
+                BinaryOperator.REM_S -> leftValue % rightValue
+                BinaryOperator.REM_U -> TODO()
                 BinaryOperator.AND -> leftValue and rightValue
                 BinaryOperator.OR -> leftValue or rightValue
                 BinaryOperator.XOR -> leftValue xor rightValue
 
                 BinaryOperator.SHL -> leftValue shl leftValue.toInt()
-                BinaryOperator.SHR -> leftValue shr rightValue.toInt()
+                BinaryOperator.SHR_S -> leftValue shr rightValue.toInt()
+                BinaryOperator.SHR_U -> TODO()
 
                 BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31).toInt())
                 BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31).toInt())
@@ -109,17 +112,21 @@ object I64 : Type {
                 BinaryOperator.ADD -> WasmOpcode.I64_ADD
                 BinaryOperator.SUB -> WasmOpcode.I64_SUB
                 BinaryOperator.MUL -> WasmOpcode.I64_MUL
-                BinaryOperator.DIV -> WasmOpcode.I64_DIV_S
-                BinaryOperator.REM -> WasmOpcode.I64_REM_S
+                BinaryOperator.DIV_S -> WasmOpcode.I64_DIV_S
+                BinaryOperator.DIV_U -> WasmOpcode.I64_DIV_U
+                BinaryOperator.REM_S -> WasmOpcode.I64_REM_S
+                BinaryOperator.REM_U -> WasmOpcode.I64_REM_U
                 BinaryOperator.AND -> WasmOpcode.I64_AND
                 BinaryOperator.OR -> WasmOpcode.I64_OR
                 BinaryOperator.XOR -> WasmOpcode.I64_XOR
                 BinaryOperator.SHL -> WasmOpcode.I64_SHL
-                BinaryOperator.SHR -> WasmOpcode.I64_SHR_S
+                BinaryOperator.SHR_S -> WasmOpcode.I64_SHR_S
+                BinaryOperator.SHR_U -> WasmOpcode.I64_SHR_U
                 BinaryOperator.ROTR -> WasmOpcode.I64_ROTR
                 BinaryOperator.ROTL -> WasmOpcode.I64_ROTL
-                BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
-                BinaryOperator.MIN -> throw UnsupportedOperationException()
+
+                BinaryOperator.COPYSIGN,
+                BinaryOperator.MIN,
                 BinaryOperator.MAX -> throw UnsupportedOperationException()
             })
         }
@@ -136,19 +143,30 @@ object I64 : Type {
                 UnaryOperator.NEG -> -value
                 UnaryOperator.CLZ -> value.countLeadingZeroBits()
                 UnaryOperator.CTZ -> value.countTrailingZeroBits()
-                UnaryOperator.POPCNT -> value.countOneBits()
-                UnaryOperator.CEIL -> throw UnsupportedOperationException()
-                UnaryOperator.FLOOR -> throw UnsupportedOperationException()
-                UnaryOperator.TRUNC -> throw UnsupportedOperationException()
-                UnaryOperator.NEAREST -> throw UnsupportedOperationException()
-                UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_F32 -> value.toFloat()
-                UnaryOperator.TO_F64 -> value.toDouble()
-                UnaryOperator.TO_I32 -> value.toInt()
-                UnaryOperator.TO_I64 -> value
-                UnaryOperator.TO_U32 -> value.toUInt()
-                UnaryOperator.TO_U64 -> value.toULong()
+                UnaryOperator.CONVERT_TO_F32_S -> value.toFloat()
+                UnaryOperator.CONVERT_TO_F32_U -> value.toULong().toFloat()
+                UnaryOperator.CONVERT_TO_F64_S -> value.toDouble()
+                UnaryOperator.CONVERT_TO_F64_U -> value.toULong().toDouble()
                 UnaryOperator.NOT -> value.inv()
+                UnaryOperator.POPCNT -> value.countOneBits()
+                UnaryOperator.REINTERPRET -> Double.fromBits(value)
+                UnaryOperator.TRUNC_TO_I32_S -> value.toInt()
+                UnaryOperator.TRUNC_TO_I64_S -> value.toLong()
+                UnaryOperator.TRUNC_TO_I32_U -> value.toUInt().toInt()
+                UnaryOperator.TRUNC_TO_I64_U -> value.toULong().toLong()
+
+                UnaryOperator.CEIL,
+                UnaryOperator.DEMOTE,
+                UnaryOperator.EXTEND_S,
+                UnaryOperator.EXTEND_U,
+                UnaryOperator.FLOOR,
+                UnaryOperator.NEAREST,
+                UnaryOperator.PROMOTE,
+                UnaryOperator.SQRT,
+                UnaryOperator.TRUNC,
+                UnaryOperator.WRAP ->
+                    throw UnsupportedOperationException("$operator is unsupported for ${operand.returnType}")
+
             }
         }
 
@@ -170,23 +188,33 @@ object I64 : Type {
             }
             operand.toWasm(writer)
             writer.write(when (operator) {
-                UnaryOperator.ABS -> throw UnsupportedOperationException()
-                UnaryOperator.CEIL -> throw UnsupportedOperationException()
                 UnaryOperator.CLZ -> WasmOpcode.I64_CLZ
                 UnaryOperator.CTZ -> WasmOpcode.I64_CTZ
-                UnaryOperator.FLOOR -> throw UnsupportedOperationException()
                 UnaryOperator.POPCNT -> WasmOpcode.I64_POPCNT
                 UnaryOperator.NEG -> WasmOpcode.I64_SUB
-                UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.NOT -> WasmOpcode.I64_XOR
+
+                UnaryOperator.ABS -> throw UnsupportedOperationException()
+                UnaryOperator.CEIL -> throw UnsupportedOperationException()
+                UnaryOperator.FLOOR -> throw UnsupportedOperationException()
+                UnaryOperator.NEAREST -> throw UnsupportedOperationException()
                 UnaryOperator.SQRT -> throw UnsupportedOperationException()
-                UnaryOperator.TO_F32 -> WasmOpcode.F32_CONVERT_I64_S
-                UnaryOperator.TO_F64 -> WasmOpcode.F64_CONVERT_I64_S
-                UnaryOperator.TO_I32 -> WasmOpcode.I32_WRAP_I64
-                UnaryOperator.TO_I64 -> WasmOpcode.NOP
-                UnaryOperator.TO_U32 -> WasmOpcode.I32_WRAP_I64
-                UnaryOperator.TO_U64 -> WasmOpcode.NOP
                 UnaryOperator.TRUNC -> throw UnsupportedOperationException()
+
+                UnaryOperator.EXTEND_S -> TODO()
+                UnaryOperator.EXTEND_U -> TODO()
+                UnaryOperator.TRUNC_TO_I32_S -> TODO()
+                UnaryOperator.TRUNC_TO_I32_U -> TODO()
+                UnaryOperator.TRUNC_TO_I64_U -> TODO()
+                UnaryOperator.TRUNC_TO_I64_S -> TODO()
+                UnaryOperator.WRAP -> TODO()
+                UnaryOperator.PROMOTE -> TODO()
+                UnaryOperator.DEMOTE -> TODO()
+                UnaryOperator.CONVERT_TO_F32_S -> TODO()
+                UnaryOperator.CONVERT_TO_F32_U -> TODO()
+                UnaryOperator.CONVERT_TO_F64_S -> TODO()
+                UnaryOperator.CONVERT_TO_F64_U -> TODO()
+                UnaryOperator.REINTERPRET -> TODO()
             })
         }
 

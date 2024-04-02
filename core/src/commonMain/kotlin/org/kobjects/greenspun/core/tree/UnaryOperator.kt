@@ -1,40 +1,47 @@
 package org.kobjects.greenspun.core.tree
 
-import org.kobjects.greenspun.core.type.F32
-import org.kobjects.greenspun.core.type.F64
-import org.kobjects.greenspun.core.type.I32
-import org.kobjects.greenspun.core.type.I64
-import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.type.U32
-import org.kobjects.greenspun.core.type.U64
+import org.kobjects.greenspun.core.type.*
 
 enum class UnaryOperator(
-    val typeSupport: TypeSupport = TypeSupport.ALL,
-    val deviantResultType: Type? = null
+    val deviantResultType: Type? = null,
+    vararg val supportedTypes: Type
 ) {
-    ABS(TypeSupport.FLOAT_ONLY),
+    ABS(null, F32, F64),
 
-    CEIL(TypeSupport.FLOAT_ONLY),
-    CLZ(TypeSupport.INT_ONLY),
-    CTZ(TypeSupport.INT_ONLY),
+    CEIL(null, F32, F64),
+    CLZ(null, I32, I64),
+    CTZ(null, I32, I64),
 
-    FLOOR(TypeSupport.FLOAT_ONLY),
-    POPCNT(TypeSupport.INT_ONLY),
+    FLOOR(null, F32, F64),
+    POPCNT(null, I32, I64),
 
     NEG,
-    NEAREST(TypeSupport.FLOAT_ONLY),
-    NOT(TypeSupport.INT_ONLY),
+    NEAREST(null, I32, I64),
+    NOT(null, I32, I64, Bool),
 
-    SQRT(TypeSupport.FLOAT_ONLY),
+    SQRT(null, F32, F64),
+    TRUNC,
 
-    TO_F32(TypeSupport.ALL, F32),
-    TO_F64(TypeSupport.ALL, F64),
-    TO_I32(TypeSupport.ALL, I32),
-    TO_I64(TypeSupport.ALL, I64),
-    TO_U32(TypeSupport.ALL, U32),
-    TO_U64(TypeSupport.ALL, U64),
+    EXTEND_S(I64, I32),
+    EXTEND_U(I64, I32),
 
-    TRUNC(TypeSupport.FLOAT_ONLY);
+    TRUNC_TO_I32_S(I32, F32, F64),
+    TRUNC_TO_I32_U(I32, F32, F64),
+    TRUNC_TO_I64_U(I32, F32, F64),
+    TRUNC_TO_I64_S(I32, F32, F64),
+
+    WRAP(I32, I64),
+
+    PROMOTE(F64, F32),
+    DEMOTE(F32, F64),
+
+    CONVERT_TO_F32_S(F32, I32, I64),
+    CONVERT_TO_F32_U(F32, I32, I64),
+    CONVERT_TO_F64_S(F64, I32, I64),
+    CONVERT_TO_F64_U(F64, I32, I64),
+
+    REINTERPRET();
+
 
 
     override fun toString() = name.titleCase()

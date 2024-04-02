@@ -117,8 +117,5 @@ object Bool : Type {
                 else -> throw UnsupportedOperationException()
             }
 
-        override val returnType: Type
-            get() = operator.deviantResultType ?: Bool
-
     }
 }
