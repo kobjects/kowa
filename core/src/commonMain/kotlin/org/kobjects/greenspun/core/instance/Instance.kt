@@ -79,7 +79,7 @@ class Instance(
     }
 
     fun invoke(name: String, vararg args: Any): Any {
-        return funcExports[name]!!.invoke(*args)
+        return funcExports[name]?.invoke(*args) ?: throw IllegalArgumentException("Function '$name' not found")
     }
 
     fun setGlobal(index: Int, value: Any) {

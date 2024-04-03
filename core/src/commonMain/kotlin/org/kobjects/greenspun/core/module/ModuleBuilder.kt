@@ -71,12 +71,6 @@ class ModuleBuilder {
         return result
     }
 
-    fun ExportFunc(name: String, returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
-        val result = Func(returnType, init)
-        export(name, result)
-        return result
-    }
-
     fun Export(name: String, funcReference: FuncInterface): FuncInterface {
         export(name, funcReference)
         return funcReference
@@ -191,14 +185,14 @@ class ModuleBuilder {
         datas.toList(),
     )
 
-   fun export(name: String, exportable: Exportable) {
+   private fun export(name: String, exportable: Exportable) {
         require(!exports.containsKey(name)) {
             "Export '$name' already defined."
         }
         exports.put(name, Export(name, exportable))
     }
 
-    fun global(name: String?, mutable: Boolean, initializerOrValue: Any): GlobalReference {
+    private fun global(name: String?, mutable: Boolean, initializerOrValue: Any): GlobalReference {
         val initializer = Node.of(initializerOrValue)
         val global = GlobalImpl(globals.size, mutable, initializer)
         globals.add(global)
@@ -208,7 +202,7 @@ class ModuleBuilder {
         return GlobalReference(global)
     }
 
-    fun importGlobal(module: String, name: String, mutable: Boolean, type: Type): GlobalReference {
+    private fun importGlobal(module: String, name: String, mutable: Boolean, type: Type): GlobalReference {
         require(globals.lastOrNull() !is GlobalImpl) {
             "All global imports must be declared before declaring global variables."
         }

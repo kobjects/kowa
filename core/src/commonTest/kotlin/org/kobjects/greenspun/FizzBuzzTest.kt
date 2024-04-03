@@ -22,7 +22,7 @@ class FizzBuzzTest {
         val LogStr = ImportFunc("console", "logStr", Void, I32, I32)
         val LogI32 = ImportFunc("console", "logI32", Void, I32)
 
-        ExportFunc("fizzBuzz", Void) {
+        val fizzBuzzFunc = Func(Void) {
             +For(1, 21) { count ->
                 +If(count % 3 Eq 0) {
                     +If(count % 5 Eq 0) {
@@ -39,6 +39,8 @@ class FizzBuzzTest {
                 }
             }
         }
+
+        Export("fizzBuzz", fizzBuzzFunc)
     }
 
 

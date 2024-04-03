@@ -8,11 +8,11 @@ import kotlin.test.assertEquals
 class I32Test {
 
     val module = Module {
-        ExportFunc("add", I32) {
+        Export("add", Func(I32) {
             val x = Param(I32)
             val y = Param(I32)
             +(x + y)
-        }
+        })
     }
 
     val instance = module.instantiate()

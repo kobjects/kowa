@@ -46,7 +46,7 @@ class MemoryTest {
             0,
             Module {
                 Data("")
-                ExportFunc("memsize", I32) { +MemorySize() }
+                Export("memsize", Func(I32) { +MemorySize() })
             }.instantiate().invoke("memsize")
         )
 
@@ -54,7 +54,7 @@ class MemoryTest {
             1,
             Module {
                 Data("x")
-                ExportFunc("memsize", I32) { +MemorySize() }
+                Export("memsize", Func(I32) { +MemorySize() })
             }.instantiate().invoke("memsize")
         )
     }
