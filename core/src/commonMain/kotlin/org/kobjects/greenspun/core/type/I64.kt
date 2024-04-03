@@ -67,6 +67,15 @@ object I64 : Type {
             require(operator.typeSupport != TypeSupport.FLOAT_ONLY) {
                 "Operator '$operator' not supported for Integer types"
             }
+
+            require(leftOperand.returnType == I64) {
+                "Left operand ($leftOperand) type (${leftOperand.returnType} must be I64 for '$operator'"
+            }
+
+            require(rightOperand.returnType == I64) {
+                "Left operand ($rightOperand) type (${rightOperand.returnType} must be I64 for '$operator'"
+            }
+
         }
 
         override fun eval(context: LocalRuntimeContext) = evalI64(context)

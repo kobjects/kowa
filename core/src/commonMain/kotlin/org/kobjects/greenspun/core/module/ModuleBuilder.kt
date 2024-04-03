@@ -77,7 +77,7 @@ class ModuleBuilder {
         return result
     }
 
-    fun Export(name: String, funcReference: FuncImpl): FuncImpl {
+    fun Export(name: String, funcReference: FuncInterface): FuncInterface {
         export(name, funcReference)
         return funcReference
     }

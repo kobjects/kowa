@@ -88,22 +88,25 @@ class FizzBuzzTest {
       
               val func2 = Func(Void) {
                 val local0 = Local(I32(1))
-                +Loop {
-                  +BranchIf((local0 Ge I32(21)))
-                  +If(((local0 % I32(3)) Eq I32(0))) {
-                    +If(((local0 % I32(5)) Eq I32(0))) {
-                      +func0(I32(8), I32(8))
+                +Block {
+                  +Loop {
+                    +BranchIf((local0 Ge I32(21)), 1)
+                    +If(((local0 % I32(3)) Eq I32(0))) {
+                      +If(((local0 % I32(5)) Eq I32(0))) {
+                        +func0(I32(8), I32(8))
+                      }.Else {
+                        +func0(I32(0), I32(4))
+                      }
                     }.Else {
-                      +func0(I32(0), I32(4))
+                      +If(((local0 % I32(5)) Eq I32(0))) {
+                        +func0(I32(4), I32(4))
+                      }.Else {
+                        +func1(local0)
+                      }
                     }
-                  }.Else {
-                    +If(((local0 % I32(5)) Eq I32(0))) {
-                      +func0(I32(4), I32(4))
-                    }.Else {
-                      +func1(local0)
-                    }
+                    +Set(local0, (local0 + I32(1)))
+                    +Branch()
                   }
-                  +Set(local0, (local0 + I32(1)))
                 }
               }
               Export("fizzBuzz", func2) 

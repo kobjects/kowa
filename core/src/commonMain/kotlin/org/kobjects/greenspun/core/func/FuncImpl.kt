@@ -16,6 +16,11 @@ class FuncImpl(
     val body: Sequence
 ) : FuncInterface {
 
+    init {
+        require(type.returnType == body.returnType) {
+            "Declared (${type.returnType}) and actual (${body.returnType}) must match."
+        }
+    }
 
     override fun call(context: LocalRuntimeContext, vararg params: Node): Any {
         val childContext = context.createChild(type.parameterTypes.size + locals.size)

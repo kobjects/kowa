@@ -11,14 +11,12 @@ import org.kobjects.greenspun.core.type.Void
 
 class BlockNode(val child: Node) : Node() {
 
-    override fun eval(context: LocalRuntimeContext): Any {
-        while (true) {
-            try {
-                return child.eval(context)
-            } catch (signal: BranchSignal) {
-                if (signal.label > 0) {
-                    throw BranchSignal(signal.label - 1)
-                }
+    override fun eval(context: LocalRuntimeContext) {
+        try {
+            child.eval(context)
+        } catch (signal: BranchSignal) {
+            if (signal.label > 0) {
+                throw BranchSignal(signal.label - 1)
             }
         }
     }

@@ -16,15 +16,15 @@ class LoopNode(val child: Node) : Node() {
             "Void type expected for Loop body."
         }
     }
-    override fun eval(context: LocalRuntimeContext): Any {
-        while (true) {
+    override fun eval(context: LocalRuntimeContext) {
+        while(true) {
             try {
                 child.eval(context)
             } catch (signal: BranchSignal) {
                 if (signal.label > 0) {
                     throw BranchSignal(signal.label - 1)
                 }
-                return Unit
+                continue
             }
         }
     }

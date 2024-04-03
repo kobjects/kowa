@@ -24,7 +24,7 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         statements.add(this)
     }
 
-    fun local(mutable: Boolean, initializerOrValue: Any): LocalReference {
+    private fun local(mutable: Boolean, initializerOrValue: Any): LocalReference {
         val initializer = Node.of(initializerOrValue)
         statements.add(LocalDefinition(variables.size, initializer))
         val variable = LocalReference(variables.size, mutable, initializer.returnType)
@@ -55,17 +55,18 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         return LoopNode(builder.build())
     }
 
-    fun While(condition: Node, init: SequenceBuilder.() -> Unit): LoopNode {
+    fun While(condition: Node, init: SequenceBuilder.() -> Unit): BlockNode {
         require(condition.returnType == Bool) {
             "While condition must be boolean"
         }
         val builder = SequenceBuilder(moduleBuilder, variables)
-        builder.statements.add(BranchIf(Not(condition)))
+        builder.statements.add(BranchIf(Not(condition), 1))
         builder.init()
-        return LoopNode(builder.build())
+        builder.statements.add(Branch())
+        return BlockNode(LoopNode(builder.build()))
     }
 
-    fun For(initialValue: Any, until: Any, step: Any = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): LoopNode {
+    fun For(initialValue: Any, until: Any, step: Any = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): BlockNode {
         val initialValueNode = Node.of(initialValue)
         val untilNode = Node.of(until)
         val stepNode = Node.of(step)
@@ -81,11 +82,12 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         }
         val loopVar = Var(initialValueNode)
         val builder = SequenceBuilder(moduleBuilder, variables)
-        builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.GE, loopVar, untilNode)))
+        builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.GE, loopVar, untilNode), 1))
         builder.init(loopVar)
         builder.statements.add(Set(loopVar, I32.BinaryOperation(BinaryOperator.ADD, loopVar, stepNode)))
+        builder.statements.add(Branch())
 
-        return LoopNode(builder.build())
+        return BlockNode(LoopNode(builder.build()))
     }
 
 
@@ -95,8 +97,11 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         }
         val builder = SequenceBuilder(moduleBuilder, variables)
         builder.init()
-        return If(condition, builder.build(), Void.None)
+        return org.kobjects.greenspun.core.control.If(condition, builder.build(), Void.None)
     }
+
+    fun If(condition: Any, then: Any, otherwise: Any): org.kobjects.greenspun.core.control.If =
+        org.kobjects.greenspun.core.control.If(Node.of(condition), Node.of(then), Node.of(otherwise))
 
 
     fun If.Else(init: SequenceBuilder.() -> Unit): If {

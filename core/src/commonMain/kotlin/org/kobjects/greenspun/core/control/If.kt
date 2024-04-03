@@ -12,10 +12,30 @@ import org.kobjects.greenspun.core.module.ModuleWriter
 class If(
     val condition: Node,
     val then: Node,
-    val otherwise: Node? = null
+    val otherwise: Node?
 ) : Node() {
-    override fun eval(context: LocalRuntimeContext) =
-        if (condition.evalBool(context)) then.eval(context) else otherwise?.eval(context) ?: Unit
+
+    init {
+        if (otherwise != null) {
+            require( otherwise.returnType == then.returnType) {
+                "'then' (${then.returnType}) and 'else' (${otherwise.returnType}) types must match."
+            }
+        }
+    }
+
+    override fun eval(context: LocalRuntimeContext): Any {
+        try {
+            return if (condition.evalBool(context)) then.eval(context) else otherwise?.eval(context) ?: Unit
+        } catch (signal: BranchSignal) {
+            if (signal.label > 0) {
+                throw BranchSignal(signal.label - 1)
+            }
+            if (returnType != Void) {
+                throw IllegalStateException("Return type mismatch")
+            }
+            return Unit
+        }
+    }
 
     override fun children() = if (otherwise == null) listOf(condition, then) else listOf(condition, then, otherwise)
 

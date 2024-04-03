@@ -18,11 +18,20 @@ abstract class Node {
     }
 
     open fun evalI32(context: LocalRuntimeContext): Int {
-        return eval(context) as Int
+        try {
+            return eval(context) as Int
+        } catch (e: ClassCastException) {
+            throw IllegalStateException("expression does not evaluate to I32: $this")
+        }
     }
 
     open fun evalI64(context: LocalRuntimeContext): Long {
-        return eval(context) as Long
+        try {
+            return eval(context) as Long
+        } catch (e: ClassCastException) {
+            throw IllegalStateException("expression does not evaluate to I64: $this", e)
+        }
+
     }
 
     open fun evalBool(context: LocalRuntimeContext): Boolean {
