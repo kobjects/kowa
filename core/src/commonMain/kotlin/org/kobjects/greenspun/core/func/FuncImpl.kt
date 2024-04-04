@@ -1,6 +1,7 @@
 package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.control.ReturnSignal
 import org.kobjects.greenspun.core.control.Sequence
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
@@ -24,10 +25,14 @@ class FuncImpl(
 
     override fun call(context: LocalRuntimeContext, vararg params: Node): Any {
         val childContext = context.createChild(type.parameterTypes.size + locals.size)
-        for (i in 0 until params.size) {
-            childContext.setLocal(i, params[i].eval(context))
+        try {
+            for (i in 0 until params.size) {
+                childContext.setLocal(i, params[i].eval(context))
+            }
+            return body.eval(childContext)
+        } catch (r: ReturnSignal) {
+            return r.value
         }
-        return body.eval(childContext)
     }
 
     fun toString(writer: CodeWriter) {
