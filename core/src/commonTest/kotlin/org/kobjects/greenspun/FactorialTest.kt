@@ -15,7 +15,7 @@ class FactorialTest {
 
         Implementation(facRecNamed) {
             val n = Param(I64)
-            +If(n Eq 0L, 1L, n * facRecNamed(n - 1L))
+            Return(If(n Eq 0L, 1L, n * facRecNamed(n - 1L)))
         }
 
 
@@ -24,11 +24,11 @@ class FactorialTest {
             val i = Var(n)
             val res = Var(1L)
 
-            +While(i Gt 1L) {
-                +Set(res, res * i)
-                +Set(i, i - 1L)
+            While(i Gt 1L) {
+                Set(res, res * i)
+                Set(i, i - 1L)
             }
-            +res
+            Return(res)
         }
 
         Export("fac-rec-named", facRecNamed)

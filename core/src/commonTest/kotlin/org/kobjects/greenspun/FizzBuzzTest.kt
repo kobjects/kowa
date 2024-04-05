@@ -2,7 +2,6 @@ package org.kobjects.greenspun
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.kobjects.greenspun.core.control.If
 import org.kobjects.greenspun.core.instance.ImportObject
 import org.kobjects.greenspun.core.instance.Memory
 import org.kobjects.greenspun.core.type.Void
@@ -23,18 +22,18 @@ class FizzBuzzTest {
         val LogI32 = ImportFunc("console", "logI32", Void, I32)
 
         val fizzBuzzFunc = Func(Void) {
-            +For(1, 21) { count ->
-                +If(count % 3 Eq 0) {
-                    +If(count % 5 Eq 0) {
-                        +LogStr(fizzBuzz, fizzBuzz.len)
+            For(1, 21) { count ->
+                If(count % 3 Eq 0) {
+                    If(count % 5 Eq 0) {
+                        LogStr(fizzBuzz, fizzBuzz.len)
                     }.Else {
-                        +LogStr(fizz, fizz.len)
+                        LogStr(fizz, fizz.len)
                     }
                 }.Else {
-                    +If(count % 5 Eq 0) {
-                        +LogStr(buzz, buzz.len)
+                    If(count % 5 Eq 0) {
+                        LogStr(buzz, buzz.len)
                     }.Else {
-                        +LogI32(count)
+                        LogI32(count)
                     }
                 }
             }

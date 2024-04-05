@@ -107,7 +107,7 @@ class Instance(
     inner class FuncExport(val func: FuncInterface) : Func {
 
         override operator fun invoke(vararg param: Any): Any {
-            return func.call(rootContext, *Array(param.size) { Type.of(param[it]).createConstant(param[it]) })
+            return func.call(rootContext, *param)
         }
     }
 }

@@ -11,7 +11,7 @@ class I32Test {
         Export("add", Func(I32) {
             val x = Param(I32)
             val y = Param(I32)
-            +(x + y)
+            Return(x + y)
         })
     }
 

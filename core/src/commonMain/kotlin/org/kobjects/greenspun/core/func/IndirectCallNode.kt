@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
@@ -36,7 +36,7 @@ class IndirectCallNode(
         writer.write(")")
     }
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         writer.write(WasmOpcode.CALL_INDIRECT)
         writer.writeU32(funcType.index)
         writer.writeU32(0)

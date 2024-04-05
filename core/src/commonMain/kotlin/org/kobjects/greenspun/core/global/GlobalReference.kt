@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
@@ -14,7 +14,7 @@ class GlobalReference(val global: GlobalInterface) : AbstractLeafNode() {
     override fun toString(writer: CodeWriter) =
         writer.write("global${global.index}")
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         TODO("Not yet implemented")
     }
 

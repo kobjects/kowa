@@ -5,7 +5,6 @@ import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.sqrt
@@ -58,7 +57,7 @@ object F32 : Type {
             writer.write(')')
         }
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             writer.write(WasmOpcode.F32_CONST)
             writer.writeF32(value)
         }
@@ -98,7 +97,7 @@ object F32 : Type {
         override fun reconstruct(newChildren: List<Node>): Node =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {
@@ -175,7 +174,7 @@ object F32 : Type {
 
         override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(operator, newChildren[0])
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             writer.write(when (operator) {
                 UnaryOperator.ABS -> WasmOpcode.F32_ABS
                 UnaryOperator.CEIL -> WasmOpcode.F32_CEIL
@@ -238,7 +237,7 @@ object F32 : Type {
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
             writer.write(when(operator) {

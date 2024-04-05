@@ -7,7 +7,7 @@ import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.instance.Global
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 open class GlobalAssignment(
     val global: GlobalInterface,
@@ -42,7 +42,7 @@ open class GlobalAssignment(
         writer.write(')')
     }
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         expression.toWasm(writer)
         writer.write(WasmOpcode.GLOBAL_SET)
         writer.writeU32(global.index)

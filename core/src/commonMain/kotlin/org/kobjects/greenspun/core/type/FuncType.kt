@@ -4,7 +4,6 @@ import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncImpl
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.module.ModuleWriter
 
 data class FuncType(
     val index: Int,

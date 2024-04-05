@@ -6,7 +6,6 @@ import org.kobjects.greenspun.core.tree.BinaryOperator
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.tree.RelationalOperator
 import org.kobjects.greenspun.core.tree.UnaryOperator
-import org.kobjects.greenspun.core.module.ModuleWriter
 
 
 interface Type {

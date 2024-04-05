@@ -1,8 +1,8 @@
 package org.kobjects.greenspun.core.tree
 
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.module.ModuleWriter
 
 
 abstract class Node {
@@ -44,7 +44,7 @@ abstract class Node {
 
     abstract fun toString(writer: CodeWriter)
 
-    abstract fun toWasm(writer: ModuleWriter)
+    abstract fun toWasm(writer: WasmWriter)
 
     override fun toString(): String {
         val writer = CodeWriter()

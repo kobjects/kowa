@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.I32
 
 class LocalReference(
@@ -21,7 +21,7 @@ class LocalReference(
     override fun toString(writer: CodeWriter) =
         writer.write("local$index")
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         writer.write(WasmOpcode.LOCAL_GET)
         writer.writeU32(index)
     }

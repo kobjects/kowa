@@ -1,34 +1,34 @@
 package org.kobjects.greenspun.core.control
 
-import org.kobjects.greenspun.core.func.LocalAssignment
-import org.kobjects.greenspun.core.func.LocalDefinition
+import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalReference
 import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
-import org.kobjects.greenspun.core.tree.BinaryOperator
 import org.kobjects.greenspun.core.func.IndirectCallNode
 import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.tree.Node.Companion.Not
-import org.kobjects.greenspun.core.tree.RelationalOperator
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.type.Void
 
-open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: MutableList<Type>) {
-    val statements = mutableListOf<Node>()
+open class SequenceBuilder(
+    val moduleBuilder: ModuleBuilder,
+    val variables: MutableList<Type>,
+    val wasmWriter: WasmWriter) {
 
-    operator fun Node.unaryPlus() {
-        statements.add(this)
-    }
+    private fun local(mutable: Boolean, initializer: Any): LocalReference {
+        val initializerNode = Node.of(initializer)
 
-    private fun local(mutable: Boolean, initializerOrValue: Any): LocalReference {
-        val initializer = Node.of(initializerOrValue)
-        statements.add(LocalDefinition(variables.size, initializer))
-        val variable = LocalReference(variables.size, mutable, initializer.returnType)
-        variables.add(initializer.returnType)
+        val variable = LocalReference(variables.size, mutable, initializerNode.returnType)
+        variables.add(initializerNode.returnType)
+
+        initializerNode.toWasm(wasmWriter)
+        wasmWriter.write(WasmOpcode.LOCAL_SET)
+        wasmWriter.writeU32(variable.index)
+
         return variable
     }
 
@@ -37,10 +37,9 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
     fun Const(initializerOrValue: Any) = local(true, initializerOrValue)
 
 
-    fun Block(init: SequenceBuilder.() -> Unit): BlockNode {
-        val builder = SequenceBuilder(moduleBuilder, variables)
+    fun Block(init: SequenceBuilder.() -> Unit) {
+        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
         builder.init()
-        return BlockNode(builder.build())
     }
 
     fun CallIndirect(table: TableInterface, index: Node, returnType: Type, vararg parameter: Node): IndirectCallNode {
@@ -49,24 +48,43 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
     }
 
 
-    fun Loop(init: SequenceBuilder.() -> Unit): LoopNode {
-        val builder = SequenceBuilder(moduleBuilder, variables)
+    fun Loop(init: SequenceBuilder.() -> Unit) {
+        wasmWriter.write(WasmOpcode.LOOP)
+        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
         builder.init()
-        return LoopNode(builder.build())
+        wasmWriter.write(WasmOpcode.END)
     }
 
-    fun While(condition: Node, init: SequenceBuilder.() -> Unit): BlockNode {
-        require(condition.returnType == Bool) {
+    fun While(condition: Any, init: SequenceBuilder.() -> Unit) {
+        val conditionNode = Node.of(condition)
+
+        require(conditionNode.returnType == Bool) {
             "While condition must be boolean"
         }
-        val builder = SequenceBuilder(moduleBuilder, variables)
-        builder.statements.add(BranchIf(Not(condition), 1))
+
+        wasmWriter.write(WasmOpcode.BLOCK)
+        wasmWriter.write(WasmType.VOID)
+
+        wasmWriter.write(WasmOpcode.LOOP)
+        wasmWriter.write(WasmType.VOID)
+
+        conditionNode.toWasm(wasmWriter)
+
+        wasmWriter.write(WasmOpcode.I32_EQZ)
+        wasmWriter.write(WasmOpcode.BR_IF)
+        wasmWriter.writeU32(1)
+
+        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
         builder.init()
-        builder.statements.add(Branch())
-        return BlockNode(LoopNode(builder.build()))
+
+        wasmWriter.write(WasmOpcode.BR)
+        wasmWriter.writeU32(0)
+
+        wasmWriter.write(WasmOpcode.END)
+        wasmWriter.write(WasmOpcode.END)
     }
 
-    fun For(initialValue: Any, until: Any, step: Any = I32.Const(1), init: SequenceBuilder.(Node) -> Unit): BlockNode {
+    fun For(initialValue: Any, until: Any, step: Any = I32.Const(1), init: SequenceBuilder.(Node) -> Unit) {
         val initialValueNode = Node.of(initialValue)
         val untilNode = Node.of(until)
         val stepNode = Node.of(step)
@@ -80,56 +98,88 @@ open class SequenceBuilder(val moduleBuilder: ModuleBuilder, val variables: Muta
         require(stepNode.returnType == I32) {
             "I32 expected for step value."
         }
-        val loopVar = Var(initialValueNode)
-        val builder = SequenceBuilder(moduleBuilder, variables)
-        builder.statements.add(BranchIf(I32.createRelationalOperation(RelationalOperator.GE, loopVar, untilNode), 1))
-        builder.init(loopVar)
-        builder.statements.add(Set(loopVar, I32.BinaryOperation(BinaryOperator.ADD, loopVar, stepNode)))
-        builder.statements.add(Branch())
 
-        return BlockNode(LoopNode(builder.build()))
+        wasmWriter.write(WasmOpcode.BLOCK)
+        wasmWriter.write(WasmType.VOID)
+
+        // Creates init
+        val loopVar = Var(initialValueNode)
+
+        wasmWriter.write(WasmOpcode.LOOP)
+        wasmWriter.write(WasmType.VOID)
+
+        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
+
+        loopVar.toWasm(wasmWriter)
+        untilNode.toWasm(wasmWriter)
+        wasmWriter.write(WasmOpcode.I32_GE_S)
+        wasmWriter.write(WasmOpcode.BR_IF)
+        wasmWriter.writeU32(1)
+
+        builder.init(loopVar)
+
+        loopVar.toWasm(wasmWriter)
+        I32.Const(1).toWasm(wasmWriter)
+        wasmWriter.write(WasmOpcode.I32_ADD)
+        wasmWriter.write(WasmOpcode.BR)
+        wasmWriter.write(WasmOpcode.END)
+        wasmWriter.write(WasmOpcode.END)
     }
 
 
-    fun If(condition: Node, init: SequenceBuilder.() -> Unit): If {
-        require(condition.returnType == Bool) {
+    fun If(condition: Any, init: SequenceBuilder.() -> Unit): Elseable {
+        val conditionNode = Node.of(condition)
+        require(conditionNode.returnType == Bool) {
             "If condition must be boolean"
         }
-        val builder = SequenceBuilder(moduleBuilder, variables)
+
+        conditionNode.toWasm(wasmWriter)
+        val ifPosition = wasmWriter.size
+        wasmWriter.write(WasmOpcode.IF)
+
+        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
         builder.init()
-        return org.kobjects.greenspun.core.control.If(condition, builder.build(), Void.None)
+
+        val endPosition = wasmWriter.size
+        wasmWriter.write(WasmOpcode.END)
+
+        return Elseable(ifPosition, endPosition)
     }
 
-    fun If(condition: Any, then: Any, otherwise: Any): org.kobjects.greenspun.core.control.If =
-        org.kobjects.greenspun.core.control.If(Node.of(condition), Node.of(then), Node.of(otherwise))
+    fun If(condition: Any, then: Any, otherwise: Any): IfNode =
+        IfNode(Node.of(condition), Node.of(then), Node.of(otherwise))
 
 
-    fun If.Else(init: SequenceBuilder.() -> Unit): If {
-        /*val last = statements.lastOrNull()
-        if (last !is If) {
-            throw IllegalStateException("If required for Else")
-        }*/
-        val builder = SequenceBuilder(moduleBuilder, variables)
-        builder.init()
-        /*
-        val ifChildren = last.children()
-        statements[statements.size] = last.reconstruct(listOf(ifChildren[0], ifChildren[1], builder.build()))
-         */
-        val children = children()
-        return reconstruct(listOf(children[0], children[1], builder.build()))
-    }
 
 
-    fun Set(variable: LocalReference, expression: Node): LocalAssignment {
+
+    fun Set(variable: LocalReference, expression: Node) {
         require(expression.returnType == variable.returnType) {
             "Expression type ${expression.returnType} does not match variable type ${variable.returnType}"
         }
-        return LocalAssignment(variable.index, expression)
+        expression.toWasm(wasmWriter)
+        wasmWriter.write(WasmOpcode.LOCAL_SET)
+        wasmWriter.writeU32(variable.index)
     }
 
     fun Set(variable: GlobalReference, expression: Node) =
         GlobalAssignment(variable.global, expression)
 
-    private fun build(): Sequence = Sequence(*statements.toTypedArray())
+
+    inner class Elseable(val ifPosition: Int, val endPosition: Int) {
+
+        fun Else(init: SequenceBuilder.() -> Unit) {
+            wasmWriter.trunc(endPosition)
+            wasmWriter.openBlocks.add(ifPosition)
+
+            wasmWriter.write(WasmOpcode.ELSE)
+
+            val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
+            builder.init()
+
+            wasmWriter.write(WasmOpcode.END)
+        }
+
+    }
 
 }

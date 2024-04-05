@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.memory
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.global.GlobalReference
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.I32
@@ -23,7 +23,7 @@ class DataReference(val offset: Node, val len: Int) : Node() {
 
     override fun toString(writer: CodeWriter) = offset.toString(writer)
 
-    override fun toWasm(writer: ModuleWriter) = offset.toWasm(writer)
+    override fun toWasm(writer: WasmWriter) = offset.toWasm(writer)
 
     override val returnType = I32
 }

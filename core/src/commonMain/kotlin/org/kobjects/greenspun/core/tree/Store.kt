@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.binary.storeF64
 import org.kobjects.greenspun.core.binary.storeI32
 import org.kobjects.greenspun.core.binary.storeI64
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.*
 
 class Store(val target: Node, val value: Node) : Node() {
@@ -30,7 +30,7 @@ class Store(val target: Node, val value: Node) : Node() {
         stringifyChildren(writer, "Store(", ", ", ")")
     }
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         when(value.returnType) {
             Bool, I32 -> writer.write(WasmOpcode.I32_STORE)
             I64 -> writer.write(WasmOpcode.I64_STORE)

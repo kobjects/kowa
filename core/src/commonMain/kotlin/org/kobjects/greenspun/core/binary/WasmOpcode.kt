@@ -214,5 +214,19 @@ enum class WasmOpcode(val code: Int) {
     TABLE_COPY(0xFC14),
     TABLE_GROW(0xFC15),
     TABLE_SIZE(0xFC16),
-    TABLE_FILL(0xFC17)
+    TABLE_FILL(0xFC17);
+
+
+    companion object {
+
+        fun of(value: Int): WasmOpcode {
+            for (opcode in WasmOpcode.values()) {
+                if (opcode.code == value) {
+                    return opcode
+                }
+            }
+            throw IllegalStateException("Unrecognized opcode: $value")
+        }
+
+    }
 }

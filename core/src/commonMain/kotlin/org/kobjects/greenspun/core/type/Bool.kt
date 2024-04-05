@@ -5,9 +5,14 @@ import org.kobjects.greenspun.core.tree.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.module.ModuleWriter
 
 object Bool : Type {
+
+    val False = Const(false)
+
+    val True = Const(true)
+
+
 
     override fun createConstant(value: Any) = when(value) {
         true -> True
@@ -28,10 +33,6 @@ object Bool : Type {
     }
 
 
-    val False = Const(false)
-
-    val True = Const(true)
-
     class Const(val value: Boolean) : AbstractLeafNode() {
         override fun eval(context: LocalRuntimeContext) = value
 
@@ -44,7 +45,7 @@ object Bool : Type {
         override val returnType: Type
             get() = Bool
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             writer.write(WasmOpcode.I32_CONST)
             writer.writeI32(if (value) 1 else 0)
         }
@@ -67,7 +68,7 @@ object Bool : Type {
         override fun reconstruct(newChildren: List<Node>) =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             when(operator) {
                 BinaryOperator.OR -> {
                     leftOperand.toWasm(writer)
@@ -97,6 +98,9 @@ object Bool : Type {
             get() = Bool
     }
 
+
+
+
     class UnaryOperation(
         operator: UnaryOperator,
         operand: Node
@@ -111,11 +115,14 @@ object Bool : Type {
         override fun reconstruct(newChildren: List<Node>) =
             UnaryOperation(operator, operand)
 
-        override fun toWasm(writer: ModuleWriter) =
+        override fun toWasm(writer: WasmWriter) {
+            operand.toWasm(writer)
             when (operator) {
                 UnaryOperator.NOT -> writer.write(WasmOpcode.I32_EQZ)
                 else -> throw UnsupportedOperationException()
             }
+        }
+
 
     }
 }

@@ -6,6 +6,10 @@ open class WasmWriter {
     var data: ByteArray = ByteArray(0)
     var size = 0
 
+    val endPositions = mutableMapOf<Int, Int>()
+    val elsePositions = mutableMapOf<Int, Int>()
+    val openBlocks = mutableListOf(0)
+
     private fun ensureCapacity(capacity: Int) {
         if (data.size < capacity) {
             data = data.copyOf(max(capacity, data.size * 3 / 2))
@@ -64,7 +68,19 @@ open class WasmWriter {
     }
 
     fun write(opcode: WasmOpcode) {
+        when (opcode) {
+            WasmOpcode.IF,
+            WasmOpcode.BLOCK,
+            WasmOpcode.LOOP ->
+                openBlocks.add(size)
+        }
         writeByte(opcode.code.toByte())
+        when (opcode) {
+            WasmOpcode.ELSE ->
+                elsePositions[openBlocks.last()] = size
+            WasmOpcode.END ->
+                endPositions[openBlocks.removeLast()] = size
+        }
     }
 
     fun writeU32(value: UInt) = writeU32(value.toInt())
@@ -144,4 +160,13 @@ open class WasmWriter {
         writeU32(encoded.size)
         writeBytes(encoded)
     }
+
+    fun trunc(position: Int): ByteArray {
+        val result = data.copyOfRange(position, size)
+        size = position
+        return result
+    }
+
+    fun toWasm() = Wasm(toByteArray(), endPositions.toMap(), elsePositions.toMap())
+
 }

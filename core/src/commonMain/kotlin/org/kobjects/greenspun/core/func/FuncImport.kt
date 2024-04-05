@@ -14,8 +14,8 @@ class FuncImport(
 ) : FuncInterface, Imported {
 
 
-    override fun call(context: LocalRuntimeContext, vararg params: Node) =
-        context.instance.funcImports[index](*Array(params.size) { params[it].eval(context) })
+    override fun call(context: LocalRuntimeContext, vararg params: Any) =
+        context.instance.funcImports[index](*params)
 
     override fun writeImport(writer: CodeWriter) {
         writer.newLine()

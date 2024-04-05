@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
 
 
 class Call(
@@ -45,7 +45,7 @@ class Call(
         writer.write(")")
     }
 
-    override fun toWasm(writer: ModuleWriter) {
+    override fun toWasm(writer: WasmWriter) {
         for (parameter in parameters) {
             parameter.toWasm(writer)
         }

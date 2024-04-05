@@ -6,7 +6,6 @@ import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.binary.loadI32
-import org.kobjects.greenspun.core.module.ModuleWriter
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
@@ -48,7 +47,7 @@ object I32 : Type {
         override fun toString(writer: CodeWriter) =
             writer.write("I32($value)")
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             writer.write(WasmOpcode.I32_CONST)
             writer.writeI32(value)
         }
@@ -106,29 +105,31 @@ object I32 : Type {
         override val returnType: Type
             get() = I32
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
-            writer.write(when (operator) {
-                BinaryOperator.ADD -> WasmOpcode.I32_ADD
-                BinaryOperator.SUB -> WasmOpcode.I32_SUB
-                BinaryOperator.MUL -> WasmOpcode.I32_MUL
-                BinaryOperator.DIV_S -> WasmOpcode.I32_DIV_S
-                BinaryOperator.REM_S -> WasmOpcode.I32_REM_S
-                BinaryOperator.AND -> WasmOpcode.I32_AND
-                BinaryOperator.OR -> WasmOpcode.I32_OR
-                BinaryOperator.XOR -> WasmOpcode.I32_XOR
-                BinaryOperator.SHL -> WasmOpcode.I32_SHL
-                BinaryOperator.SHR_S -> WasmOpcode.I32_SHR_S
-                BinaryOperator.ROTR -> WasmOpcode.I32_ROTR
-                BinaryOperator.ROTL -> WasmOpcode.I32_ROTL
-                BinaryOperator.SHR_U -> WasmOpcode.I32_SHR_U
-                BinaryOperator.DIV_U -> WasmOpcode.I32_DIV_U
-                BinaryOperator.REM_U -> WasmOpcode.I32_REM_U
-                BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
-                BinaryOperator.MIN -> throw UnsupportedOperationException()
-                BinaryOperator.MAX -> throw UnsupportedOperationException()
-            })
+            writer.write(
+                when (operator) {
+                    BinaryOperator.ADD -> WasmOpcode.I32_ADD
+                    BinaryOperator.SUB -> WasmOpcode.I32_SUB
+                    BinaryOperator.MUL -> WasmOpcode.I32_MUL
+                    BinaryOperator.DIV_S -> WasmOpcode.I32_DIV_S
+                    BinaryOperator.REM_S -> WasmOpcode.I32_REM_S
+                    BinaryOperator.AND -> WasmOpcode.I32_AND
+                    BinaryOperator.OR -> WasmOpcode.I32_OR
+                    BinaryOperator.XOR -> WasmOpcode.I32_XOR
+                    BinaryOperator.SHL -> WasmOpcode.I32_SHL
+                    BinaryOperator.SHR_S -> WasmOpcode.I32_SHR_S
+                    BinaryOperator.ROTR -> WasmOpcode.I32_ROTR
+                    BinaryOperator.ROTL -> WasmOpcode.I32_ROTL
+                    BinaryOperator.SHR_U -> WasmOpcode.I32_SHR_U
+                    BinaryOperator.DIV_U -> WasmOpcode.I32_DIV_U
+                    BinaryOperator.REM_U -> WasmOpcode.I32_REM_U
+                    BinaryOperator.COPYSIGN -> throw UnsupportedOperationException()
+                    BinaryOperator.MIN -> throw UnsupportedOperationException()
+                    BinaryOperator.MAX -> throw UnsupportedOperationException()
+                }
+            )
         }
     }
 
@@ -176,7 +177,7 @@ object I32 : Type {
         override fun toString(writer: CodeWriter) =
             writer.write("$operator(", operand, ")")
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             if (operator == UnaryOperator.NEG) {
                 writer.write(WasmOpcode.I32_CONST)
                 writer.writeI32(0)
@@ -185,37 +186,39 @@ object I32 : Type {
                 writer.writeI32(-1)
             }
             operand.toWasm(writer)
-            writer.write(when (operator) {
-                UnaryOperator.ABS -> throw UnsupportedOperationException()
-                UnaryOperator.CEIL -> throw UnsupportedOperationException()
-                UnaryOperator.CLZ -> WasmOpcode.I32_CLZ
-                UnaryOperator.CTZ -> WasmOpcode.I32_CTZ
-                UnaryOperator.FLOOR -> throw UnsupportedOperationException()
-                UnaryOperator.POPCNT -> WasmOpcode.I32_POPCNT
-                UnaryOperator.NEG -> WasmOpcode.I32_SUB
-                UnaryOperator.NEAREST -> throw UnsupportedOperationException()
-                UnaryOperator.NOT -> WasmOpcode.I32_XOR
-                UnaryOperator.SQRT -> throw UnsupportedOperationException()
+            writer.write(
+                when (operator) {
+                    UnaryOperator.ABS -> throw UnsupportedOperationException()
+                    UnaryOperator.CEIL -> throw UnsupportedOperationException()
+                    UnaryOperator.CLZ -> WasmOpcode.I32_CLZ
+                    UnaryOperator.CTZ -> WasmOpcode.I32_CTZ
+                    UnaryOperator.FLOOR -> throw UnsupportedOperationException()
+                    UnaryOperator.POPCNT -> WasmOpcode.I32_POPCNT
+                    UnaryOperator.NEG -> WasmOpcode.I32_SUB
+                    UnaryOperator.NEAREST -> throw UnsupportedOperationException()
+                    UnaryOperator.NOT -> WasmOpcode.I32_XOR
+                    UnaryOperator.SQRT -> throw UnsupportedOperationException()
 
-                UnaryOperator.CONVERT_TO_F64_S -> WasmOpcode.F64_CONVERT_I32_S
-                UnaryOperator.CONVERT_TO_F32_S -> WasmOpcode.F32_CONVERT_I32_S
-                UnaryOperator.CONVERT_TO_F32_U -> WasmOpcode.F32_CONVERT_I32_U
-                UnaryOperator.CONVERT_TO_F64_U -> WasmOpcode.F64_CONVERT_I32_U
+                    UnaryOperator.CONVERT_TO_F64_S -> WasmOpcode.F64_CONVERT_I32_S
+                    UnaryOperator.CONVERT_TO_F32_S -> WasmOpcode.F32_CONVERT_I32_S
+                    UnaryOperator.CONVERT_TO_F32_U -> WasmOpcode.F32_CONVERT_I32_U
+                    UnaryOperator.CONVERT_TO_F64_U -> WasmOpcode.F64_CONVERT_I32_U
 
-                UnaryOperator.EXTEND_S -> WasmOpcode.I64_EXTEND_I32_S
-                UnaryOperator.EXTEND_U -> WasmOpcode.I64_EXTEND_I32_U
-                UnaryOperator.REINTERPRET -> WasmOpcode.F32_REINTERPRET_I32
+                    UnaryOperator.EXTEND_S -> WasmOpcode.I64_EXTEND_I32_S
+                    UnaryOperator.EXTEND_U -> WasmOpcode.I64_EXTEND_I32_U
+                    UnaryOperator.REINTERPRET -> WasmOpcode.F32_REINTERPRET_I32
 
-                UnaryOperator.TRUNC,
-                UnaryOperator.TRUNC_TO_I32_S,
-                UnaryOperator.TRUNC_TO_I64_S,
-                UnaryOperator.WRAP,
-                UnaryOperator.PROMOTE,
-                UnaryOperator.DEMOTE,
-                UnaryOperator.TRUNC_TO_I32_U,
-                UnaryOperator.TRUNC_TO_I64_U ->
-                    throw UnsupportedOperationException("$operator is unsupported for ${operand.returnType}")
-            })
+                    UnaryOperator.TRUNC,
+                    UnaryOperator.TRUNC_TO_I32_S,
+                    UnaryOperator.TRUNC_TO_I64_S,
+                    UnaryOperator.WRAP,
+                    UnaryOperator.PROMOTE,
+                    UnaryOperator.DEMOTE,
+                    UnaryOperator.TRUNC_TO_I32_U,
+                    UnaryOperator.TRUNC_TO_I64_U ->
+                        throw UnsupportedOperationException("$operator is unsupported for $I32")
+                }
+            )
         }
 
         override val returnType: Type
@@ -243,17 +246,19 @@ object I32 : Type {
         override fun reconstruct(newChildren: List<Node>): Node =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
             rightOperand.toWasm(writer)
-            writer.write(when(operator) {
-                RelationalOperator.EQ -> WasmOpcode.I32_EQ
-                RelationalOperator.GE -> WasmOpcode.I32_GE_S
-                RelationalOperator.GT -> WasmOpcode.I32_GT_S
-                RelationalOperator.LE -> WasmOpcode.I32_LE_S
-                RelationalOperator.LT -> WasmOpcode.I32_LT_S
-                RelationalOperator.NE -> WasmOpcode.I32_NE
-            })
+            writer.write(
+                when (operator) {
+                    RelationalOperator.EQ -> WasmOpcode.I32_EQ
+                    RelationalOperator.GE -> WasmOpcode.I32_GE_S
+                    RelationalOperator.GT -> WasmOpcode.I32_GT_S
+                    RelationalOperator.LE -> WasmOpcode.I32_LE_S
+                    RelationalOperator.LT -> WasmOpcode.I32_LT_S
+                    RelationalOperator.NE -> WasmOpcode.I32_NE
+                }
+            )
         }
     }
 
@@ -267,7 +272,7 @@ object I32 : Type {
 
         override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
 
-        override fun toWasm(writer: ModuleWriter) {
+        override fun toWasm(writer: WasmWriter) {
             writer.write(WasmOpcode.I32_LOAD)
             writer.writeU32(0)
             writer.writeU32(0)

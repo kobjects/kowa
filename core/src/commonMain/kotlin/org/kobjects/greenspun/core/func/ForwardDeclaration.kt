@@ -6,7 +6,7 @@ import org.kobjects.greenspun.core.type.FuncType
 class ForwardDeclaration(override val index: Int, override val type: FuncType) : FuncInterface {
     
 
-    override fun call(context: LocalRuntimeContext, vararg params: Node): Any {
+    override fun call(context: LocalRuntimeContext, vararg params: Any): Any {
       val resolved = context.instance.module.funcs[index]
       require(resolved !is ForwardDeclaration) {
           throw UnsupportedOperationException("Unresolved forward declaration")

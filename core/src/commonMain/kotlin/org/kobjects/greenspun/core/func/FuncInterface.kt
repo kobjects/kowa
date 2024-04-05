@@ -10,7 +10,7 @@ interface FuncInterface : Exportable {
     val index: Int
     val type: FuncType
 
-    fun call(context: LocalRuntimeContext, vararg params: Node): Any
+    fun call(context: LocalRuntimeContext, vararg params: Any): Any
 
     operator fun invoke(vararg node: Any) =
         Call(this, *node.map { Node.of(it) }.toTypedArray())

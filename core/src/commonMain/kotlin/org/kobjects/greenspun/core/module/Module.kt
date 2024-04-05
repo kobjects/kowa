@@ -2,6 +2,7 @@ package org.kobjects.greenspun.core.module
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmSection
+import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.FuncImpl
 import org.kobjects.greenspun.core.func.FuncImport
@@ -42,14 +43,14 @@ class Module(
 
     fun instantiate(importObject: ImportObject = ImportObject()) = Instance(this, importObject)
 
-    private fun writeTypes(writer: ModuleWriter) {
+    private fun writeTypes(writer: WasmWriter) {
         writer.writeU32(types.size)
         for (type in types) {
             type.toWasm(writer)
         }
     }
 
-    private fun writeImports(writer: ModuleWriter) {
+    private fun writeImports(writer: WasmWriter) {
         val imports = imports()
         if (imports.isNotEmpty()) {
             writer.writeU32(imports.size)
@@ -61,7 +62,7 @@ class Module(
         }
     }
 
-    private fun writeFunctions(writer: ModuleWriter) {
+    private fun writeFunctions(writer: WasmWriter) {
         val funcs = funcs.filterIsInstance<FuncImpl>()
         writer.writeU32(funcs.size)
         for (func in funcs) {
@@ -69,11 +70,11 @@ class Module(
         }
     }
 
-    private fun writeCode(writer: ModuleWriter) {
+    private fun writeCode(writer: WasmWriter) {
         val funcs = funcs.filterIsInstance<FuncImpl>()
         writer.writeU32(funcs.size)
         for (func in funcs) {
-            val funcWriter = ModuleWriter(this)
+            val funcWriter = WasmWriter()
             func.writeBody(funcWriter)
             val bytes = funcWriter.toByteArray()
 
@@ -82,7 +83,7 @@ class Module(
         }
     }
 
-    private fun writeExports(writer: ModuleWriter) {
+    private fun writeExports(writer: WasmWriter) {
         if (exports.isNotEmpty()) {
             writer.writeU32(exports.size)
             for (export in exports) {
@@ -92,7 +93,7 @@ class Module(
         }
     }
 
-    private fun writeGlobals(writer: ModuleWriter) {
+    private fun writeGlobals(writer: WasmWriter) {
         val globals = globals.filterIsInstance<GlobalImpl>()
         if (globals.isNotEmpty()) {
             writer.writeU32(globals.size)
@@ -105,20 +106,20 @@ class Module(
         }
     }
 
-    private fun writeMemory(writer: ModuleWriter) {
+    private fun writeMemory(writer: WasmWriter) {
         if (memory is MemoryImpl) {
             writer.writeU32(1)
             memory.writeType(writer)
         }
     }
 
-    private fun writeDataCount(writer: ModuleWriter) {
+    private fun writeDataCount(writer: WasmWriter) {
         if (datas.isNotEmpty()) {
             writer.writeU32(datas.size)
         }
     }
 
-    private fun writeElements(writer: ModuleWriter) {
+    private fun writeElements(writer: WasmWriter) {
         if (elements.isNotEmpty()) {
             writer.writeU32(elements.size)
             for (element in elements) {
@@ -133,7 +134,7 @@ class Module(
         }
     }
 
-    private fun writeDatas(writer: ModuleWriter) {
+    private fun writeDatas(writer: WasmWriter) {
         if (datas.isNotEmpty()) {
             writer.writeU32(datas.size)
             for (data in datas) {
@@ -150,7 +151,7 @@ class Module(
         }
     }
 
-    private fun writeTables(writer: ModuleWriter) {
+    private fun writeTables(writer: WasmWriter) {
         val tables = tables.filterIsInstance<TableInterface>()
         if (tables.isNotEmpty()) {
             writer.writeU32(tables.size)
@@ -169,8 +170,8 @@ class Module(
         }
     }
 
-    private fun writeSection(writer: ModuleWriter, section: WasmSection, writeSection: (ModuleWriter) -> Unit) {
-        val sectionWriter = ModuleWriter(this)
+    private fun writeSection(writer: WasmWriter, section: WasmSection, writeSection: (WasmWriter) -> Unit) {
+        val sectionWriter = WasmWriter()
         writeSection(sectionWriter)
         val bytes = sectionWriter.toByteArray()
 
@@ -183,7 +184,7 @@ class Module(
 
 
     fun toWasm(): ByteArray {
-        val writer = ModuleWriter(this)
+        val writer = WasmWriter()
 
         // Magic
         writer.writeByte(0)

@@ -1,35 +1,30 @@
 package org.kobjects.greenspun.core.func
 
+import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.control.ReturnSignal
-import org.kobjects.greenspun.core.control.Sequence
 import org.kobjects.greenspun.core.tree.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
-import org.kobjects.greenspun.core.tree.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.module.ModuleWriter
+import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.instance.WasmInterpreter
 import org.kobjects.greenspun.core.tree.Node
 
 class FuncImpl(
     override val index: Int,
     override val type: FuncType,
     val locals: List<Type>,
-    val body: Sequence
+    val body: Wasm
 ) : FuncInterface {
 
-    init {
-        require(type.returnType == body.returnType) {
-            "Declared (${type.returnType}) and actual (${body.returnType}) must match."
-        }
-    }
 
-    override fun call(context: LocalRuntimeContext, vararg params: Node): Any {
+    override fun call(context: LocalRuntimeContext, vararg params: Any): Any {
         val childContext = context.createChild(type.parameterTypes.size + locals.size)
         try {
             for (i in 0 until params.size) {
-                childContext.setLocal(i, params[i].eval(context))
+                childContext.setLocal(i, params[i])
             }
-            return body.eval(childContext)
+            return WasmInterpreter(body, childContext).run()
         } catch (r: ReturnSignal) {
             return r.value
         }
@@ -49,7 +44,7 @@ class FuncImpl(
             inner.write("val param$i = param(${type.parameterTypes[i]})")
         }
 
-        body.toString(inner)
+        // body.toString(inner)
 
         writer.newLine()
         writer.write("}")
@@ -58,13 +53,13 @@ class FuncImpl(
 
 
     // Called from the module code segment writer
-    fun writeBody(writer: ModuleWriter) {
+    fun writeBody(writer: WasmWriter) {
         writer.writeU32(locals.size)
         for (local in locals) {
             writer.writeU32(1)  // TODO: Add compression
             local.toWasm(writer)
         }
-        body.toWasm(writer)
+        writer.writeBytes(body.code)
         writer.write(WasmOpcode.END)
     }
 
