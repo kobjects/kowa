@@ -15,11 +15,8 @@ class DataReference(val offset: Expr, val len: Int) : Expr() {
         }
     }
 
-    override fun eval(context: LocalRuntimeContext) = offset.eval(context)
 
     override fun children(): List<Expr> = listOf(offset)
-
-    override fun reconstruct(newChildren: List<Expr>) = DataReference(offset, len)
 
     override fun toString(writer: CodeWriter) = offset.toString(writer)
 

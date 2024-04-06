@@ -22,8 +22,6 @@ object Str : Type {
     class Const(
         val value: String
     ): AbstractLeafExpr() {
-        override fun eval(context: LocalRuntimeContext) = value
-
         override fun toString(writer: CodeWriter) =
             writer.write("Str(\"$value\")")
 
@@ -36,14 +34,6 @@ object Str : Type {
     class BinaryOperation(
         operator: BinaryOperator, leftOperand: Expr, rightOperand: Expr
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
-        override fun eval(context: LocalRuntimeContext) =
-            when (operator) {
-                BinaryOperator.ADD -> leftOperand.eval(context).toString() + rightOperand.eval(context)
-                else -> throw UnsupportedOperationException()
-            }
-
-        override fun reconstruct(newChildren: List<Expr>): Expr =
-            BinaryOperation(operator, leftOperand, rightOperand)
 
         override fun toWasm(writer: WasmWriter) = throw UnsupportedOperationException("NYI")
 

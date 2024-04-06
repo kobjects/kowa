@@ -8,8 +8,6 @@ import org.kobjects.greenspun.core.type.Type
 
 class GlobalReference(val global: GlobalInterface) : AbstractLeafExpr() {
 
-    override fun eval(context: LocalRuntimeContext) =
-        context.instance.getGlobal(global.index)
 
     override fun toString(writer: CodeWriter) =
         writer.write("global${global.index}")

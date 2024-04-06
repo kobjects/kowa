@@ -14,8 +14,7 @@ object Void : Type {
     }
 
     object None : AbstractLeafExpr() {
-        override fun eval(context: LocalRuntimeContext) = Unit
-
+   
         override fun toString(writer: CodeWriter) {
             writer.write("None")
         }

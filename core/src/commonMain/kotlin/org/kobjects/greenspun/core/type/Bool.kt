@@ -34,9 +34,6 @@ object Bool : Type {
 
 
     class Const(val value: Boolean) : AbstractLeafExpr() {
-        override fun eval(context: LocalRuntimeContext) = value
-
-        override fun evalBool(context: LocalRuntimeContext) = value
 
         override fun toString(writer: CodeWriter) {
             writer.write(if (value) "True" else "False")
@@ -56,17 +53,7 @@ object Bool : Type {
         leftOperand: Expr,
         rightOperand: Expr
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
-        override fun eval(context: LocalRuntimeContext) = evalBool(context)
 
-        override fun evalBool(context: LocalRuntimeContext) =
-            when(operator) {
-                BinaryOperator.OR -> if (leftOperand.evalBool(context)) true else rightOperand.evalBool(context)
-                BinaryOperator.AND -> if (leftOperand.evalBool(context)) rightOperand.evalBool(context) else false
-                else -> throw UnsupportedOperationException()
-            }
-
-        override fun reconstruct(newChildren: List<Expr>) =
-            BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {
             when(operator) {
@@ -105,15 +92,7 @@ object Bool : Type {
         operator: UnaryOperator,
         operand: Expr
     ) : AbstractUnaryOperation(operator, operand) {
-        override fun eval(context: LocalRuntimeContext) =
-            when (operator) {
-                UnaryOperator.NOT -> !operand.evalBool(context)
-                else -> throw UnsupportedOperationException()
-            }
 
-
-        override fun reconstruct(newChildren: List<Expr>) =
-            UnaryOperation(operator, operand)
 
         override fun toWasm(writer: WasmWriter) {
             operand.toWasm(writer)

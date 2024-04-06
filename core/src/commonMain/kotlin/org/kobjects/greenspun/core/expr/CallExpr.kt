@@ -25,14 +25,7 @@ class CallExpr(
         }
     }
 
-    override fun eval(context: LocalRuntimeContext): Any {
-        return callable.call(context, *parameters)
-    }
-
     override fun children(): List<Expr> = parameters.toList()
-
-    override fun reconstruct(newChildren: List<Expr>) =
-        CallExpr(callable, *newChildren.toTypedArray())
 
     override fun toString(writer: CodeWriter) {
         writer.write("func${callable.index}(")

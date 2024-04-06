@@ -1,14 +1,9 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.binary.loadI32
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sign
 
 /**
  *  I32 type & builtin operations.
@@ -40,9 +35,6 @@ object I32 : Type {
     class Const(
         val value: Int
     ): AbstractLeafExpr() {
-        override fun eval(context: LocalRuntimeContext) = value
-
-        override fun evalI32(context: LocalRuntimeContext) = value
 
         override fun toString(writer: CodeWriter) =
             writer.write("I32($value)")
@@ -68,39 +60,6 @@ object I32 : Type {
             }
         }
 
-        override fun eval(context: LocalRuntimeContext) = evalI32(context)
-
-        override fun evalI32(context: LocalRuntimeContext): Int {
-            val leftValue = leftOperand.evalI32(context)
-            val rightValue = rightOperand.evalI32(context)
-            return when (operator) {
-                BinaryOperator.ADD -> leftValue + rightValue
-                BinaryOperator.DIV_S -> leftValue / rightValue
-                BinaryOperator.MUL -> leftValue * rightValue
-                BinaryOperator.SUB -> leftValue - rightValue
-                BinaryOperator.REM_S -> leftValue % rightValue
-                BinaryOperator.AND -> leftValue and rightValue
-                BinaryOperator.OR -> leftValue or rightValue
-                BinaryOperator.XOR -> leftValue xor rightValue
-
-                BinaryOperator.SHL -> leftValue shl leftValue
-                BinaryOperator.SHR_S -> leftValue shr rightValue
-
-                BinaryOperator.ROTL -> leftValue.rotateLeft((rightValue and 31).toInt())
-                BinaryOperator.ROTR -> leftValue.rotateRight((rightValue and 31).toInt())
-
-                BinaryOperator.MIN -> min(leftValue, rightValue)
-                BinaryOperator.MAX -> max(leftValue, rightValue)
-                BinaryOperator.COPYSIGN -> if (leftValue.sign == rightValue.sign) leftValue else -leftValue
-
-                BinaryOperator.DIV_U -> (leftValue.toUInt() / rightValue.toUInt()).toInt()
-                BinaryOperator.REM_U -> (leftValue.toUInt() % rightValue.toUInt()).toInt()
-                BinaryOperator.SHR_U -> leftValue ushr rightValue
-            }
-        }
-
-        override fun reconstruct(newChildren: List<Expr>): Expr =
-            BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override val returnType: Type
             get() = I32
@@ -137,42 +96,10 @@ object I32 : Type {
         val operator: UnaryOperator,
         val operand: Expr,
     ) : Expr() {
-        override fun eval(context: LocalRuntimeContext): Any {
-            val value = operand.evalI32(context)
-            return when (operator) {
-                UnaryOperator.CLZ -> value.countLeadingZeroBits()
-                UnaryOperator.CTZ -> value.countTrailingZeroBits()
-                UnaryOperator.POPCNT -> value.countOneBits()
-                UnaryOperator.CONVERT_TO_F64_S -> value.toDouble()
-                UnaryOperator.CONVERT_TO_F32_S -> value.toDouble()
-                UnaryOperator.CONVERT_TO_F32_U -> value.toUInt().toDouble()
-                UnaryOperator.CONVERT_TO_F64_U -> value.toUInt().toDouble()
-                UnaryOperator.NOT -> value.inv()
-                UnaryOperator.EXTEND_S -> value.toLong()
-                UnaryOperator.EXTEND_U -> value.toUInt().toLong()
-                UnaryOperator.REINTERPRET -> Float.fromBits(value)
-
-                UnaryOperator.ABS,
-                UnaryOperator.NEG,
-                UnaryOperator.CEIL,
-                UnaryOperator.FLOOR,
-                UnaryOperator.TRUNC,
-                UnaryOperator.NEAREST,
-                UnaryOperator.SQRT,
-                UnaryOperator.TRUNC_TO_I32_S,
-                UnaryOperator.TRUNC_TO_I64_S,
-                UnaryOperator.PROMOTE,
-                UnaryOperator.DEMOTE,
-                UnaryOperator.TRUNC_TO_I32_U,
-                UnaryOperator.TRUNC_TO_I64_U,
-                UnaryOperator.WRAP -> throw UnsupportedOperationException()
-            }
-        }
 
 
         override fun children() = listOf(operand)
 
-        override fun reconstruct(newChildren: List<Expr>): Expr = UnaryOperation(operator, newChildren[0])
 
         override fun toString(writer: CodeWriter) =
             writer.write("$operator(", operand, ")")
@@ -230,21 +157,7 @@ object I32 : Type {
         leftOperand: Expr,
         rightOperand: Expr,
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
-        override fun eval(context: LocalRuntimeContext): Boolean {
-            val leftValue = leftOperand.evalI32(context)
-            val rightValue = rightOperand.evalI32(context)
-            return when (operator) {
-                RelationalOperator.EQ -> leftValue == rightValue
-                RelationalOperator.NE -> leftValue != rightValue
-                RelationalOperator.LE -> leftValue <= rightValue
-                RelationalOperator.GE -> leftValue >= rightValue
-                RelationalOperator.GT -> leftValue > rightValue
-                RelationalOperator.LT -> leftValue < rightValue
-            }
-        }
 
-        override fun reconstruct(newChildren: List<Expr>): Expr =
-            RelationalOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
@@ -264,11 +177,9 @@ object I32 : Type {
 
 
     class Load(val address: Expr) : Expr() {
-        override fun eval(context: LocalRuntimeContext) = context.instance.memory.buffer.loadI32(address.evalI32(context))
 
         override fun children(): List<Expr> = listOf(address)
 
-        override fun reconstruct(newChildren: List<Expr>) = Load(newChildren[0])
 
         override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
 

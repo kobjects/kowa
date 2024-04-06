@@ -13,18 +13,9 @@ class IndirectCallNode(
     val funcType: FuncType,
     vararg val parameter: Expr
 ) : Expr() {
-    override fun eval(context: LocalRuntimeContext): Any {
-        val i = index.evalI32(context)
-        val table = context.instance.tables[table]
-        val f = table.elements[i] as FuncInterface
-        return f.call(context, *parameter)
-    }
 
     override fun children() =
         listOf(index) + parameter.toList()
-
-    override fun reconstruct(newChildren: List<Expr>) =
-        IndirectCallNode(table, newChildren[0], funcType, *newChildren.subList(1, newChildren.size).toTypedArray())
 
 
     override fun toString(writer: CodeWriter) {

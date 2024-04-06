@@ -2,45 +2,13 @@ package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
+import org.kobjects.greenspun.core.runtime.Interpreter
 import org.kobjects.greenspun.core.type.Type
 
 
 abstract class Expr {
-    abstract fun eval(context: LocalRuntimeContext): Any
-
-    // Overrides to avoid boxing; use to avoid type casts.
-    open fun evalF32(context: LocalRuntimeContext): Float {
-        return eval(context) as Float
-    }
-
-    open fun evalF64(context: LocalRuntimeContext): Double {
-        return eval(context) as Double
-    }
-
-    open fun evalI32(context: LocalRuntimeContext): Int {
-        try {
-            return eval(context) as Int
-        } catch (e: ClassCastException) {
-            throw IllegalStateException("expression does not evaluate to I32: $this")
-        }
-    }
-
-    open fun evalI64(context: LocalRuntimeContext): Long {
-        try {
-            return eval(context) as Long
-        } catch (e: ClassCastException) {
-            throw IllegalStateException("expression does not evaluate to I64: $this", e)
-        }
-
-    }
-
-    open fun evalBool(context: LocalRuntimeContext): Boolean {
-        return eval(context) as Boolean
-    }
 
     abstract fun children(): List<Expr>
-
-    abstract fun reconstruct(newChildren: List<Expr>): Expr
 
     abstract fun toString(writer: CodeWriter)
 
@@ -107,4 +75,16 @@ abstract class Expr {
 
     fun Max(left: Expr, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MAX, left, of(right))
     fun Min(left: Expr, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MIN, left, of(right))
+
+
+    fun eval(context: LocalRuntimeContext): Any {
+        val wasmWriter = WasmWriter()
+        toWasm(wasmWriter)
+        val wasm = wasmWriter.toWasm()
+        return Interpreter(wasm, context).run()
+    }
+
+    fun evalI32(context: LocalRuntimeContext) = eval(context) as Int
+
+
 }

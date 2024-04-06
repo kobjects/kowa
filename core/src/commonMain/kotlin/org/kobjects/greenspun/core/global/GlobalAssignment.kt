@@ -23,14 +23,7 @@ open class GlobalAssignment(
     }
 
 
-    override fun eval(context: LocalRuntimeContext): Any {
-        context.instance.setGlobal(global.index, expression.eval(context))
-        return Unit
-    }
-
     override fun children() = listOf(expression)
-
-    override fun reconstruct(newChildren: List<Expr>) = GlobalAssignment(global, newChildren[0])
 
     override val returnType: Type
         get() = Void

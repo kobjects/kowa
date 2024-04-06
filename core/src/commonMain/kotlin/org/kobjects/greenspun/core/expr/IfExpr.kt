@@ -19,14 +19,8 @@ class IfExpr(
 
     }
 
-    override fun eval(context: LocalRuntimeContext): Any {
-        throw UnsupportedOperationException()
-    }
-
     override fun children() = listOf(condition, then, otherwise)
 
-    override fun reconstruct(newChildren: List<Expr>) =
-        IfExpr(newChildren[0], newChildren[1], newChildren[2])
 
     override fun toString(writer: CodeWriter) {
         writer.write("If(", condition)

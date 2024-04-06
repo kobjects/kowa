@@ -6,9 +6,6 @@ import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
 class InvalidExpr(val errorMessage: String) : AbstractLeafExpr() {
-    override fun eval(context: LocalRuntimeContext): Any {
-        throw IllegalStateException(errorMessage)
-    }
 
     override fun toString(writer: CodeWriter) {
         writer.write("InvalidNode(", errorMessage, ")")

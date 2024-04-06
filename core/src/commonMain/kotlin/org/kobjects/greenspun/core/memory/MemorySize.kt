@@ -10,8 +10,7 @@ import org.kobjects.greenspun.core.type.Type
 
 
 class MemorySize() : AbstractLeafExpr() {
-    override fun eval(context: LocalRuntimeContext) =
-        context.instance.memory.buffer.size / 65536
+
 
     override fun toString(writer: CodeWriter) = writer.write("MemorySize()")
 

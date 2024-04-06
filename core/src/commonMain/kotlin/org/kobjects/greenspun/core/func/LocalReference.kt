@@ -11,11 +11,7 @@ class LocalReference(
     val mutable: Boolean,
     override val returnType: Type
 ) : Expr() {
-    override fun eval(context: LocalRuntimeContext) = context.getLocal(index)
-
     override fun children(): List<Expr> = emptyList()
-
-    override fun reconstruct(newChildren: List<Expr>) = this
 
     override fun toString(writer: CodeWriter) =
         writer.write("local$index")
