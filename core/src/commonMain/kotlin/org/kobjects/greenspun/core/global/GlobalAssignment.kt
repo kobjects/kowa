@@ -1,12 +1,11 @@
 package org.kobjects.greenspun.core.global
 
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
-import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.expression.CodeWriter
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.instance.Global
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 open class GlobalAssignment(

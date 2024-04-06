@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.tree
+package org.kobjects.greenspun.core.expression
 
 /** Glorified string builder with indent support */
 class CodeWriter(

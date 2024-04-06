@@ -2,8 +2,8 @@ package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.AbstractLeafNode
+import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expression.AbstractLeafNode
 import org.kobjects.greenspun.core.type.Type
 
 class GlobalReference(val global: GlobalInterface) : AbstractLeafNode() {

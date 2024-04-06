@@ -2,8 +2,7 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 
 interface FuncInterface : Exportable {
@@ -11,9 +10,6 @@ interface FuncInterface : Exportable {
     val type: FuncType
 
     fun call(context: LocalRuntimeContext, vararg params: Any): Any
-
-    operator fun invoke(vararg node: Any) =
-        Call(this, *node.map { Node.of(it) }.toTypedArray())
 
     override fun writeExportDescription(writer: WasmWriter) {
         writer.writeByte(0)

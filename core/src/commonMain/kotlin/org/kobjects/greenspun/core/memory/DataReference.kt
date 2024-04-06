@@ -3,8 +3,8 @@ package org.kobjects.greenspun.core.memory
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.I32
 
 class DataReference(val offset: Node, val len: Int) : Node() {

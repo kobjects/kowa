@@ -2,8 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.func.FuncImpl
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.Node
 
 data class FuncType(
     val index: Int,

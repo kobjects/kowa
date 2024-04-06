@@ -3,16 +3,20 @@ package org.kobjects.greenspun.core.control
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.func.CallNode
+import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.LocalReference
 import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.func.IndirectCallNode
 import org.kobjects.greenspun.core.table.TableInterface
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.InvalidNode
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.Void
 
 open class SequenceBuilder(
     val moduleBuilder: ModuleBuilder,
@@ -99,33 +103,39 @@ open class SequenceBuilder(
             "I32 expected for step value."
         }
 
-        wasmWriter.write(WasmOpcode.BLOCK)
-        wasmWriter.write(WasmType.VOID)
-
         // Creates init
         val loopVar = Var(initialValueNode)
+
+        wasmWriter.write(WasmOpcode.BLOCK)
+        wasmWriter.write(WasmType.VOID)
 
         wasmWriter.write(WasmOpcode.LOOP)
         wasmWriter.write(WasmType.VOID)
 
-        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
-
-        loopVar.toWasm(wasmWriter)
-        untilNode.toWasm(wasmWriter)
-        wasmWriter.write(WasmOpcode.I32_GE_S)
+        (loopVar Ge untilNode).toWasm(wasmWriter)
         wasmWriter.write(WasmOpcode.BR_IF)
         wasmWriter.writeU32(1)
 
+        val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
         builder.init(loopVar)
 
-        loopVar.toWasm(wasmWriter)
-        I32.Const(1).toWasm(wasmWriter)
-        wasmWriter.write(WasmOpcode.I32_ADD)
+        Set(loopVar, loopVar + 1)
+
         wasmWriter.write(WasmOpcode.BR)
+        wasmWriter.writeU32(0)
+
         wasmWriter.write(WasmOpcode.END)
         wasmWriter.write(WasmOpcode.END)
     }
 
+    operator fun FuncInterface.invoke(vararg node: Any): Node {
+        val result = CallNode(this, *node.map { Node.of(it) }.toTypedArray())
+        if (type.returnType != Void) {
+            return result
+        }
+        result.toWasm(wasmWriter)
+        return InvalidNode("Void function are expected to be used as statements.")
+    }
 
     fun If(condition: Any, init: SequenceBuilder.() -> Unit): Elseable {
         val conditionNode = Node.of(condition)
@@ -136,6 +146,7 @@ open class SequenceBuilder(
         conditionNode.toWasm(wasmWriter)
         val ifPosition = wasmWriter.size
         wasmWriter.write(WasmOpcode.IF)
+        wasmWriter.write(WasmType.VOID)
 
         val builder = SequenceBuilder(moduleBuilder, variables, wasmWriter)
         builder.init()

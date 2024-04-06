@@ -1,13 +1,13 @@
 package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 
-class Call(
+class CallNode(
     val callable: FuncInterface,
     vararg val parameters: Node
 ) : Node() {
@@ -32,7 +32,7 @@ class Call(
     override fun children(): List<Node> = parameters.toList()
 
     override fun reconstruct(newChildren: List<Node>) =
-        Call(callable, *newChildren.toTypedArray())
+        CallNode(callable, *newChildren.toTypedArray())
 
     override fun toString(writer: CodeWriter) {
         writer.write("func${callable.index}(")

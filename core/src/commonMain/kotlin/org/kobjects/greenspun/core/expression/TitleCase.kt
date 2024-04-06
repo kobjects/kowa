@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.tree
+package org.kobjects.greenspun.core.expression
 
 
 fun String.titleCase(): String {

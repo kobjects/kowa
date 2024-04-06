@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.tree
+package org.kobjects.greenspun.core.expression
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.storeF64

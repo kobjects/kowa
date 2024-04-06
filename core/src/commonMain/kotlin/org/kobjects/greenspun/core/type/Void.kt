@@ -1,9 +1,9 @@
 package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.tree.AbstractLeafNode
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.AbstractLeafNode
+import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 

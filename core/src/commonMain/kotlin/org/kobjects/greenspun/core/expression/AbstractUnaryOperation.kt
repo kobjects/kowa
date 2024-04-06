@@ -1,6 +1,5 @@
-package org.kobjects.greenspun.core.tree
+package org.kobjects.greenspun.core.expression
 
-import org.kobjects.greenspun.core.type.F64
 import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractUnaryOperation(

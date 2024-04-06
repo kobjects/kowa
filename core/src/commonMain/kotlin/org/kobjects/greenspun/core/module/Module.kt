@@ -18,7 +18,7 @@ import org.kobjects.greenspun.core.memory.MemoryInterface
 import org.kobjects.greenspun.core.table.ElementImpl
 import org.kobjects.greenspun.core.table.TableImport
 import org.kobjects.greenspun.core.table.TableInterface
-import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.expression.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 
 class Module(

@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.global
 
-import org.kobjects.greenspun.core.tree.CodeWriter
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.Type
 
 class GlobalImpl(

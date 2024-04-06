@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.memory.*
 import org.kobjects.greenspun.core.table.*
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type

@@ -2,10 +2,10 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncImpl
-import org.kobjects.greenspun.core.tree.BinaryOperator
-import org.kobjects.greenspun.core.tree.Node
-import org.kobjects.greenspun.core.tree.RelationalOperator
-import org.kobjects.greenspun.core.tree.UnaryOperator
+import org.kobjects.greenspun.core.expression.BinaryOperator
+import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expression.RelationalOperator
+import org.kobjects.greenspun.core.expression.UnaryOperator
 
 
 interface Type {

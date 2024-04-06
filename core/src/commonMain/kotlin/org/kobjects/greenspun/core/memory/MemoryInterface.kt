@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.memory
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
-import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.expression.CodeWriter
 
 interface MemoryInterface : Exportable {
     val min: Int

@@ -3,12 +3,11 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.control.ReturnSignal
-import org.kobjects.greenspun.core.tree.CodeWriter
+import org.kobjects.greenspun.core.expression.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.instance.WasmInterpreter
-import org.kobjects.greenspun.core.tree.Node
 
 class FuncImpl(
     override val index: Int,

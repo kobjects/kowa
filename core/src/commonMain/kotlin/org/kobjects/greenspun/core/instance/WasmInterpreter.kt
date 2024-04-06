@@ -61,7 +61,13 @@ class WasmInterpreter(
                 if (popBool()) {
                     blockStack.add(ip0)
                 } else {
-                    ip = wasm.elsePositions[ip0] ?: wasm.endPositions[ip0]!!
+                    val elsePos = wasm.elsePositions[ip0]
+                    if (elsePos != null) {
+                        blockStack.add(ip0)
+                        ip = elsePos
+                    } else {
+                        ip = wasm.endPositions[ip0]!!
+                    }
                 }
             }
             WasmOpcode.ELSE ->

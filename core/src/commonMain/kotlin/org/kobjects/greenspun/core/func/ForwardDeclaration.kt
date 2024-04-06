@@ -1,6 +1,5 @@
 package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.tree.Node
 import org.kobjects.greenspun.core.type.FuncType
 
 class ForwardDeclaration(override val index: Int, override val type: FuncType) : FuncInterface {

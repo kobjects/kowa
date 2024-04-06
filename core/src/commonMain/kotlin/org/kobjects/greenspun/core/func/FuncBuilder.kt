@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.control.SequenceBuilder
 import org.kobjects.greenspun.core.module.ModuleBuilder
-import org.kobjects.greenspun.core.tree.Node
+import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.Void
 
 class FuncBuilder(

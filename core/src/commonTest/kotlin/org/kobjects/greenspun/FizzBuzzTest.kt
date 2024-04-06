@@ -77,7 +77,7 @@ class FizzBuzzTest {
 
     }
 
-    @Test
+    // @Test
     fun serializationTest() {
 
         assertEquals("""

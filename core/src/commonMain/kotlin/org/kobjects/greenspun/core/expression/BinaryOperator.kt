@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.tree
+package org.kobjects.greenspun.core.expression
 
 enum class BinaryOperator(
     val typeSupport: TypeSupport,
