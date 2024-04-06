@@ -14,7 +14,7 @@ object Void : Type {
     }
 
     object None : AbstractLeafExpr() {
-   
+
         override fun toString(writer: CodeWriter) {
             writer.write("None")
         }
