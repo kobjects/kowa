@@ -1,17 +1,17 @@
 package org.kobjects.greenspun.core.global
 
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
-import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 open class GlobalAssignment(
     val global: GlobalInterface,
-    val expression: Node
-) : Node() {
+    val expression: Expr
+) : Expr() {
 
     init {
         require(global.mutable) {
@@ -30,7 +30,7 @@ open class GlobalAssignment(
 
     override fun children() = listOf(expression)
 
-    override fun reconstruct(newChildren: List<Node>) = GlobalAssignment(global, newChildren[0])
+    override fun reconstruct(newChildren: List<Expr>) = GlobalAssignment(global, newChildren[0])
 
     override val returnType: Type
         get() = Void

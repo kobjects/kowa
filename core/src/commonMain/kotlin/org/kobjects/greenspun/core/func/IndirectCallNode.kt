@@ -2,17 +2,17 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expression.CodeWriter
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.CodeWriter
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.Type
 
 class IndirectCallNode(
     val table: Int,
-    val index: Node,
+    val index: Expr,
     val funcType: FuncType,
-    vararg val parameter: Node
-) : Node() {
+    vararg val parameter: Expr
+) : Expr() {
     override fun eval(context: LocalRuntimeContext): Any {
         val i = index.evalI32(context)
         val table = context.instance.tables[table]
@@ -23,7 +23,7 @@ class IndirectCallNode(
     override fun children() =
         listOf(index) + parameter.toList()
 
-    override fun reconstruct(newChildren: List<Node>) =
+    override fun reconstruct(newChildren: List<Expr>) =
         IndirectCallNode(table, newChildren[0], funcType, *newChildren.subList(1, newChildren.size).toTypedArray())
 
 

@@ -1,11 +1,11 @@
 package org.kobjects.greenspun.core.table
 
 import org.kobjects.greenspun.core.func.FuncInterface
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.Expr
 
 class ElementImpl(
     val tableIdx: Int,
-    val offset: Node,
+    val offset: Expr,
     vararg val funcs: FuncInterface
 ) {
 

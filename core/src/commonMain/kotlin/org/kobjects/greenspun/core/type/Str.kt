@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.expression.*
+import org.kobjects.greenspun.core.expr.*
 
 
 object Str : Type {
@@ -11,7 +11,7 @@ object Str : Type {
 
     override fun createConstant(value: Any) = Const(value as String)
 
-    override fun createBinaryOperation(operator: BinaryOperator, leftOperand: Node, rightOperand: Node): Node {
+    override fun createBinaryOperation(operator: BinaryOperator, leftOperand: Expr, rightOperand: Expr): Expr {
         return BinaryOperation(operator, leftOperand, rightOperand)
     }
 
@@ -21,7 +21,7 @@ object Str : Type {
 
     class Const(
         val value: String
-    ): AbstractLeafNode() {
+    ): AbstractLeafExpr() {
         override fun eval(context: LocalRuntimeContext) = value
 
         override fun toString(writer: CodeWriter) =
@@ -34,7 +34,7 @@ object Str : Type {
     }
 
     class BinaryOperation(
-        operator: BinaryOperator, leftOperand: Node, rightOperand: Node
+        operator: BinaryOperator, leftOperand: Expr, rightOperand: Expr
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext) =
             when (operator) {
@@ -42,7 +42,7 @@ object Str : Type {
                 else -> throw UnsupportedOperationException()
             }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             BinaryOperation(operator, leftOperand, rightOperand)
 
         override fun toWasm(writer: WasmWriter) = throw UnsupportedOperationException("NYI")

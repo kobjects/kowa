@@ -1,13 +1,13 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractRelationalOperation(
     val operator: RelationalOperator,
-    val leftOperand: Node,
-    val rightOperand: Node
-) : Node() {
+    val leftOperand: Expr,
+    val rightOperand: Expr
+) : Expr() {
 
 
     final override fun children() = listOf(leftOperand, rightOperand)

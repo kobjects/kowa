@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.expression.*
+import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
@@ -18,18 +18,18 @@ object I64 : Type {
 
     override fun createConstant(value: Any) = Const(value as Long)
 
-    override fun createUnaryOperation(operator: UnaryOperator, operand: Node) = UnaryOperation(operator, operand)
+    override fun createUnaryOperation(operator: UnaryOperator, operand: Expr) = UnaryOperation(operator, operand)
 
     override fun createBinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node
+        leftOperand: Expr,
+        rightOperand: Expr
     ) = BinaryOperation(operator, leftOperand, rightOperand)
 
     override fun createRelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Node,
-        rightOperand: Node
+        leftOperand: Expr,
+        rightOperand: Expr
     ) = RelationalOperation(operator, leftOperand, rightOperand)
 
     override fun toString() = "I64"
@@ -39,7 +39,7 @@ object I64 : Type {
 
     class Const(
         val value: Long
-    ): AbstractLeafNode() {
+    ): AbstractLeafExpr() {
         override fun eval(context: LocalRuntimeContext) = value
 
         override fun evalI64(context: LocalRuntimeContext) = value
@@ -58,8 +58,8 @@ object I64 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node,
+        leftOperand: Expr,
+        rightOperand: Expr,
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
 
         init {
@@ -107,7 +107,7 @@ object I64 : Type {
             }
         }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override val returnType: Type
@@ -144,8 +144,8 @@ object I64 : Type {
 
     class UnaryOperation(
         val operator: UnaryOperator,
-        val operand: Node,
-    ) : Node() {
+        val operand: Expr,
+    ) : Expr() {
         override fun eval(context: LocalRuntimeContext): Any {
             val value = operand.evalI64(context)
             return when (operator) {
@@ -183,7 +183,7 @@ object I64 : Type {
 
         override fun children() = listOf(operand)
 
-        override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(operator, newChildren[0])
+        override fun reconstruct(newChildren: List<Expr>): Expr = UnaryOperation(operator, newChildren[0])
 
         override fun toString(writer: CodeWriter) =
             writer.write("$operator(", operand, ")")
@@ -236,8 +236,8 @@ object I64 : Type {
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Node,
-        rightOperand: Node,
+        leftOperand: Expr,
+        rightOperand: Expr,
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext): Boolean {
             val leftValue = leftOperand.evalI64(context)
@@ -252,7 +252,7 @@ object I64 : Type {
             }
         }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {

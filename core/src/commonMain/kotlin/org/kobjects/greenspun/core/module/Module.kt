@@ -9,8 +9,8 @@ import org.kobjects.greenspun.core.func.FuncImport
 import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalImport
-import org.kobjects.greenspun.core.instance.ImportObject
-import org.kobjects.greenspun.core.instance.Instance
+import org.kobjects.greenspun.core.runtime.ImportObject
+import org.kobjects.greenspun.core.runtime.Instance
 import org.kobjects.greenspun.core.memory.DataImpl
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport
@@ -18,7 +18,7 @@ import org.kobjects.greenspun.core.memory.MemoryInterface
 import org.kobjects.greenspun.core.table.ElementImpl
 import org.kobjects.greenspun.core.table.TableImport
 import org.kobjects.greenspun.core.table.TableInterface
-import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 
 class Module(

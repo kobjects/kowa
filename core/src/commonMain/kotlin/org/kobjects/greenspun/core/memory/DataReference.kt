@@ -3,11 +3,11 @@ package org.kobjects.greenspun.core.memory
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expression.CodeWriter
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.CodeWriter
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.I32
 
-class DataReference(val offset: Node, val len: Int) : Node() {
+class DataReference(val offset: Expr, val len: Int) : Expr() {
 
     init {
         require(offset is I32.Const || (offset is GlobalReference && offset.returnType == I32)) {
@@ -17,9 +17,9 @@ class DataReference(val offset: Node, val len: Int) : Node() {
 
     override fun eval(context: LocalRuntimeContext) = offset.eval(context)
 
-    override fun children(): List<Node> = listOf(offset)
+    override fun children(): List<Expr> = listOf(offset)
 
-    override fun reconstruct(newChildren: List<Node>) = DataReference(offset, len)
+    override fun reconstruct(newChildren: List<Expr>) = DataReference(offset, len)
 
     override fun toString(writer: CodeWriter) = offset.toString(writer)
 

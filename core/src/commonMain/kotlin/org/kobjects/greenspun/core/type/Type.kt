@@ -2,18 +2,18 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncImpl
-import org.kobjects.greenspun.core.expression.BinaryOperator
-import org.kobjects.greenspun.core.expression.Node
-import org.kobjects.greenspun.core.expression.RelationalOperator
-import org.kobjects.greenspun.core.expression.UnaryOperator
+import org.kobjects.greenspun.core.expr.BinaryOperator
+import org.kobjects.greenspun.core.expr.Expr
+import org.kobjects.greenspun.core.expr.RelationalOperator
+import org.kobjects.greenspun.core.expr.UnaryOperator
 
 
 interface Type {
 
-    fun createConstant(value: Any): Node = throw UnsupportedOperationException()
-    fun createBinaryOperation(operator: BinaryOperator, leftOperand: Node, rightOperand: Node): Node = throw UnsupportedOperationException()
-    fun createRelationalOperation(operator: RelationalOperator, leftOperand: Node, rightOperand: Node): Node = throw UnsupportedOperationException()
-    fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node = throw UnsupportedOperationException()
+    fun createConstant(value: Any): Expr = throw UnsupportedOperationException()
+    fun createBinaryOperation(operator: BinaryOperator, leftOperand: Expr, rightOperand: Expr): Expr = throw UnsupportedOperationException()
+    fun createRelationalOperation(operator: RelationalOperator, leftOperand: Expr, rightOperand: Expr): Expr = throw UnsupportedOperationException()
+    fun createUnaryOperation(operator: UnaryOperator, operand: Expr): Expr = throw UnsupportedOperationException()
 
     fun toWasm(writer: WasmWriter)
 

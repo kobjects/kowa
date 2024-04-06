@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.instance
+package org.kobjects.greenspun.core.runtime
 
 class Memory(
     val initial: Int,

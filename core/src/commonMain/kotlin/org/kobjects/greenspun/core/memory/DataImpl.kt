@@ -1,8 +1,8 @@
 package org.kobjects.greenspun.core.memory
 
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.Expr
 
 class DataImpl(
-    val offset: Node?,
+    val offset: Expr?,
     val data: ByteArray
 )

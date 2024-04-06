@@ -1,18 +1,15 @@
-package org.kobjects.greenspun.core.control
+package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.type.Void
-import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.expression.CodeWriter
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
-class IfNode(
-    val condition: Node,
-    val then: Node,
-    val otherwise: Node
-) : Node() {
+class IfExpr(
+    val condition: Expr,
+    val then: Expr,
+    val otherwise: Expr
+) : Expr() {
 
     init {
 
@@ -23,23 +20,13 @@ class IfNode(
     }
 
     override fun eval(context: LocalRuntimeContext): Any {
-        try {
-            return if (condition.evalBool(context)) then.eval(context) else otherwise.eval(context)
-        } catch (signal: BranchSignal) {
-            if (signal.label > 0) {
-                throw BranchSignal(signal.label - 1)
-            }
-            if (returnType != Void) {
-                throw IllegalStateException("Return type mismatch")
-            }
-            return Unit
-        }
+        throw UnsupportedOperationException()
     }
 
     override fun children() = listOf(condition, then, otherwise)
 
-    override fun reconstruct(newChildren: List<Node>) =
-        IfNode(newChildren[0], newChildren[1], newChildren[2])
+    override fun reconstruct(newChildren: List<Expr>) =
+        IfExpr(newChildren[0], newChildren[1], newChildren[2])
 
     override fun toString(writer: CodeWriter) {
         writer.write("If(", condition)

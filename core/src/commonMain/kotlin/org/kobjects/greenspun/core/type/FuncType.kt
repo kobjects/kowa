@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.Expr
 
 data class FuncType(
     val index: Int,
@@ -10,7 +10,7 @@ data class FuncType(
     val parameterTypes: List<Type>,
 ) : Type {
 
-    override fun createConstant(value: Any): Node {
+    override fun createConstant(value: Any): Expr {
         throw UnsupportedOperationException("TODO: Re-Implement when FuncInterface is a node")
     }
 

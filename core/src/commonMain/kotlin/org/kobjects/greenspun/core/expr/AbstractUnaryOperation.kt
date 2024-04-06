@@ -1,11 +1,11 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractUnaryOperation(
     val operator: UnaryOperator,
-    val operand: Node
-) : Node() {
+    val operand: Expr
+) : Expr() {
 
     init {
         require(operator.supportedTypes.isEmpty() || operator.supportedTypes.contains(operand.returnType)) {

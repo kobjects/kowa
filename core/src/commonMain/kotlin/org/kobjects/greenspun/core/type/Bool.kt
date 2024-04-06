@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.expression.*
+import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
@@ -20,11 +20,11 @@ object Bool : Type {
         else -> throw IllegalArgumentException("Not a boolean value: $value")
     }
 
-    override fun createBinaryOperation(operator: BinaryOperator, leftOperand: Node, rightOperand: Node): Node {
+    override fun createBinaryOperation(operator: BinaryOperator, leftOperand: Expr, rightOperand: Expr): Expr {
         return BinaryOperation(operator, leftOperand, rightOperand)
     }
 
-    override fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node {
+    override fun createUnaryOperation(operator: UnaryOperator, operand: Expr): Expr {
         return UnaryOperation(operator, operand)
     }
 
@@ -33,7 +33,7 @@ object Bool : Type {
     }
 
 
-    class Const(val value: Boolean) : AbstractLeafNode() {
+    class Const(val value: Boolean) : AbstractLeafExpr() {
         override fun eval(context: LocalRuntimeContext) = value
 
         override fun evalBool(context: LocalRuntimeContext) = value
@@ -53,8 +53,8 @@ object Bool : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node
+        leftOperand: Expr,
+        rightOperand: Expr
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext) = evalBool(context)
 
@@ -65,7 +65,7 @@ object Bool : Type {
                 else -> throw UnsupportedOperationException()
             }
 
-        override fun reconstruct(newChildren: List<Node>) =
+        override fun reconstruct(newChildren: List<Expr>) =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {
@@ -103,7 +103,7 @@ object Bool : Type {
 
     class UnaryOperation(
         operator: UnaryOperator,
-        operand: Node
+        operand: Expr
     ) : AbstractUnaryOperation(operator, operand) {
         override fun eval(context: LocalRuntimeContext) =
             when (operator) {
@@ -112,7 +112,7 @@ object Bool : Type {
             }
 
 
-        override fun reconstruct(newChildren: List<Node>) =
+        override fun reconstruct(newChildren: List<Expr>) =
             UnaryOperation(operator, operand)
 
         override fun toWasm(writer: WasmWriter) {

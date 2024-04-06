@@ -2,8 +2,8 @@ package org.kobjects.greenspun
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.kobjects.greenspun.core.instance.ImportObject
-import org.kobjects.greenspun.core.instance.Memory
+import org.kobjects.greenspun.core.runtime.ImportObject
+import org.kobjects.greenspun.core.runtime.Memory
 import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32

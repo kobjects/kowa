@@ -1,10 +1,10 @@
-package org.kobjects.greenspun.core.instance
+package org.kobjects.greenspun.core.runtime
 
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 
-class WasmInterpreter(
+class Interpreter(
     val wasm: Wasm,
     val localRuntimeContext: LocalRuntimeContext
 ) {

@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.memory
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Imported
-import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expr.CodeWriter
 
 class MemoryImport(
     override val module: String,

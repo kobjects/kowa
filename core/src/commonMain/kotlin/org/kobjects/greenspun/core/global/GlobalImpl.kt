@@ -1,13 +1,13 @@
 package org.kobjects.greenspun.core.global
 
-import org.kobjects.greenspun.core.expression.CodeWriter
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.CodeWriter
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Type
 
 class GlobalImpl(
     override val index: Int,
     override val mutable: Boolean,
-    val initializer: Node
+    val initializer: Expr
 
 ) : GlobalInterface {
     override val type: Type

@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 /** Glorified string builder with indent support */
 class CodeWriter(
@@ -13,7 +13,7 @@ class CodeWriter(
 
     fun write(vararg values: Any) {
         for (value in values) {
-            if (value is Node) {
+            if (value is Expr) {
                 value.toString(this)
             } else {
                 sb.append(value)

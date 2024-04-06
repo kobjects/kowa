@@ -2,12 +2,11 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.control.ReturnSignal
-import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.instance.WasmInterpreter
+import org.kobjects.greenspun.core.runtime.Interpreter
 
 class FuncImpl(
     override val index: Int,
@@ -19,14 +18,10 @@ class FuncImpl(
 
     override fun call(context: LocalRuntimeContext, vararg params: Any): Any {
         val childContext = context.createChild(type.parameterTypes.size + locals.size)
-        try {
-            for (i in 0 until params.size) {
-                childContext.setLocal(i, params[i])
-            }
-            return WasmInterpreter(body, childContext).run()
-        } catch (r: ReturnSignal) {
-            return r.value
+        for (i in 0 until params.size) {
+            childContext.setLocal(i, params[i])
         }
+        return Interpreter(body, childContext).run()
     }
 
     fun toString(writer: CodeWriter) {

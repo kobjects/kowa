@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.expression.*
+import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
@@ -21,17 +21,17 @@ object F64 : Type {
 
     override fun createBinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node
-    ): Node = BinaryOperation(operator, leftOperand, rightOperand)
+        leftOperand: Expr,
+        rightOperand: Expr
+    ): Expr = BinaryOperation(operator, leftOperand, rightOperand)
 
     override fun createRelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Node,
-        rightOperand: Node
-    ): Node = RelationalOperation(operator, leftOperand, rightOperand)
+        leftOperand: Expr,
+        rightOperand: Expr
+    ): Expr = RelationalOperation(operator, leftOperand, rightOperand)
 
-    override fun createUnaryOperation(operator: UnaryOperator, operand: Node): Node {
+    override fun createUnaryOperation(operator: UnaryOperator, operand: Expr): Expr {
         return UnaryOperation(operator, operand)
     }
 
@@ -43,7 +43,7 @@ object F64 : Type {
 
     class Const(
         val value: Double
-    ): AbstractLeafNode() {
+    ): AbstractLeafExpr() {
         override fun eval(context: LocalRuntimeContext) = value
 
         override fun evalF64(context: LocalRuntimeContext) = value
@@ -65,8 +65,8 @@ object F64 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node,
+        leftOperand: Expr,
+        rightOperand: Expr,
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
 
         init {
@@ -91,7 +91,7 @@ object F64 : Type {
             }
         }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {
@@ -124,7 +124,7 @@ object F64 : Type {
 
     open class UnaryOperation(
         operator: UnaryOperator,
-        operand: Node,
+        operand: Expr,
     ) : AbstractUnaryOperation(operator, operand) {
 
         init {
@@ -165,7 +165,7 @@ object F64 : Type {
         }
 
 
-        override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(operator, newChildren[0])
+        override fun reconstruct(newChildren: List<Expr>): Expr = UnaryOperation(operator, newChildren[0])
 
         override fun toWasm(writer: WasmWriter) {
             writer.write(when (operator) {
@@ -203,8 +203,8 @@ object F64 : Type {
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Node,
-        rightOperand: Node,
+        leftOperand: Expr,
+        rightOperand: Expr,
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
 
         init {
@@ -225,7 +225,7 @@ object F64 : Type {
             }
         }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
 

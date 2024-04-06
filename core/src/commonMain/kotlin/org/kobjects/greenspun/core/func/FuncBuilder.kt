@@ -3,15 +3,14 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.control.SequenceBuilder
 import org.kobjects.greenspun.core.module.ModuleBuilder
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Void
 
 class FuncBuilder(
     moduleBuilder: ModuleBuilder,
     val returnType: Type
-) : SequenceBuilder(moduleBuilder, mutableListOf(), WasmWriter()) {
+) : BodyBuilder(moduleBuilder, mutableListOf(), WasmWriter()) {
 
     internal var paramCount = 0
 
@@ -34,7 +33,7 @@ class FuncBuilder(
     }
 
     fun Return(value: Any = Void.None) {
-        val node = Node.of(value)
+        val node = Expr.of(value)
         require(node.returnType == returnType) {
             "Return value type (${node.returnType}) does not match function return type ($returnType)."
         }

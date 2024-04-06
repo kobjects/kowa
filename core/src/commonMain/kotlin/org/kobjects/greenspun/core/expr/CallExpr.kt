@@ -1,16 +1,16 @@
-package org.kobjects.greenspun.core.func
+package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.expression.CodeWriter
-import org.kobjects.greenspun.core.expression.Node
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.core.func.FuncInterface
+import org.kobjects.greenspun.core.func.LocalRuntimeContext
 
 
-class CallNode(
+class CallExpr(
     val callable: FuncInterface,
-    vararg val parameters: Node
-) : Node() {
+    vararg val parameters: Expr
+) : Expr() {
 
 
     init {
@@ -29,10 +29,10 @@ class CallNode(
         return callable.call(context, *parameters)
     }
 
-    override fun children(): List<Node> = parameters.toList()
+    override fun children(): List<Expr> = parameters.toList()
 
-    override fun reconstruct(newChildren: List<Node>) =
-        CallNode(callable, *newChildren.toTypedArray())
+    override fun reconstruct(newChildren: List<Expr>) =
+        CallExpr(callable, *newChildren.toTypedArray())
 
     override fun toString(writer: CodeWriter) {
         writer.write("func${callable.index}(")

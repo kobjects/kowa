@@ -1,11 +1,11 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
 
 
-abstract class Node {
+abstract class Expr {
     abstract fun eval(context: LocalRuntimeContext): Any
 
     // Overrides to avoid boxing; use to avoid type casts.
@@ -38,9 +38,9 @@ abstract class Node {
         return eval(context) as Boolean
     }
 
-    abstract fun children(): List<Node>
+    abstract fun children(): List<Expr>
 
-    abstract fun reconstruct(newChildren: List<Node>): Node
+    abstract fun reconstruct(newChildren: List<Expr>): Expr
 
     abstract fun toString(writer: CodeWriter)
 
@@ -98,13 +98,13 @@ abstract class Node {
 
 
     companion object {
-        fun of(value: Any): Node = if (value is Node) value else Type.of(value).createConstant(value)
+        fun of(value: Any): Expr = if (value is Expr) value else Type.of(value).createConstant(value)
 
-        fun Not(value: Any): Node = (if (value is Node) value.returnType else Type.of(value)).createUnaryOperation(UnaryOperator.NOT, Node.of(value))
+        fun Not(value: Any): Expr = (if (value is Expr) value.returnType else Type.of(value)).createUnaryOperation(UnaryOperator.NOT, Expr.of(value))
 
 
     }
 
-    fun Max(left: Node, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MAX, left, of(right))
-    fun Min(left: Node, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MIN, left, of(right))
+    fun Max(left: Expr, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MAX, left, of(right))
+    fun Min(left: Expr, right: Any) = left.returnType.createBinaryOperation(BinaryOperator.MIN, left, of(right))
 }

@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.memory.*
 import org.kobjects.greenspun.core.table.*
-import org.kobjects.greenspun.core.expression.Node
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
@@ -37,7 +37,7 @@ class ModuleBuilder {
      */
     fun Data(data: Any) = Data(I32.Const(activeDataAddress), data)
 
-    fun Data(offset: Node, data: Any): DataReference {
+    fun Data(offset: Expr, data: Any): DataReference {
 
         if (offset is I32.Const && offset.value < activeDataAddress) {
             throw IllegalArgumentException("Potentially overlapping data")
@@ -65,7 +65,7 @@ class ModuleBuilder {
         return result
     }
 
-    fun Element(table: TableInterface, offset: Node, vararg funcs: FuncInterface): ElementImpl {
+    fun Element(table: TableInterface, offset: Expr, vararg funcs: FuncInterface): ElementImpl {
         val result = ElementImpl(table.index, offset, *funcs)
         elements.add(result)
         return result
@@ -193,7 +193,7 @@ class ModuleBuilder {
     }
 
     private fun global(name: String?, mutable: Boolean, initializerOrValue: Any): GlobalReference {
-        val initializer = Node.of(initializerOrValue)
+        val initializer = Expr.of(initializerOrValue)
         val global = GlobalImpl(globals.size, mutable, initializer)
         globals.add(global)
         if (name != null) {

@@ -1,11 +1,11 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.type.Void
 
-class InvalidNode(val errorMessage: String) : AbstractLeafNode() {
+class InvalidExpr(val errorMessage: String) : AbstractLeafExpr() {
     override fun eval(context: LocalRuntimeContext): Any {
         throw IllegalStateException(errorMessage)
     }

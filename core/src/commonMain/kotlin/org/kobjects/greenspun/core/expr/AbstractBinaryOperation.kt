@@ -1,10 +1,10 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 abstract class AbstractBinaryOperation(
     val operator: BinaryOperator,
-    val leftOperand: Node,
-    val rightOperand: Node,
-) : Node() {
+    val leftOperand: Expr,
+    val rightOperand: Expr,
+) : Expr() {
 
     init {
         require(rightOperand.returnType == leftOperand.returnType) {
@@ -22,5 +22,5 @@ abstract class AbstractBinaryOperation(
                 stringifyChildren(writer, "(", " $operator ", ")")
         }
 
-    final override fun children(): List<Node> = listOf(leftOperand, rightOperand)
+    final override fun children(): List<Expr> = listOf(leftOperand, rightOperand)
 }

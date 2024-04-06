@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.instance
+package org.kobjects.greenspun.core.runtime
 
 import org.kobjects.greenspun.core.func.FuncImport
 import org.kobjects.greenspun.core.func.FuncInterface
@@ -9,7 +9,6 @@ import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.memory.MemoryImport
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.table.TableImport
-import org.kobjects.greenspun.core.type.Type
 
 class Instance(
     val module: Module,

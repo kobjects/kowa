@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.expression.*
+import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
@@ -19,18 +19,18 @@ object I32 : Type {
 
     override fun createConstant(value: Any) = Const(value as Int)
 
-    override fun createUnaryOperation(operator: UnaryOperator, operand: Node) = UnaryOperation(operator, operand)
+    override fun createUnaryOperation(operator: UnaryOperator, operand: Expr) = UnaryOperation(operator, operand)
 
     override fun createBinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node
+        leftOperand: Expr,
+        rightOperand: Expr
     ) = BinaryOperation(operator, leftOperand, rightOperand)
 
     override fun createRelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Node,
-        rightOperand: Node
+        leftOperand: Expr,
+        rightOperand: Expr
     ) = RelationalOperation(operator, leftOperand, rightOperand)
 
     override fun toString() = "I32"
@@ -39,7 +39,7 @@ object I32 : Type {
 
     class Const(
         val value: Int
-    ): AbstractLeafNode() {
+    ): AbstractLeafExpr() {
         override fun eval(context: LocalRuntimeContext) = value
 
         override fun evalI32(context: LocalRuntimeContext) = value
@@ -58,8 +58,8 @@ object I32 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Node,
-        rightOperand: Node,
+        leftOperand: Expr,
+        rightOperand: Expr,
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
 
         init {
@@ -99,7 +99,7 @@ object I32 : Type {
             }
         }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             BinaryOperation(operator, newChildren[0], newChildren[1])
 
         override val returnType: Type
@@ -135,8 +135,8 @@ object I32 : Type {
 
     class UnaryOperation(
         val operator: UnaryOperator,
-        val operand: Node,
-    ) : Node() {
+        val operand: Expr,
+    ) : Expr() {
         override fun eval(context: LocalRuntimeContext): Any {
             val value = operand.evalI32(context)
             return when (operator) {
@@ -172,7 +172,7 @@ object I32 : Type {
 
         override fun children() = listOf(operand)
 
-        override fun reconstruct(newChildren: List<Node>): Node = UnaryOperation(operator, newChildren[0])
+        override fun reconstruct(newChildren: List<Expr>): Expr = UnaryOperation(operator, newChildren[0])
 
         override fun toString(writer: CodeWriter) =
             writer.write("$operator(", operand, ")")
@@ -227,8 +227,8 @@ object I32 : Type {
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Node,
-        rightOperand: Node,
+        leftOperand: Expr,
+        rightOperand: Expr,
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
         override fun eval(context: LocalRuntimeContext): Boolean {
             val leftValue = leftOperand.evalI32(context)
@@ -243,7 +243,7 @@ object I32 : Type {
             }
         }
 
-        override fun reconstruct(newChildren: List<Node>): Node =
+        override fun reconstruct(newChildren: List<Expr>): Expr =
             RelationalOperation(operator, newChildren[0], newChildren[1])
 
         override fun toWasm(writer: WasmWriter) {
@@ -263,12 +263,12 @@ object I32 : Type {
     }
 
 
-    class Load(val address: Node) : Node() {
+    class Load(val address: Expr) : Expr() {
         override fun eval(context: LocalRuntimeContext) = context.instance.memory.buffer.loadI32(address.evalI32(context))
 
-        override fun children(): List<Node> = listOf(address)
+        override fun children(): List<Expr> = listOf(address)
 
-        override fun reconstruct(newChildren: List<Node>) = Load(newChildren[0])
+        override fun reconstruct(newChildren: List<Expr>) = Load(newChildren[0])
 
         override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
 

@@ -2,11 +2,11 @@ package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expression.CodeWriter
-import org.kobjects.greenspun.core.expression.AbstractLeafNode
+import org.kobjects.greenspun.core.expr.CodeWriter
+import org.kobjects.greenspun.core.expr.AbstractLeafExpr
 import org.kobjects.greenspun.core.type.Type
 
-class GlobalReference(val global: GlobalInterface) : AbstractLeafNode() {
+class GlobalReference(val global: GlobalInterface) : AbstractLeafExpr() {
 
     override fun eval(context: LocalRuntimeContext) =
         context.instance.getGlobal(global.index)

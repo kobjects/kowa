@@ -3,13 +3,13 @@ package org.kobjects.greenspun.core.memory
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expression.AbstractLeafNode
-import org.kobjects.greenspun.core.expression.CodeWriter
+import org.kobjects.greenspun.core.expr.AbstractLeafExpr
+import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
 
 
-class MemorySize() : AbstractLeafNode() {
+class MemorySize() : AbstractLeafExpr() {
     override fun eval(context: LocalRuntimeContext) =
         context.instance.memory.buffer.size / 65536
 

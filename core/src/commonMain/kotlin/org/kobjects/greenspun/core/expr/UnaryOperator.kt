@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.type.*
 

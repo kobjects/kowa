@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.expression
+package org.kobjects.greenspun.core.expr
 
 enum class RelationalOperator {
     EQ, GE, GT, LE, LT, NE;
