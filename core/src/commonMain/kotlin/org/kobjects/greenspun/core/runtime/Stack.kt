@@ -53,6 +53,13 @@ class Stack {
 
     fun replaceU64(count: Int, value: UInt) = replaceI64(count, value.toLong())
 
+    fun replaceAny(count: Int, value: Any) {
+        for (i in 0 until count) {
+            stack.removeLast()
+        }
+        stack.add(value)
+    }
+
     fun replaceBool(count: Int, value: Boolean) {
         for (i in 0 until count) {
             stack.removeLast()

@@ -1,13 +1,11 @@
-package org.kobjects.greenspun.core.func
+package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.Type
 
-class IndirectCallNode(
+class IndirectCallExpr(
     val table: Int,
     val index: Expr,
     val funcType: FuncType,
@@ -28,9 +26,13 @@ class IndirectCallNode(
     }
 
     override fun toWasm(writer: WasmWriter) {
+        for (p in parameter) {
+            p.toWasm(writer)
+        }
+        index.toWasm(writer)
         writer.write(WasmOpcode.CALL_INDIRECT)
         writer.writeU32(funcType.index)
-        writer.writeU32(0)
+        writer.writeU32(table)
     }
 
     override val returnType: Type

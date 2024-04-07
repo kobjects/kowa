@@ -81,8 +81,10 @@ class ModuleBuilder {
         return globalReference
     }
 
-    fun Func(returnType: Type, vararg paramTypes: Type): ForwardDeclaration {
-        val f = ForwardDeclaration(funcs.size, getFuncType(returnType, paramTypes.toList()))
+    fun ForwardDecl(returnType: Type, init: ParamBuilder.() -> Unit): ForwardDeclaration {
+        val paramBuilder = ParamBuilder()
+        paramBuilder.init()
+        val f = ForwardDeclaration(funcs.size, getFuncType(returnType, paramBuilder.build()))
         funcs.add(f)
         return f
     }
@@ -118,14 +120,19 @@ class ModuleBuilder {
 
     fun ImportConst(module: String, name : String, type: Type) = importGlobal(module, name, false, type)
 
-    fun ImportFunc(module: String, name: String, returnType: Type, vararg paramTypes: Type): FuncImport {
+    fun ImportFunc(module: String, name: String, returnType: Type, init: ParamBuilder.() -> Unit): FuncImport {
         require (funcs.lastOrNull() !is FuncImpl) {
             "All func imports need to be declared before any function declaration."
         }
-        val i = FuncImport(funcs.size, module, name, getFuncType(returnType, paramTypes.toList()))
+
+        val paramBuilder = ParamBuilder()
+        paramBuilder.init()
+
+        val i = FuncImport(funcs.size, module, name, getFuncType(returnType, paramBuilder.build()))
         funcs.add(i)
         return i
     }
+
 
     fun ImportTable(module: String, name: String, type: Type, min: Int, max: Int?): TableImport {
         require (tables.lastOrNull() !is TableImpl) {
@@ -185,7 +192,7 @@ class ModuleBuilder {
         datas.toList(),
     )
 
-   private fun export(name: String, exportable: Exportable) {
+    private fun export(name: String, exportable: Exportable) {
         require(!exports.containsKey(name)) {
             "Export '$name' already defined."
         }
@@ -201,7 +208,6 @@ class ModuleBuilder {
         }
         return GlobalReference(global)
     }
-
     private fun importGlobal(module: String, name: String, mutable: Boolean, type: Type): GlobalReference {
         require(globals.lastOrNull() !is GlobalImpl) {
             "All global imports must be declared before declaring global variables."
@@ -222,4 +228,6 @@ class ModuleBuilder {
         types.add(result)
         return result
     }
+
+
 }

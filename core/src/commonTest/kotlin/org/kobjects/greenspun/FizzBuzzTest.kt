@@ -18,8 +18,8 @@ class FizzBuzzTest {
         val buzz = Data("Buzz")
         val fizzBuzz = Data("FizzBuzz")
 
-        val LogStr = ImportFunc("console", "logStr", Void, I32, I32)
-        val LogI32 = ImportFunc("console", "logI32", Void, I32)
+        val LogStr = ImportFunc("console", "logStr", Void) { Param(I32, I32) }
+        val LogI32 = ImportFunc("console", "logI32", Void) { Param(I32) }
 
         val fizzBuzzFunc = Func(Void) {
             For(1, 21) { count ->

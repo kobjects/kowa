@@ -3,14 +3,11 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expr.CallExpr
-import org.kobjects.greenspun.core.expr.IfExpr
+import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.table.TableInterface
-import org.kobjects.greenspun.core.expr.InvalidExpr
-import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
@@ -44,11 +41,17 @@ open class BodyBuilder(
         builder.init()
     }
 
-    fun CallIndirect(table: TableInterface, index: Expr, returnType: Type, vararg parameter: Expr): IndirectCallNode {
-        val funcType = moduleBuilder.getFuncType(returnType, parameter.toList().map { it.returnType })
-        return IndirectCallNode(table.index, index, funcType, *parameter)
-    }
 
+
+    fun TableInterface.Call(index: Expr, returnType: Type, vararg parameter: Expr): Expr {
+        val funcType = moduleBuilder.getFuncType(returnType, parameter.toList().map { it.returnType })
+        val node = IndirectCallExpr(this.index, index, funcType, *parameter)
+        if (node.returnType != Void) {
+            return node
+        }
+        node.toWasm(wasmWriter)
+        return InvalidExpr("Void calls are expected to be used as statements.")
+    }
 
     fun Loop(init: BodyBuilder.() -> Unit) {
         wasmWriter.write(WasmOpcode.LOOP)

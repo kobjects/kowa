@@ -2,6 +2,7 @@ package org.kobjects.greenspun.core.runtime
 
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import kotlin.math.*
 
@@ -68,17 +69,18 @@ class Interpreter(
             }
             WasmOpcode.BR_TABLE -> throw UnsupportedOperationException()
             WasmOpcode.RETURN -> ip = wasm.code.size
-            WasmOpcode.CALL -> {
-                val func = localRuntimeContext.instance.module.funcs[immediateU32()]
-                val type = func.type
-                val parCount = type.parameterTypes.size
-                val result = func.call(localRuntimeContext, *stack.stack.subList(stack.size - parCount, stack.size).toTypedArray())
-                for (i in 0 until parCount) {
-                    stack.popAny()
+            WasmOpcode.CALL -> call(localRuntimeContext.instance.module.funcs[immediateU32()])
+            WasmOpcode.CALL_INDIRECT -> {
+                val i = stack.popI32()
+                val typeIdx = immediateU32()
+                val tableIdx = immediateU32()
+                val table = localRuntimeContext.instance.tables[tableIdx]
+                val f = table.elements[i] as FuncInterface
+                require(typeIdx == f.type.index) {
+                    "Indirect call type mismatch. Expected type is ${localRuntimeContext.instance.module.types[typeIdx]} index $typeIdx; actual: ${f.type} index ${f.type.index}"
                 }
-                stack.pushAny(result)
+                return call(f)
             }
-            WasmOpcode.CALL_INDIRECT -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.DROP -> stack.popAny()
             WasmOpcode.SELECT -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.SELECT_T -> throw UnsupportedOperationException(opcode.name)
@@ -179,8 +181,8 @@ class Interpreter(
             WasmOpcode.I32_SHL -> stack.replaceI32(2, stack.peekI32(1) shl stack.peekI32(0))
             WasmOpcode.I32_SHR_S -> stack.replaceI32(2, stack.peekI32(1) shr stack.peekI32(0))
             WasmOpcode.I32_SHR_U -> stack.replaceI32(2, stack.peekI32(1) ushr stack.peekI32(0))
-            WasmOpcode.I32_ROTL -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_ROTR -> throw UnsupportedOperationException(opcode.name)
+            WasmOpcode.I32_ROTL -> stack.replaceI32(2, stack.peekI32(1).rotateLeft(stack.peekI32(0)))
+            WasmOpcode.I32_ROTR -> stack.replaceI32(2, stack.peekI32(1).rotateRight(stack.peekI32(0)))
 
             WasmOpcode.I64_CLZ -> stack.pushI64(stack.popI64().countLeadingZeroBits().toLong())
             WasmOpcode.I64_CTZ ->  stack.pushI64(stack.popI64().countTrailingZeroBits().toLong())
@@ -198,8 +200,8 @@ class Interpreter(
             WasmOpcode.I64_SHL -> stack.replaceI64(2, stack.peekI64(1) shl stack.peekI64(0).toInt())
             WasmOpcode.I64_SHR_S -> stack.replaceI64(2, stack.peekI64(1) shr stack.peekI64(0).toInt())
             WasmOpcode.I64_SHR_U -> stack.replaceI64(2, stack.peekI64(1) ushr stack.peekI64(0).toInt())
-            WasmOpcode.I64_ROTL -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_ROTR -> throw UnsupportedOperationException(opcode.name)
+            WasmOpcode.I64_ROTL -> stack.replaceI64(2, stack.peekI64(1).rotateLeft(stack.peekI64().toInt()))
+            WasmOpcode.I64_ROTR -> stack.replaceI64(2, stack.peekI64(1).rotateRight(stack.peekI64().toInt()))
 
             WasmOpcode.F32_ABS -> stack.pushF32(stack.popF32().absoluteValue)
             WasmOpcode.F32_NEG -> stack.pushF32(-stack.popF32())
@@ -214,8 +216,11 @@ class Interpreter(
             WasmOpcode.F32_DIV -> stack.replaceF32(2, stack.peekF32(1) / stack.peekF32(0))
             WasmOpcode.F32_MIN -> stack.pushF32(min(stack.popF32(), stack.popF32()))
             WasmOpcode.F32_MAX -> stack.pushF32(max(stack.popF32(), stack.popF32()))
-            WasmOpcode.F32_COPYSIGN -> throw UnsupportedOperationException(opcode.name)
-
+            WasmOpcode.F32_COPYSIGN -> {
+                val r = stack.popF32()
+                val l = stack.popF32()
+                stack.pushF32(if (l.sign == r.sign) l else -l)
+            }
             WasmOpcode.F64_ABS -> stack.pushF64(stack.popF64().absoluteValue)
             WasmOpcode.F64_NEG -> stack.pushF64(-stack.popF64())
             WasmOpcode.F64_CEIL -> stack.pushF64(ceil(stack.popF64()))
@@ -229,8 +234,11 @@ class Interpreter(
             WasmOpcode.F64_DIV -> stack.replaceF64(2, stack.peekF64(1) / stack.peekF64(0))
             WasmOpcode.F64_MIN -> stack.pushF64(min(stack.popF64(), stack.popF64()))
             WasmOpcode.F64_MAX -> stack.pushF64(max(stack.popF64(), stack.popF64()))
-            WasmOpcode.F64_COPYSIGN -> throw UnsupportedOperationException(opcode.name)
-
+            WasmOpcode.F64_COPYSIGN -> {
+                val r = stack.popF64()
+                val l = stack.popF64()
+                stack.pushF64(if (l.sign == r.sign) l else -l)
+            }
 
             WasmOpcode.I32_WRAP_I64 -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.I32_TRUNC_F32_S -> throw UnsupportedOperationException(opcode.name)
@@ -243,20 +251,20 @@ class Interpreter(
             WasmOpcode.I64_TRUNC_F32_U -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.I64_TRUNC_F64_S -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.I64_TRUNC_F64_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_CONVERT_I32_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_CONVERT_I32_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_CONVERT_I64_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_CONVERT_I64_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_DEMOTE_F64 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_CONVERT_I32_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_CONVERT_I32_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_CONVERT_I64_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_CONVERT_I64_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_PROMOTE_F32 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_REINTERPRET_F32 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_REINTERPRET_F64 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_REINTERPRET_I32 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_REINTERPRET_I64 -> throw UnsupportedOperationException(opcode.name)
+            WasmOpcode.F32_CONVERT_I32_S -> stack.pushF32(stack.popI32().toFloat())
+            WasmOpcode.F32_CONVERT_I32_U -> stack.pushF32(stack.popU32().toFloat())
+            WasmOpcode.F32_CONVERT_I64_S -> stack.pushF32(stack.popI64().toFloat())
+            WasmOpcode.F32_CONVERT_I64_U -> stack.pushF32(stack.popU64().toFloat())
+            WasmOpcode.F32_DEMOTE_F64 -> stack.pushF32(stack.popF64().toFloat())
+            WasmOpcode.F64_CONVERT_I32_S -> stack.pushF64(stack.popI32().toDouble())
+            WasmOpcode.F64_CONVERT_I32_U -> stack.pushF64(stack.popU32().toDouble())
+            WasmOpcode.F64_CONVERT_I64_S -> stack.pushF64(stack.popI64().toDouble())
+            WasmOpcode.F64_CONVERT_I64_U -> stack.pushF64(stack.popU64().toDouble())
+            WasmOpcode.F64_PROMOTE_F32 -> stack.pushF64(stack.popF32().toDouble())
+            WasmOpcode.I32_REINTERPRET_F32 -> stack.pushI32(stack.popF32().toBits())
+            WasmOpcode.I64_REINTERPRET_F64 -> stack.pushI64(stack.popF64().toBits())
+            WasmOpcode.F32_REINTERPRET_I32 -> stack.pushF32(Float.fromBits(stack.popI32()))
+            WasmOpcode.F64_REINTERPRET_I64 -> stack.pushF64(Double.fromBits(stack.popI64()))
 
             WasmOpcode.REF_NULL -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.REF_IS_NULL -> throw UnsupportedOperationException(opcode.name)
@@ -274,6 +282,14 @@ class Interpreter(
         }
 
 
+    }
+
+
+    fun call(f: FuncInterface) {
+        val type = f.type
+        val parCount = type.parameterTypes.size
+        val result = f.call(localRuntimeContext, *stack.stack.subList(stack.size - parCount, stack.size).toTypedArray())
+        stack.replaceAny(type.parameterTypes.size, result)
     }
 
     fun immediateType() {

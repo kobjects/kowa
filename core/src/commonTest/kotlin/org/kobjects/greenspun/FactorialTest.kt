@@ -1,6 +1,5 @@
 package org.kobjects.greenspun
 
-import org.kobjects.greenspun.core.binary.hexDump
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I64
 import kotlin.test.Test
@@ -11,7 +10,7 @@ class FactorialTest {
 
     val module = Module {
 
-        val facRecNamed = Func(I64, I64)
+        val facRecNamed = ForwardDecl(I64) { Param(I64) }
 
         Implementation(facRecNamed) {
             val n = Param(I64)
@@ -21,6 +20,7 @@ class FactorialTest {
 
         val facIterNamed = Func(I64) {
             val n = Param(I64)
+
             val i = Var(n)
             val res = Var(1L)
 
