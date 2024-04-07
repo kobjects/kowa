@@ -39,8 +39,8 @@ object Bool : Type {
             writer.write(if (value) "True" else "False")
         }
 
-        override val returnType: Type
-            get() = Bool
+        override val returnType: List<Type>
+            get() = listOf(Bool)
 
         override fun toWasm(writer: WasmWriter) {
             writer.write(WasmOpcode.I32_CONST)
@@ -81,8 +81,8 @@ object Bool : Type {
             }
         }
 
-        override val returnType: Type
-            get() = Bool
+        override val returnType: List<Type>
+            get() = listOf(Bool)
     }
 
 

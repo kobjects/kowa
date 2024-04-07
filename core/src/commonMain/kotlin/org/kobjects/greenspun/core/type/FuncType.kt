@@ -6,7 +6,7 @@ import org.kobjects.greenspun.core.expr.Expr
 
 data class FuncType(
     val index: Int,
-    val returnType: Type,
+    val returnType: List<Type>,
     val parameterTypes: List<Type>,
 ) : Type {
 
@@ -17,18 +17,16 @@ data class FuncType(
     override fun toWasm(writer: WasmWriter) {
         writer.write(WasmType.FUNC)
         writer.writeU32(parameterTypes.size)
-        for (parameterType in parameterTypes) {
-            parameterType.toWasm(writer)
+        for (t in parameterTypes) {
+            t.toWasm(writer)
         }
-        if (returnType == Void) {
-            writer.writeU32(0)
-        } else {
-            writer.writeU32(1)
-            returnType.toWasm(writer)
+        writer.writeU32(returnType.size)
+        for (t in returnType) {
+            t.toWasm(writer)
         }
     }
 
-    fun matches(returnType: Type, parameterTypes: List<Type>) =
+    fun matches(returnType: List<Type>, parameterTypes: List<Type>) =
         this.returnType == returnType && this.parameterTypes == parameterTypes
 
 }

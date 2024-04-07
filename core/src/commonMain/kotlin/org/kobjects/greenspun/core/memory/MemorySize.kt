@@ -16,6 +16,6 @@ class MemorySize() : AbstractLeafExpr() {
 
     override fun toWasm(writer: WasmWriter) = writer.write(WasmOpcode.MEMORY_SIZE)
 
-    override val returnType: Type
-        get() = I32
+    override val returnType: List<Type>
+        get() = listOf(I32)
 }

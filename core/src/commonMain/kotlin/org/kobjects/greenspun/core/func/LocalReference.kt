@@ -9,9 +9,13 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 class LocalReference(
     val index: Int,
     val mutable: Boolean,
-    override val returnType: Type
+    val type: Type
 ) : Expr() {
     override fun children(): List<Expr> = emptyList()
+
+
+    override val returnType: List<Type>
+        get() = listOf(type)
 
     override fun toString(writer: CodeWriter) =
         writer.write("local$index")

@@ -81,16 +81,16 @@ class ModuleBuilder {
         return globalReference
     }
 
-    fun ForwardDecl(returnType: Type, init: ParamBuilder.() -> Unit): ForwardDeclaration {
+    fun ForwardDecl(vararg returnType: Type, init: ParamBuilder.() -> Unit): ForwardDeclaration {
         val paramBuilder = ParamBuilder()
         paramBuilder.init()
-        val f = ForwardDeclaration(funcs.size, getFuncType(returnType, paramBuilder.build()))
+        val f = ForwardDeclaration(funcs.size, getFuncType(returnType.toList(), paramBuilder.build()))
         funcs.add(f)
         return f
     }
 
-    fun Func(returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
-        val builder = FuncBuilder(this, returnType)
+    fun Func(vararg returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
+        val builder = FuncBuilder(this, returnType.toList())
         builder.init()
         val f = builder.build()
         funcs.add(f)
@@ -120,7 +120,7 @@ class ModuleBuilder {
 
     fun ImportConst(module: String, name : String, type: Type) = importGlobal(module, name, false, type)
 
-    fun ImportFunc(module: String, name: String, returnType: Type, init: ParamBuilder.() -> Unit): FuncImport {
+    fun ImportFunc(module: String, name: String, vararg returnType: Type, init: ParamBuilder.() -> Unit): FuncImport {
         require (funcs.lastOrNull() !is FuncImpl) {
             "All func imports need to be declared before any function declaration."
         }
@@ -128,7 +128,7 @@ class ModuleBuilder {
         val paramBuilder = ParamBuilder()
         paramBuilder.init()
 
-        val i = FuncImport(funcs.size, module, name, getFuncType(returnType, paramBuilder.build()))
+        val i = FuncImport(funcs.size, module, name, getFuncType(returnType.toList(), paramBuilder.build()))
         funcs.add(i)
         return i
     }
@@ -218,7 +218,7 @@ class ModuleBuilder {
     }
 
 
-    internal fun getFuncType(returnType: Type, paramTypes: List<Type>): FuncType {
+    internal fun getFuncType(returnType: List<Type>, paramTypes: List<Type>): FuncType {
         for (candidate in types) {
             if (candidate.matches(returnType, paramTypes)) {
                 return candidate

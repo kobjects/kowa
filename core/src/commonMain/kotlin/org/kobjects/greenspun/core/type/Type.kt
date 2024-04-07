@@ -20,12 +20,9 @@ interface Type {
     companion object {
 
         fun of(value: Any?) = when (value) {
-            null,
-            Unit -> Void
             is Int -> I32
             is Long -> I64
             is Double -> F64
-            is String -> Str
             is Boolean -> Bool
             is FuncImpl -> value.type
             else -> throw IllegalArgumentException("Unrecognized type for $value")

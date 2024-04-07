@@ -5,11 +5,10 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.expr.Expr
-import org.kobjects.greenspun.core.type.Void
 
 class FuncBuilder(
     moduleBuilder: ModuleBuilder,
-    val returnType: Type
+    val returnType: List<Type>
 ) : BodyBuilder(moduleBuilder, mutableListOf(), WasmWriter()) {
 
     internal var paramCount = 0
@@ -32,13 +31,13 @@ class FuncBuilder(
         return variable
     }
 
-    fun Return(value: Any = Void.None) {
-        val node = Expr.of(value)
-        require(node.returnType == returnType) {
+    fun Return(vararg value: Any) {
+        val children = value.map { Expr.of(it) }
+/*        require(children.map {it.returnType } == returnType) {
             "Return value type (${node.returnType}) does not match function return type ($returnType)."
-        }
-        if (node.returnType != Void) {
-            node.toWasm(wasmWriter)
+        }*/
+        for (child in children) {
+            child.toWasm(wasmWriter)
         }
         wasmWriter.write(WasmOpcode.RETURN)
     }

@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.kobjects.greenspun.core.runtime.ImportObject
 import org.kobjects.greenspun.core.runtime.Memory
-import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.I32
 
@@ -18,10 +17,10 @@ class FizzBuzzTest {
         val buzz = Data("Buzz")
         val fizzBuzz = Data("FizzBuzz")
 
-        val LogStr = ImportFunc("console", "logStr", Void) { Param(I32, I32) }
-        val LogI32 = ImportFunc("console", "logI32", Void) { Param(I32) }
+        val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) }
+        val LogI32 = ImportFunc("console", "logI32") { Param(I32) }
 
-        val fizzBuzzFunc = Func(Void) {
+        val fizzBuzzFunc = Func {
             For(1, 21) { count ->
                 If(count % 3 Eq 0) {
                     If(count % 5 Eq 0) {

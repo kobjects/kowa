@@ -44,8 +44,8 @@ object I32 : Type {
             writer.writeI32(value)
         }
 
-        override val returnType: Type
-            get() = I32
+        override val returnType: List<Type>
+            get() = listOf(I32)
     }
 
     class BinaryOperation(
@@ -61,8 +61,8 @@ object I32 : Type {
         }
 
 
-        override val returnType: Type
-            get() = I32
+        override val returnType: List<Type>
+            get() = listOf(I32)
 
         override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
@@ -148,8 +148,8 @@ object I32 : Type {
             )
         }
 
-        override val returnType: Type
-            get() = operator.deviantResultType ?: I32
+        override val returnType: List<Type>
+            get() = listOf(operator.deviantResultType ?: I32)
     }
 
     class RelationalOperation(
@@ -189,8 +189,8 @@ object I32 : Type {
             writer.writeU32(0)
         }
 
-        override val returnType: Type
-            get() = I32
+        override val returnType: List<Type>
+            get() = listOf(I32)
     }
 
 }

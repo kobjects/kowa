@@ -16,6 +16,6 @@ class GlobalReference(val global: GlobalInterface) : AbstractLeafExpr() {
         TODO("Not yet implemented")
     }
 
-    override val returnType: Type
-        get() = global.type
+    override val returnType: List<Type>
+        get() = listOf(global.type)
 }

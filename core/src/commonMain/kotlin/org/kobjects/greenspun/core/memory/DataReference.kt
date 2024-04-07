@@ -10,7 +10,7 @@ import org.kobjects.greenspun.core.type.I32
 class DataReference(val offset: Expr, val len: Int) : Expr() {
 
     init {
-        require(offset is I32.Const || (offset is GlobalReference && offset.returnType == I32)) {
+        require(offset is I32.Const || (offset is GlobalReference && offset.returnType == listOf(I32))) {
             "Data offset must be a I32 literal or a constant global of type I32."
         }
     }
@@ -22,5 +22,5 @@ class DataReference(val offset: Expr, val len: Int) : Expr() {
 
     override fun toWasm(writer: WasmWriter) = offset.toWasm(writer)
 
-    override val returnType = I32
+    override val returnType = listOf(I32)
 }

@@ -59,8 +59,8 @@ object F32 : Type {
             writer.writeF32(value)
         }
 
-        override val returnType: Type
-            get() = F32
+        override val returnType: List<Type>
+            get() = listOf(F32)
     }
 
     class BinaryOperation(
@@ -70,12 +70,12 @@ object F32 : Type {
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
 
         init {
-            require(leftOperand.returnType == F32) { "Left operand type must be F32."}
-            require(rightOperand.returnType == F32) { "Right operand type must be F32."}
+            require(leftOperand.returnType == listOf(F32)) { "Left operand type must be F32."}
+            require(rightOperand.returnType == listOf(F32)) { "Right operand type must be F32."}
         }
 
-        override val returnType: Type
-            get() = F32
+        override val returnType: List<Type>
+            get() = listOf(F32)
 
         override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
@@ -111,7 +111,7 @@ object F32 : Type {
     ) : AbstractUnaryOperation(operator, operand) {
 
         init {
-            require(operand.returnType == F32) { "Operand type must be F32."}
+            require(operand.returnType == listOf(F32)) { "Operand type must be F32."}
         }
 
 
@@ -157,8 +157,8 @@ object F32 : Type {
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
 
         init {
-            require(leftOperand.returnType == F32) { "Left operand type must be F32" }
-            require(rightOperand.returnType == F32) { "Right operand type must be F32" }
+            require(leftOperand.returnType == listOf(F32)) { "Left operand type must be F32" }
+            require(rightOperand.returnType == listOf(F32)) { "Right operand type must be F32" }
         }
 
 

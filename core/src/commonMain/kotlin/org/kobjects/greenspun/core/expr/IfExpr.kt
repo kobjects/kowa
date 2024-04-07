@@ -30,14 +30,14 @@ class IfExpr(
     override fun toWasm(writer: WasmWriter) {
         condition.toWasm(writer)
         writer.write(WasmOpcode.IF)
-        returnType.toWasm(writer)
+        returnType[0].toWasm(writer)
         then.toWasm(writer)
         writer.write(WasmOpcode.ELSE)
         otherwise.toWasm(writer)
         writer.write(WasmOpcode.END)
     }
 
-    override val returnType: Type
+    override val returnType: List<Type>
         get() = then.returnType
 
 }

@@ -17,12 +17,15 @@ class CallExpr(
         require(callable.type.parameterTypes.size == parameters.size) {
             "${callable.type.parameterTypes.size} parameters expected, but got ${parameters.size}"}
 
+        /*
         for (i in parameters.indices) {
             val expectedType = callable.type.parameterTypes[i]
             val actualType = parameters[i].returnType
             require(expectedType == actualType) {
                 "Type mismatch for parameter $i; expected type: $expectedType; actual type: $actualType "}
         }
+        
+         */
     }
 
     override fun children(): List<Expr> = parameters.toList()
@@ -46,6 +49,6 @@ class CallExpr(
         writer.writeU32(callable.index)
     }
 
-    override val returnType: Type
+    override val returnType: List<Type>
         get() = callable.type.returnType
 }

@@ -7,11 +7,9 @@ import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
-import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.type.Void
 
 open class BodyBuilder(
     val moduleBuilder: ModuleBuilder,
@@ -21,8 +19,12 @@ open class BodyBuilder(
     private fun local(mutable: Boolean, initializer: Any): LocalReference {
         val initializerNode = Expr.of(initializer)
 
-        val variable = LocalReference(variables.size, mutable, initializerNode.returnType)
-        variables.add(initializerNode.returnType)
+        require(initializerNode.returnType.size == 1) {
+            "Single return value expected for variable initialization"
+        }
+
+        val variable = LocalReference(variables.size, mutable, initializerNode.returnType[0])
+        variables.add(initializerNode.returnType[0])
 
         initializerNode.toWasm(wasmWriter)
         wasmWriter.write(WasmOpcode.LOCAL_SET)
@@ -41,18 +43,20 @@ open class BodyBuilder(
         builder.init()
     }
 
+/*
 
-
-    fun TableInterface.Call(index: Expr, returnType: Type, vararg parameter: Expr): Expr {
-        val funcType = moduleBuilder.getFuncType(returnType, parameter.toList().map { it.returnType })
+    fun TableInterface.Call(index: Expr, returnType: List<Type>, vararg parameter: Expr): Expr {
+        val funcType = moduleBuilder.getFuncType(returnType, parameter.map { it.returnType })
         val node = IndirectCallExpr(this.index, index, funcType, *parameter)
-        if (node.returnType != Void) {
+        if (node.returnType.isNotEmpty()) {
             return node
         }
         node.toWasm(wasmWriter)
         return InvalidExpr("Void calls are expected to be used as statements.")
     }
 
+
+ */
     fun Loop(init: BodyBuilder.() -> Unit) {
         wasmWriter.write(WasmOpcode.LOOP)
         val builder = BodyBuilder(moduleBuilder, variables, wasmWriter)
@@ -63,7 +67,7 @@ open class BodyBuilder(
     fun While(condition: Any, init: BodyBuilder.() -> Unit) {
         val conditionNode = Expr.of(condition)
 
-        require(conditionNode.returnType == Bool) {
+        require(conditionNode.returnType == listOf(Bool)) {
             "While condition must be boolean"
         }
 
@@ -94,13 +98,13 @@ open class BodyBuilder(
         val untilNode = Expr.of(until)
         val stepNode = Expr.of(step)
 
-        require(initialValueNode.returnType == I32) {
+        require(initialValueNode.returnType == listOf(I32)) {
             "I32 expected for initial value."
         }
-        require(untilNode.returnType == I32) {
+        require(untilNode.returnType == listOf(I32)) {
             "I32 expected for target value."
         }
-        require(stepNode.returnType == I32) {
+        require(stepNode.returnType == listOf(I32)) {
             "I32 expected for step value."
         }
 
@@ -131,7 +135,7 @@ open class BodyBuilder(
 
     operator fun FuncInterface.invoke(vararg node: Any): Expr {
         val result = CallExpr(this, *node.map { Expr.of(it) }.toTypedArray())
-        if (type.returnType != Void) {
+        if (type.returnType.isNotEmpty()) {
             return result
         }
         result.toWasm(wasmWriter)
@@ -140,7 +144,7 @@ open class BodyBuilder(
 
     fun If(condition: Any, init: BodyBuilder.() -> Unit): Elseable {
         val conditionNode = Expr.of(condition)
-        require(conditionNode.returnType == Bool) {
+        require(conditionNode.returnType == listOf(Bool)) {
             "If condition must be boolean"
         }
 

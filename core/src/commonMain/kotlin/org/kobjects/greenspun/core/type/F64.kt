@@ -56,8 +56,8 @@ object F64 : Type {
             writer.writeF64(value)
         }
 
-        override val returnType: Type
-            get() = F64
+        override val returnType: List<Type>
+            get() = listOf(F64)
     }
 
     class BinaryOperation(
@@ -67,12 +67,12 @@ object F64 : Type {
     ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
 
         init {
-            require(leftOperand.returnType == F64) { "Left operand type must be F64."}
-            require(rightOperand.returnType == F64) { "Right operand type must be F64."}
+            require(leftOperand.returnType == listOf(F64)) { "Left operand type must be F64."}
+            require(rightOperand.returnType == listOf(F64)) { "Right operand type must be F64."}
         }
 
-        override val returnType: Type
-            get() = F64
+        override val returnType: List<Type>
+            get() = listOf(F64)
 
         override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
@@ -108,7 +108,7 @@ object F64 : Type {
     ) : AbstractUnaryOperation(operator, operand) {
 
         init {
-            require(operand.returnType == F64) { "Operand type must be F64."}
+            require(operand.returnType == listOf(F64)) { "Operand type must be F64."}
         }
 
         override fun toWasm(writer: WasmWriter) {
@@ -152,8 +152,8 @@ object F64 : Type {
     ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
 
         init {
-            require(leftOperand.returnType == F64) { "Left operand type must be F64" }
-            require(rightOperand.returnType == F64) { "Right operand type must be F64" }
+            require(leftOperand.returnType == listOf(F64)) { "Left operand type must be F64" }
+            require(rightOperand.returnType == listOf(F64)) { "Right operand type must be F64" }
         }
 
 

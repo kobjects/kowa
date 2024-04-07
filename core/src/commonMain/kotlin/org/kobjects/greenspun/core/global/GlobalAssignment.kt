@@ -2,10 +2,8 @@ package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.type.Void
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 open class GlobalAssignment(
@@ -25,8 +23,8 @@ open class GlobalAssignment(
 
     override fun children() = listOf(expression)
 
-    override val returnType: Type
-        get() = Void
+    override val returnType: List<Type>
+        get() = emptyList()
 
     override fun toString(writer: CodeWriter) {
         writer.write("Set(global${global.index}, ")

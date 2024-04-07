@@ -11,7 +11,7 @@ class GlobalImpl(
 
 ) : GlobalInterface {
     override val type: Type
-        get() = initializer.returnType
+        get() = initializer.returnType[0]
 
 
     fun toString(writer: CodeWriter) {

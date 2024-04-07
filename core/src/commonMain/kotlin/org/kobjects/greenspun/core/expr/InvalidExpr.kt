@@ -1,9 +1,7 @@
 package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.type.Void
 
 class InvalidExpr(val errorMessage: String) : AbstractLeafExpr() {
 
@@ -15,6 +13,6 @@ class InvalidExpr(val errorMessage: String) : AbstractLeafExpr() {
         throw IllegalStateException(errorMessage)
     }
 
-    override val returnType: Type
-        get() = Void
+    override val returnType: List<Type>
+        get() = emptyList()
 }

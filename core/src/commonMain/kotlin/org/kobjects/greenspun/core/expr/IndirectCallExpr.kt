@@ -35,7 +35,7 @@ class IndirectCallExpr(
         writer.writeU32(table)
     }
 
-    override val returnType: Type
+    override val returnType: List<Type>
         get() = funcType.returnType
 
 

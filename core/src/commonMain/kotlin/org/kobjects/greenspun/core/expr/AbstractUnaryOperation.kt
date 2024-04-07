@@ -8,13 +8,13 @@ abstract class AbstractUnaryOperation(
 ) : Expr() {
 
     init {
-        require(operator.supportedTypes.isEmpty() || operator.supportedTypes.contains(operand.returnType)) {
+        require(operator.supportedTypes.isEmpty() || (operand.returnType.size == 1 && operator.supportedTypes.contains(operand.returnType[0]))) {
             "Operator $operator not supported for ${operand.returnType}"
         }
     }
 
-    override final val returnType: Type
-        get() = operator.deviantResultType ?: operand.returnType
+    override final val returnType: List<Type>
+        get() = if (operator.deviantResultType != null) listOf(operator.deviantResultType) else operand.returnType
 
     override fun children() = listOf(operand)
 

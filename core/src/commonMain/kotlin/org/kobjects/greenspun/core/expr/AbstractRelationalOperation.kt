@@ -11,8 +11,8 @@ abstract class AbstractRelationalOperation(
 
 
     final override fun children() = listOf(leftOperand, rightOperand)
-    final override val returnType: Type
-        get() = Bool
+    final override val returnType: List<Type>
+        get() = listOf(Bool)
 
     final override fun toString(writer: CodeWriter) =
         stringifyChildren(writer, "(", " $operator ", ")")

@@ -48,8 +48,8 @@ object I64 : Type {
             writer.writeI64(value)
         }
 
-        override val returnType: Type
-            get() = I64
+        override val returnType: List<Type>
+            get() = listOf(I64)
     }
 
     class BinaryOperation(
@@ -63,17 +63,17 @@ object I64 : Type {
                 "Operator '$operator' not supported for Integer types"
             }
 
-            require(leftOperand.returnType == I64) {
+            require(leftOperand.returnType == listOf(I64)) {
                 "Left operand ($leftOperand) type (${leftOperand.returnType} must be I64 for '$operator'"
             }
 
-            require(rightOperand.returnType == I64) {
+            require(rightOperand.returnType == listOf(I64)) {
                 "Left operand ($rightOperand) type (${rightOperand.returnType} must be I64 for '$operator'"
             }
 
         }
-        override val returnType: Type
-            get() = I64
+        override val returnType: List<Type>
+            get() = listOf(I64)
 
         override fun toWasm(writer: WasmWriter) {
             leftOperand.toWasm(writer)
@@ -157,8 +157,8 @@ object I64 : Type {
             )
         }
 
-        override val returnType: Type
-            get() = operator.deviantResultType ?: I64
+        override val returnType: List<Type>
+            get() = listOf(operator.deviantResultType ?: I64)
     }
 
     class RelationalOperation(
