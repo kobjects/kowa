@@ -76,6 +76,12 @@ class ModuleBuilder {
         return funcReference
     }
 
+    fun Export(name: String, funcReference: ForwardDeclaration): ForwardDeclaration {
+        export(name, funcReference)
+        return funcReference
+    }
+
+
     fun Export(name: String, globalReference: GlobalReference): GlobalReference {
         export(name, globalReference.global)
         return globalReference

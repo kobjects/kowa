@@ -17,7 +17,6 @@ class FactorialTest {
             Return(If(n Eq 0L, 1L, n * facRecNamed(n - 1L)))
         }
 
-
         val facIterNamed = Func(I64) {
             val n = Param(I64)
 
