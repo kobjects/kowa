@@ -33,7 +33,7 @@ object Bool : Type {
     }
 
 
-    class Const(val value: Boolean) : AbstractLeafExpr() {
+    class Const(val value: Boolean) : Expr() {
 
         override fun toString(writer: CodeWriter) {
             writer.write(if (value) "True" else "False")
@@ -50,28 +50,27 @@ object Bool : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Expr,
-        rightOperand: Expr
-    ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
+        vararg operands: Any
+    ) : AbstractBinaryOperation(Bool, operator, *operands) {
 
 
         override fun toWasm(writer: WasmWriter) {
             when(operator) {
                 BinaryOperator.OR -> {
-                    leftOperand.toWasm(writer)
+                    children[0].toWasm(writer)
                     writer.write(WasmOpcode.IF)
                     Bool.toWasm(writer)
                     writer.write(WasmOpcode.I32_CONST)
                     writer.writeI32(1)
                     writer.write(WasmOpcode.ELSE)
-                    rightOperand.toWasm(writer)
+                    children[1].toWasm(writer)
                     writer.write(WasmOpcode.END)
                 }
                 BinaryOperator.AND -> {
-                    leftOperand.toWasm(writer)
+                    children[0].toWasm(writer)
                     writer.write(WasmOpcode.IF)
                     Bool.toWasm(writer)
-                    rightOperand.toWasm(writer)
+                    children[1].toWasm(writer)
                     writer.write(WasmOpcode.ELSE)
                     writer.write(WasmOpcode.I32_CONST)
                     writer.writeI32(0)
@@ -80,22 +79,17 @@ object Bool : Type {
                 else -> throw UnsupportedOperationException()
             }
         }
-
-        override val returnType: List<Type>
-            get() = listOf(Bool)
     }
-
-
 
 
     class UnaryOperation(
         operator: UnaryOperator,
-        operand: Expr
-    ) : AbstractUnaryOperation(operator, operand) {
+        operand: Any
+    ) : AbstractUnaryOperation(Bool, operator, operand) {
 
 
         override fun toWasm(writer: WasmWriter) {
-            operand.toWasm(writer)
+            super.toWasm(writer)
             when (operator) {
                 UnaryOperator.NOT -> writer.write(WasmOpcode.I32_EQZ)
                 else -> throw UnsupportedOperationException()

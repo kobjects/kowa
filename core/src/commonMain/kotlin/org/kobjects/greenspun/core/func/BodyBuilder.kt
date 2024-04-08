@@ -4,7 +4,6 @@ import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.*
-import org.kobjects.greenspun.core.global.GlobalAssignment
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.type.Bool
@@ -169,17 +168,25 @@ open class BodyBuilder(
 
 
 
-    fun Set(variable: LocalReference, expression: Expr) {
-        require(expression.returnType == variable.returnType) {
-            "Expression type ${expression.returnType} does not match variable type ${variable.returnType}"
+    fun Set(variable: LocalReference, value: Any) {
+        val valueExpr = Expr.of(value)
+        require(valueExpr.returnType == variable.returnType) {
+            "Expression type ${valueExpr.returnType} does not match variable type ${variable.returnType}"
         }
-        expression.toWasm(wasmWriter)
+        valueExpr.toWasm(wasmWriter)
         wasmWriter.write(WasmOpcode.LOCAL_SET)
         wasmWriter.writeU32(variable.index)
     }
 
-    fun Set(variable: GlobalReference, expression: Expr) =
-        GlobalAssignment(variable.global, expression)
+    fun Set(variable: GlobalReference, value: Any) {
+        val valueExpr = Expr.of(value)
+        require(valueExpr.returnType == variable.returnType) {
+            "Expression type ${valueExpr.returnType} does not match variable type ${variable.returnType}"
+        }
+        valueExpr.toWasm(wasmWriter)
+        wasmWriter.write(WasmOpcode.GLOBAL_SET)
+        wasmWriter.writeU32(variable.global.index)
+    }
 
 
     inner class Elseable(val ifPosition: Int, val endPosition: Int) {

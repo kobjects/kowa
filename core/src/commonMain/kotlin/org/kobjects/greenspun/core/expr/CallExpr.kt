@@ -9,9 +9,8 @@ import org.kobjects.greenspun.core.func.LocalRuntimeContext
 
 class CallExpr(
     val callable: FuncInterface,
-    vararg val parameters: Expr
-) : Expr() {
-
+    vararg parameters: Expr
+) : Expr(*parameters) {
 
     init {
         require(callable.type.parameterTypes.size == parameters.size) {
@@ -28,23 +27,20 @@ class CallExpr(
          */
     }
 
-    override fun children(): List<Expr> = parameters.toList()
 
     override fun toString(writer: CodeWriter) {
         writer.write("func${callable.index}(")
-        for (i in parameters.indices) {
+        for (i in children.indices) {
             if (i > 0) {
                 writer.write(", ")
             }
-            parameters[i].toString(writer)
+            children[i].toString(writer)
         }
         writer.write(")")
     }
 
     override fun toWasm(writer: WasmWriter) {
-        for (parameter in parameters) {
-            parameter.toWasm(writer)
-        }
+        super.toWasm(writer)
         writer.write(WasmOpcode.CALL)
         writer.writeU32(callable.index)
     }

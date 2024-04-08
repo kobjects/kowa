@@ -43,7 +43,7 @@ object F64 : Type {
 
     class Const(
         val value: Double
-    ): AbstractLeafExpr() {
+    ): Expr() {
 
         override fun toString(writer: CodeWriter) {
             writer.write("F64(")
@@ -62,21 +62,12 @@ object F64 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
+        vararg operands: Any
+    ) : AbstractBinaryOperation(F64, operator, *operands) {
 
-        init {
-            require(leftOperand.returnType == listOf(F64)) { "Left operand type must be F64."}
-            require(rightOperand.returnType == listOf(F64)) { "Right operand type must be F64."}
-        }
-
-        override val returnType: List<Type>
-            get() = listOf(F64)
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(when(operator) {
                 BinaryOperator.ADD -> WasmOpcode.F64_ADD
                 BinaryOperator.SUB -> WasmOpcode.F64_SUB
@@ -104,14 +95,11 @@ object F64 : Type {
 
     open class UnaryOperation(
         operator: UnaryOperator,
-        operand: Expr,
-    ) : AbstractUnaryOperation(operator, operand) {
-
-        init {
-            require(operand.returnType == listOf(F64)) { "Operand type must be F64."}
-        }
+        operand: Any,
+    ) : AbstractUnaryOperation(F64, operator, operand) {
 
         override fun toWasm(writer: WasmWriter) {
+            super.toWasm(writer)
             writer.write(when (operator) {
                 UnaryOperator.ABS -> WasmOpcode.F64_ABS
                 UnaryOperator.CEIL -> WasmOpcode.F64_CEIL
@@ -147,19 +135,12 @@ object F64 : Type {
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
-
-        init {
-            require(leftOperand.returnType == listOf(F64)) { "Left operand type must be F64" }
-            require(rightOperand.returnType == listOf(F64)) { "Right operand type must be F64" }
-        }
+        vararg operands: Any
+    ) : AbstractRelationalOperation(F64, operator, *operands) {
 
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(when(operator) {
                 RelationalOperator.EQ -> WasmOpcode.F64_EQ
                 RelationalOperator.GE -> WasmOpcode.F64_GE

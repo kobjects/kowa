@@ -7,18 +7,15 @@ import org.kobjects.greenspun.core.type.Type
 
 class IndirectCallExpr(
     val table: Int,
-    val index: Expr,
+    index: Expr,
     val funcType: FuncType,
-    vararg val parameter: Expr
-) : Expr() {
-
-    override fun children() =
-        listOf(index) + parameter.toList()
+    vararg parameter: Expr
+) : Expr(parameter, index) {
 
 
     override fun toString(writer: CodeWriter) {
-        writer.write("CallIndirect(", table, ", ", index, ", ", funcType.returnType)
-        for (p in parameter) {
+        writer.write("CallIndirect(", table, ", ", children.last(), ", ", funcType.returnType)
+        for (p in children.subList(0, children.size - 1)) {
             writer.write(", ")
             writer.write(p)
         }
@@ -26,10 +23,7 @@ class IndirectCallExpr(
     }
 
     override fun toWasm(writer: WasmWriter) {
-        for (p in parameter) {
-            p.toWasm(writer)
-        }
-        index.toWasm(writer)
+        super.toWasm(writer)
         writer.write(WasmOpcode.CALL_INDIRECT)
         writer.writeU32(funcType.index)
         writer.writeU32(table)

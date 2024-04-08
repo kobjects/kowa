@@ -1,12 +1,11 @@
 package org.kobjects.greenspun.core.global
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.expr.AbstractLeafExpr
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Type
 
-class GlobalReference(val global: GlobalInterface) : AbstractLeafExpr() {
+class GlobalReference(val global: GlobalInterface) : Expr() {
 
 
     override fun toString(writer: CodeWriter) =

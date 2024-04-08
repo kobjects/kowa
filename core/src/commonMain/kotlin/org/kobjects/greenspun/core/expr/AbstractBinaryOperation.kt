@@ -1,15 +1,15 @@
 package org.kobjects.greenspun.core.expr
 
+import org.kobjects.greenspun.core.type.Type
+
 abstract class AbstractBinaryOperation(
+    val type: Type,
     val operator: BinaryOperator,
-    val leftOperand: Expr,
-    val rightOperand: Expr,
-) : Expr() {
+    vararg children: Any,
+) : Expr(*children) {
 
     init {
-        require(rightOperand.returnType == leftOperand.returnType) {
-            "Second operand type ${rightOperand.returnType} does not match first operand type ${leftOperand.returnType}."
-        }
+        require(parameterTypes() == listOf(type, type))
     }
 
     final override fun toString(writer: CodeWriter) =
@@ -22,5 +22,7 @@ abstract class AbstractBinaryOperation(
                 stringifyChildren(writer, "(", " $operator ", ")")
         }
 
-    final override fun children(): List<Expr> = listOf(leftOperand, rightOperand)
+    final override val returnType: List<Type>
+        get() = listOf(type)
+
 }

@@ -6,13 +6,20 @@ import org.kobjects.greenspun.core.runtime.Interpreter
 import org.kobjects.greenspun.core.type.Type
 
 
-abstract class Expr {
+abstract class Expr(vararg child: Any) {
 
-    abstract fun children(): List<Expr>
+    val children: List<Expr> = child.map { of(it) }
+
+    fun parameterTypes() = children.map { it.returnType }.flatten()
+
 
     abstract fun toString(writer: CodeWriter)
 
-    abstract fun toWasm(writer: WasmWriter)
+    open fun toWasm(writer: WasmWriter) {
+        for (child in children) {
+            child.toWasm(writer)
+        }
+    }
 
     override fun toString(): String {
         val writer = CodeWriter()
@@ -21,7 +28,6 @@ abstract class Expr {
     }
 
     fun stringifyChildren(writer: CodeWriter, prefix: String, separator: String = ", ", suffix: String = ")") {
-        val children = children()
         writer.write(prefix)
         for (i in children.indices) {
             if (i > 0) {

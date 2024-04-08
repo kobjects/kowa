@@ -39,7 +39,7 @@ object I64 : Type {
 
     class Const(
         val value: Long
-    ): AbstractLeafExpr() {
+    ): Expr() {
         override fun toString(writer: CodeWriter) =
             writer.write("I64($value)")
 
@@ -54,30 +54,11 @@ object I64 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
-
-        init {
-            require(operator.typeSupport != TypeSupport.FLOAT_ONLY) {
-                "Operator '$operator' not supported for Integer types"
-            }
-
-            require(leftOperand.returnType == listOf(I64)) {
-                "Left operand ($leftOperand) type (${leftOperand.returnType} must be I64 for '$operator'"
-            }
-
-            require(rightOperand.returnType == listOf(I64)) {
-                "Left operand ($rightOperand) type (${rightOperand.returnType} must be I64 for '$operator'"
-            }
-
-        }
-        override val returnType: List<Type>
-            get() = listOf(I64)
+        vararg operands: Expr
+    ) : AbstractBinaryOperation(I64, operator, *operands) {
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(
                 when (operator) {
                     BinaryOperator.ADD -> WasmOpcode.I64_ADD
@@ -105,15 +86,9 @@ object I64 : Type {
     }
 
     class UnaryOperation(
-        val operator: UnaryOperator,
-        val operand: Expr,
-    ) : Expr() {
-
-
-        override fun children() = listOf(operand)
-
-        override fun toString(writer: CodeWriter) =
-            writer.write("$operator(", operand, ")")
+        operator: UnaryOperator,
+        operand: Any,
+    ) : AbstractUnaryOperation(I64, operator, operand) {
 
         override fun toWasm(writer: WasmWriter) {
             if (operator == UnaryOperator.NEG) {
@@ -123,7 +98,7 @@ object I64 : Type {
                 writer.write(WasmOpcode.I64_CONST)
                 writer.writeI64(-1)
             }
-            operand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(
                 when (operator) {
                     UnaryOperator.CLZ -> WasmOpcode.I64_CLZ
@@ -156,21 +131,16 @@ object I64 : Type {
                 }
             )
         }
-
-        override val returnType: List<Type>
-            get() = listOf(operator.deviantResultType ?: I64)
     }
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
+        vararg operands: Any,
+    ) : AbstractRelationalOperation(I64, operator, *operands) {
 
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(
                 when (operator) {
                     RelationalOperator.EQ -> WasmOpcode.I64_EQ

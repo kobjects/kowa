@@ -4,13 +4,15 @@ import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractRelationalOperation(
+    val type: Type,
     val operator: RelationalOperator,
-    val leftOperand: Expr,
-    val rightOperand: Expr
-) : Expr() {
+    vararg children: Any
+) : Expr(*children) {
 
+    init {
+        require(parameterTypes() == listOf(type, type))
+    }
 
-    final override fun children() = listOf(leftOperand, rightOperand)
     final override val returnType: List<Type>
         get() = listOf(Bool)
 

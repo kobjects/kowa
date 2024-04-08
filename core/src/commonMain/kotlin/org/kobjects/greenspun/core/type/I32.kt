@@ -34,7 +34,7 @@ object I32 : Type {
 
     class Const(
         val value: Int
-    ): AbstractLeafExpr() {
+    ): Expr() {
 
         override fun toString(writer: CodeWriter) =
             writer.write("I32($value)")
@@ -50,9 +50,8 @@ object I32 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
+        vararg operands: Any,
+    ) : AbstractBinaryOperation(I32, operator, *operands) {
 
         init {
             require(operator.typeSupport != TypeSupport.FLOAT_ONLY) {
@@ -60,13 +59,8 @@ object I32 : Type {
             }
         }
 
-
-        override val returnType: List<Type>
-            get() = listOf(I32)
-
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(
                 when (operator) {
                     BinaryOperator.ADD -> WasmOpcode.I32_ADD
@@ -93,16 +87,9 @@ object I32 : Type {
     }
 
     class UnaryOperation(
-        val operator: UnaryOperator,
-        val operand: Expr,
-    ) : Expr() {
-
-
-        override fun children() = listOf(operand)
-
-
-        override fun toString(writer: CodeWriter) =
-            writer.write("$operator(", operand, ")")
+        operator: UnaryOperator,
+        operand: Any,
+    ) : AbstractUnaryOperation(I32, operator, operand) {
 
         override fun toWasm(writer: WasmWriter) {
             if (operator == UnaryOperator.NEG) {
@@ -112,7 +99,7 @@ object I32 : Type {
                 writer.write(WasmOpcode.I32_CONST)
                 writer.writeI32(-1)
             }
-            operand.toWasm(writer)
+            children[0].toWasm(writer)
             writer.write(
                 when (operator) {
                     UnaryOperator.ABS -> throw UnsupportedOperationException()
@@ -148,20 +135,16 @@ object I32 : Type {
             )
         }
 
-        override val returnType: List<Type>
-            get() = listOf(operator.deviantResultType ?: I32)
     }
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
+        vararg operands: Any
+    ) : AbstractRelationalOperation(I32, operator, *operands) {
 
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(
                 when (operator) {
                     RelationalOperator.EQ -> WasmOpcode.I32_EQ
@@ -176,14 +159,13 @@ object I32 : Type {
     }
 
 
-    class Load(val address: Expr) : Expr() {
-
-        override fun children(): List<Expr> = listOf(address)
+    class Load(address: Any) : Expr(address) {
 
 
         override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
 
         override fun toWasm(writer: WasmWriter) {
+            super.toWasm(writer)
             writer.write(WasmOpcode.I32_LOAD)
             writer.writeU32(0)
             writer.writeU32(0)

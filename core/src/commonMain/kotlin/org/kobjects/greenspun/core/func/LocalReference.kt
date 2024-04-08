@@ -11,8 +11,6 @@ class LocalReference(
     val mutable: Boolean,
     val type: Type
 ) : Expr() {
-    override fun children(): List<Expr> = emptyList()
-
 
     override val returnType: List<Type>
         get() = listOf(type)

@@ -46,7 +46,7 @@ object F32 : Type {
 
     class Const(
         val value: Float
-    ): AbstractLeafExpr() {
+    ): Expr() {
 
         override fun toString(writer: CodeWriter) {
             writer.write("F32(")
@@ -65,21 +65,11 @@ object F32 : Type {
 
     class BinaryOperation(
         operator: BinaryOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractBinaryOperation(operator, leftOperand, rightOperand) {
-
-        init {
-            require(leftOperand.returnType == listOf(F32)) { "Left operand type must be F32."}
-            require(rightOperand.returnType == listOf(F32)) { "Right operand type must be F32."}
-        }
-
-        override val returnType: List<Type>
-            get() = listOf(F32)
+        vararg children: Any
+    ) : AbstractBinaryOperation(F32, operator, *children) {
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(when(operator) {
                 BinaryOperator.ADD -> WasmOpcode.F32_ADD
                 BinaryOperator.SUB -> WasmOpcode.F32_SUB
@@ -108,11 +98,7 @@ object F32 : Type {
     open class UnaryOperation(
         operator: UnaryOperator,
         operand: Expr,
-    ) : AbstractUnaryOperation(operator, operand) {
-
-        init {
-            require(operand.returnType == listOf(F32)) { "Operand type must be F32."}
-        }
+    ) : AbstractUnaryOperation(F32, operator, operand) {
 
 
         override fun toWasm(writer: WasmWriter) {
@@ -152,19 +138,12 @@ object F32 : Type {
 
     class RelationalOperation(
         operator: RelationalOperator,
-        leftOperand: Expr,
-        rightOperand: Expr,
-    ) : AbstractRelationalOperation(operator, leftOperand, rightOperand) {
-
-        init {
-            require(leftOperand.returnType == listOf(F32)) { "Left operand type must be F32" }
-            require(rightOperand.returnType == listOf(F32)) { "Right operand type must be F32" }
-        }
+        vararg operands: Expr,
+    ) : AbstractRelationalOperation(F32, operator, *operands) {
 
 
         override fun toWasm(writer: WasmWriter) {
-            leftOperand.toWasm(writer)
-            rightOperand.toWasm(writer)
+            super.toWasm(writer)
             writer.write(when(operator) {
                 RelationalOperator.EQ -> WasmOpcode.F32_EQ
                 RelationalOperator.GE -> WasmOpcode.F32_GE
