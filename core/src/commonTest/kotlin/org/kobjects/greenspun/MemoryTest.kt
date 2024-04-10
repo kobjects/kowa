@@ -69,15 +69,15 @@ class MemoryTest {
             mem.data(20, "WASM")
 
             val data = Func(Bool) {
-                Return((mem.load8U(I32, 0) Eq 65)
-                        And (mem.load8U(I32, 3) Eq 0x0c2)
-                        And (mem.load8U(I32, 4) Eq 0x0a7)
-                        And (mem.load8U(I32, 6) Eq 0)
-                        And (mem.load8U(I32, 19) Eq 0)
-                        And (mem.load8U(I32, 20) Eq 87)
-                        And (mem.load8U(I32, 23) Eq 77)
-                        And (mem.load8U(I32, 24) Eq 0)
-                        And (mem.load8U(I32, 1023) Eq 0))
+                Return((mem.i32load8U(0) Eq 65)
+                        And (mem.i32load8U( 3) Eq 0x0c2)
+                        And (mem.i32load8U(4) Eq 0x0a7)
+                        And (mem.i32load8U(6) Eq 0)
+                        And (mem.i32load8U(19) Eq 0)
+                        And (mem.i32load8U(20) Eq 87)
+                        And (mem.i32load8U(23) Eq 77)
+                        And (mem.i32load8U(24) Eq 0)
+                        And (mem.i32load8U(1023) Eq 0))
             }
 
             Export("data", data)

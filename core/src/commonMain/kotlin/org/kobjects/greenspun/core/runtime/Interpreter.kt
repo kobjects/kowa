@@ -164,7 +164,12 @@ class Interpreter(
                 val offset = immediateU32()
                 stack.pushU64(localRuntimeContext.instance.memory.buffer.loadI32(offset + stack.popI32()).toULong())
             }
-            WasmOpcode.I32_STORE -> throw UnsupportedOperationException(opcode.name)
+            WasmOpcode.I32_STORE -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI32()
+                localRuntimeContext.instance.memory.buffer.storeI32(offset + stack.popI32(), value)
+            }
             WasmOpcode.I64_STORE -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.F32_STORE -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.F64_STORE -> throw UnsupportedOperationException(opcode.name)

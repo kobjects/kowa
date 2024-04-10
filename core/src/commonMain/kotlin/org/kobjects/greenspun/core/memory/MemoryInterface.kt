@@ -46,59 +46,60 @@ interface MemoryInterface : Exportable {
     }
 
 
-    fun load(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load", type, mapOf(
-            I32 to WasmOpcode.I32_LOAD,
-            I64 to WasmOpcode.I64_LOAD,
-            F32 to WasmOpcode.F32_LOAD,
-            F64 to WasmOpcode.F64_LOAD
-            ), address, align, offset)
+    fun i32Load(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i32Load", I32, WasmOpcode.I32_LOAD, address, align, offset)
 
-    fun load8U(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load8U", I32, mapOf(
-            I32 to WasmOpcode.I32_LOAD_8_U,
-            I64 to WasmOpcode.I64_LOAD_8_U
-        ), address, align, offset)
+    fun i64Load(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64Load", I64, WasmOpcode.I64_LOAD, address, align, offset)
 
-    fun load8S(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load8S", I32, mapOf(
-            I32 to WasmOpcode.I32_LOAD_8_S,
-            I64 to WasmOpcode.I64_LOAD_8_S
-        ), address, align, offset)
+    fun f32Load(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("f32Load", F32, WasmOpcode.F32_LOAD, address, align, offset)
 
-    fun load16U(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load16U", I32, mapOf(
-            I32 to WasmOpcode.I32_LOAD_16_U,
-            I64 to WasmOpcode.I64_LOAD_16_U
-        ), address, align, offset)
+    fun f64Load(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("f64Load", F64, WasmOpcode.F64_LOAD, address, align, offset)
 
-    fun load16S(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load16S", I32, mapOf(
-            I32 to WasmOpcode.I32_LOAD_16_U,
-            I64 to WasmOpcode.I64_LOAD_16_U
-        ), address, align, offset)
 
-    fun load32U(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load32U", I32, mapOf(
-            I64 to WasmOpcode.I64_LOAD_16_U
-        ), address, align, offset)
+    fun i32load8(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i32load8", I32, WasmOpcode.I32_LOAD_8_S, address, align, offset)
 
-    fun load32S(type: Type, address: Any, align: Int = 0, offset: Int = 0): Expr =
-        Load("load32S", I32, mapOf(
-            I64 to WasmOpcode.I64_LOAD_16_U
-        ), address, align, offset)
+    fun i32load8U(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i32load8U", I32, WasmOpcode.I32_LOAD_8_U, address, align, offset)
+
+    fun i32load16(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i32load16", I32, WasmOpcode.I32_LOAD_16_S, address, align, offset)
+
+    fun i32load16U(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i32load16U", I32, WasmOpcode.I32_LOAD_16_U, address, align, offset)
+
+    fun i64load8(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64load8", I64, WasmOpcode.I64_LOAD_8_S, address, align, offset)
+
+    fun i64load8U(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64load8U", I64, WasmOpcode.I64_LOAD_8_U, address, align, offset)
+
+    fun i64load16(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64load16", I64, WasmOpcode.I64_LOAD_16_S, address, align, offset)
+
+    fun i64load16U(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64load16U", I64, WasmOpcode.I64_LOAD_16_U, address, align, offset)
+
+
+    fun i64load32(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64load32", I64, WasmOpcode.I64_LOAD_32_S, address, align, offset)
+
+
+    fun i64load32U(address: Any, align: Int = 0, offset: Int = 0): Expr =
+        Load("i64load32U", I64, WasmOpcode.I64_LOAD_32_U, address, align, offset)
 
 
     private class Load(
         val name: String,
         val type: Type,
-        opcodes: Map<Type, WasmOpcode>,
+        val opcode: WasmOpcode,
         address: Any,
         val align: Int,
         val offset: Int
     ): Expr(address) {
-
-        val opcode = opcodes[type] ?: throw UnsupportedOperationException("$name not defined for $type")
 
         init {
             require(parameterTypes() == listOf(I32))

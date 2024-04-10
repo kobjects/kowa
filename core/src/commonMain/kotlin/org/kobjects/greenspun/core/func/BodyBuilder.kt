@@ -118,7 +118,7 @@ open class BodyBuilder(
         val builder = BodyBuilder(moduleBuilder, variables, wasmWriter)
         builder.init(loopVar)
 
-        Set(loopVar, loopVar + 1)
+        loopVar.set(loopVar + 1)
 
         wasmWriter.write(WasmOpcode.BR)
         wasmWriter.writeU32(0)
@@ -160,56 +160,64 @@ open class BodyBuilder(
         IfExpr(Expr.of(condition), Expr.of(then), Expr.of(otherwise))
 
 
-    fun Set(variable: LocalReference, value: Any) {
+    fun LocalReference.set(value: Any) {
         val valueExpr = Expr.of(value)
-        require(valueExpr.returnType == variable.returnType) {
-            "Expression type ${valueExpr.returnType} does not match variable type ${variable.returnType}"
+        require(valueExpr.returnType == returnType) {
+            "Expression type ${valueExpr.returnType} does not match variable type ${returnType}"
         }
         valueExpr.toWasm(wasmWriter)
         wasmWriter.write(WasmOpcode.LOCAL_SET)
-        wasmWriter.writeU32(variable.index)
+        wasmWriter.writeU32(index)
     }
 
-    fun Set(variable: GlobalReference, value: Any) {
+    fun GlobalReference.set(value: Any) {
         val valueExpr = Expr.of(value)
-        require(valueExpr.returnType == variable.returnType) {
-            "Expression type ${valueExpr.returnType} does not match variable type ${variable.returnType}"
+        require(valueExpr.returnType == returnType) {
+            "Expression type ${valueExpr.returnType} does not match variable type ${returnType}"
         }
         valueExpr.toWasm(wasmWriter)
         wasmWriter.write(WasmOpcode.GLOBAL_SET)
-        wasmWriter.writeU32(variable.global.index)
+        wasmWriter.writeU32(global.index)
     }
 
 
-    fun MemoryInterface.store(value: Any, address: Any, align: Int, offset: Int) {
-        store("store", value, address, align, offset, mapOf(
-            Bool to WasmOpcode.I32_STORE,
-            I32 to WasmOpcode.I32_STORE,
-            I64 to WasmOpcode.I64_STORE,
-            F32 to WasmOpcode.F32_STORE,
-            F64 to WasmOpcode.F64_STORE))
+    fun MemoryInterface.store(address: Any, value: Any, align: Int, offset: Int) {
+        store(
+            "store", address, value, align, offset, mapOf(
+                Bool to WasmOpcode.I32_STORE,
+                I32 to WasmOpcode.I32_STORE,
+                I64 to WasmOpcode.I64_STORE,
+                F32 to WasmOpcode.F32_STORE,
+                F64 to WasmOpcode.F64_STORE)
+        )
     }
 
-    fun MemoryInterface.store8(value: Any, address: Any, align: Int, offset: Int) {
-        store("store8", value, address, align, offset, mapOf(
-            Bool to WasmOpcode.I32_STORE_8,
-            I32 to WasmOpcode.I32_STORE_8,
-            I64 to WasmOpcode.I64_STORE_8))
+    fun MemoryInterface.store8(address: Any, value: Any, align: Int, offset: Int) {
+        store(
+            "store8", address, value, align, offset, mapOf(
+                Bool to WasmOpcode.I32_STORE_8,
+                I32 to WasmOpcode.I32_STORE_8,
+                I64 to WasmOpcode.I64_STORE_8)
+        )
     }
 
-    fun MemoryInterface.store16(value: Any, address: Any, align: Int, offset: Int) {
-        store("store16", value, address, align, offset, mapOf(
-            Bool to WasmOpcode.I32_STORE_16,
-            I32 to WasmOpcode.I32_STORE_16,
-            I64 to WasmOpcode.I64_STORE_16))
+    fun MemoryInterface.store16(address: Any, value: Any, align: Int, offset: Int) {
+        store(
+            "store16", address, value, align, offset, mapOf(
+                Bool to WasmOpcode.I32_STORE_16,
+                I32 to WasmOpcode.I32_STORE_16,
+                I64 to WasmOpcode.I64_STORE_16)
+        )
     }
 
-    fun MemoryInterface.store32(value: Any, address: Any, align: Int, offset: Int) {
-        store("store32", value, address, align, offset, mapOf(
-            I64 to WasmOpcode.I64_STORE_32))
+    fun MemoryInterface.store32(address: Any, value: Any, align: Int, offset: Int) {
+        store(
+            "store32", address, value, align, offset, mapOf(
+                I64 to WasmOpcode.I64_STORE_32)
+        )
     }
 
-    private fun store(name: String, value: Any, address: Any, align: Int, offset: Int, opcodeMap: Map<Type, WasmOpcode>) {
+    private fun store(name: String, address: Any, value: Any, align: Int, offset: Int, opcodeMap: Map<Type, WasmOpcode>) {
         val valueExpr = Expr.of(value)
         val type = valueExpr.returnType
 

@@ -24,8 +24,8 @@ class FactorialTest {
             val res = Var(1L)
 
             While(i Gt 1L) {
-                Set(res, res * i)
-                Set(i, i - 1L)
+                res.set(res * i)
+                i.set(i - 1L)
             }
             Return(res)
         }
