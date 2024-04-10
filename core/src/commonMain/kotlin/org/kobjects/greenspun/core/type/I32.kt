@@ -159,20 +159,6 @@ object I32 : Type {
     }
 
 
-    class Load(address: Any) : Expr(address) {
 
-
-        override fun toString(writer: CodeWriter) = stringifyChildren(writer, "LoadI32", ", ", ")")
-
-        override fun toWasm(writer: WasmWriter) {
-            super.toWasm(writer)
-            writer.write(WasmOpcode.I32_LOAD)
-            writer.writeU32(0)
-            writer.writeU32(0)
-        }
-
-        override val returnType: List<Type>
-            get() = listOf(I32)
-    }
 
 }

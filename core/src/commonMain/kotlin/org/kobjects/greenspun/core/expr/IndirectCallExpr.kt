@@ -10,8 +10,7 @@ class IndirectCallExpr(
     index: Expr,
     val funcType: FuncType,
     vararg parameter: Expr
-) : Expr(parameter, index) {
-
+) : Expr(*parameter, index) {
 
     override fun toString(writer: CodeWriter) {
         writer.write("CallIndirect(", table, ", ", children.last(), ", ", funcType.returnType)

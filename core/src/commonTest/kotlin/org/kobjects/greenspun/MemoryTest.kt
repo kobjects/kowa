@@ -1,8 +1,8 @@
 package org.kobjects.greenspun
 
 import org.kobjects.greenspun.core.module.Module
+import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
-import org.kobjects.greenspun.core.memory.MemorySize
 import kotlin.test.*
 
 class MemoryTest {
@@ -45,17 +45,35 @@ class MemoryTest {
         assertEquals(
             0,
             Module {
-                Data("")
-                Export("memsize", Func(I32) { Return(MemorySize()) })
+                val memory = Memory(0)
+                memory.data("")
+                Export("memsize", Func(I32) { Return(memory.size) })
             }.instantiate().invoke("memsize")
         )
 
         assertEquals(
             1,
             Module {
-                Data("x")
-                Export("memsize", Func(I32) { Return(MemorySize()) })
+                val memory = Memory(1)
+                memory.data("x")
+                Export("memsize", Func(I32) { Return(memory.size) })
             }.instantiate().invoke("memsize")
         )
+    }
+
+    @Test
+    fun testMemory() {
+        val module = Module {
+            val mem = Memory(1)
+            mem.data(0, "ABC\u00a7D")
+            mem.data(20, "WASM")
+
+            val data = Func(Bool) {
+                Return((mem.i32Load8U(0) Eq 65) And
+                        (mem.i32Load8U(3) Eq 167))
+
+            }
+
+        }
     }
 }

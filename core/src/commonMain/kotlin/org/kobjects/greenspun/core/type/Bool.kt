@@ -33,6 +33,8 @@ object Bool : Type {
     }
 
 
+    override fun toString() = "Bool"
+
     class Const(val value: Boolean) : Expr() {
 
         override fun toString(writer: CodeWriter) {

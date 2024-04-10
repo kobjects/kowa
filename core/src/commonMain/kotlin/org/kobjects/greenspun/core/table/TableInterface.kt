@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.table
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.expr.CodeWriter
+import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.Type
 
 interface TableInterface : Exportable {
@@ -19,4 +20,13 @@ interface TableInterface : Exportable {
         writer.writeByte(1)
         writer.writeU32(index)
     }
+
+
+    operator fun get(i: Any, vararg returnType: Type) = EntryRef(this, i, returnType.toList())
+
+
+    class EntryRef(
+        val table: TableInterface, val i: Any, val returnType: List<Type>
+    )
+    
 }

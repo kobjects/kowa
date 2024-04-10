@@ -9,7 +9,9 @@ abstract class AbstractBinaryOperation(
 ) : Expr(*children) {
 
     init {
-        require(parameterTypes() == listOf(type, type))
+        require(parameterTypes() == listOf(type, type)) {
+            "Actual parameter types (${parameterTypes()}) deviate from expectation ${listOf(type, type)} for $operator"
+        }
     }
 
     final override fun toString(writer: CodeWriter) =

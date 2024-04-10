@@ -11,11 +11,11 @@ class FizzBuzzTest {
 
     val fizzBuzzModule = Module {
 
-        ImportMemory("console", "memory", 1)
+        val memory = ImportMemory("console", "memory", 1)
 
-        val fizz = Data("Fizz")
-        val buzz = Data("Buzz")
-        val fizzBuzz = Data("FizzBuzz")
+        val fizz = memory.data("Fizz")
+        val buzz = memory.data("Buzz")
+        val fizzBuzz = memory.data("FizzBuzz")
 
         val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) }
         val LogI32 = ImportFunc("console", "logI32") { Param(I32) }

@@ -35,9 +35,10 @@ class ModuleBuilder {
      * Defines an active data block at the 'current' address, starting with 0, incrementing the current address
      * accordingly, returning an I32 const for the data start address.
      */
-    fun Data(data: Any) = Data(I32.Const(activeDataAddress), data)
+    fun MemoryInterface.data(data: Any) = data(I32.Const(activeDataAddress), data)
 
-    fun Data(offset: Expr, data: Any): DataReference {
+    fun MemoryInterface.data(offset: Int, data: Any) = data(Expr.of(offset), data)
+    fun MemoryInterface.data(offset: Expr, data: Any): DataReference {
 
         if (offset is I32.Const && offset.value < activeDataAddress) {
             throw IllegalArgumentException("Potentially overlapping data")

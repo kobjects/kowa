@@ -6,6 +6,7 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.module.ModuleBuilder
+import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.Type
@@ -32,9 +33,9 @@ open class BodyBuilder(
         return variable
     }
 
-    fun Var(initializerOrValue: Any) = local(true, initializerOrValue)
+    fun Var(initialValue: Any) = local(true, initialValue)
 
-    fun Const(initializerOrValue: Any) = local(true, initializerOrValue)
+    fun Const(value: Any) = local(true, value)
 
 
     fun Block(init: BodyBuilder.() -> Unit) {
@@ -42,20 +43,15 @@ open class BodyBuilder(
         builder.init()
     }
 
-/*
 
-    fun TableInterface.Call(index: Expr, returnType: List<Type>, vararg parameter: Expr): Expr {
-        val funcType = moduleBuilder.getFuncType(returnType, parameter.map { it.returnType })
-        val node = IndirectCallExpr(this.index, index, funcType, *parameter)
-        if (node.returnType.isNotEmpty()) {
-            return node
-        }
-        node.toWasm(wasmWriter)
-        return InvalidExpr("Void calls are expected to be used as statements.")
+    operator fun TableInterface.EntryRef.invoke(vararg param: Any): IndirectCallExpr {
+        val paramExpr = param.map { Expr.of(param) }
+        val paramTypes = paramExpr.map { it.returnType }.flatten()
+        val funcType = moduleBuilder.getFuncType(returnType, paramTypes)
+
+        return IndirectCallExpr(table.index, Expr.of(i), funcType, *paramExpr.toTypedArray())
     }
 
-
- */
     fun Loop(init: BodyBuilder.() -> Unit) {
         wasmWriter.write(WasmOpcode.LOOP)
         val builder = BodyBuilder(moduleBuilder, variables, wasmWriter)
@@ -187,6 +183,8 @@ open class BodyBuilder(
         wasmWriter.write(WasmOpcode.GLOBAL_SET)
         wasmWriter.writeU32(variable.global.index)
     }
+
+
 
 
     inner class Elseable(val ifPosition: Int, val endPosition: Int) {
