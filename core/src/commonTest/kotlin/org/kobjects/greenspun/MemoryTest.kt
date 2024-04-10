@@ -69,11 +69,22 @@ class MemoryTest {
             mem.data(20, "WASM")
 
             val data = Func(Bool) {
-                Return((mem.i32Load8U(0) Eq 65) And
-                        (mem.i32Load8U(3) Eq 167))
-
+                Return((mem.load8U(I32, 0) Eq 65)
+                        And (mem.load8U(I32, 3) Eq 0x0c2)
+                        And (mem.load8U(I32, 4) Eq 0x0a7)
+                        And (mem.load8U(I32, 6) Eq 0)
+                        And (mem.load8U(I32, 19) Eq 0)
+                        And (mem.load8U(I32, 20) Eq 87)
+                        And (mem.load8U(I32, 23) Eq 77)
+                        And (mem.load8U(I32, 24) Eq 0)
+                        And (mem.load8U(I32, 1023) Eq 0))
             }
 
+            Export("data", data)
         }
+
+        val instance = module.instantiate()
+
+        assertEquals(1, instance.invoke("data"))
     }
 }

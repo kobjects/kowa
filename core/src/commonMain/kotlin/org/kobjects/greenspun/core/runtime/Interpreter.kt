@@ -1,7 +1,6 @@
 package org.kobjects.greenspun.core.runtime
 
-import org.kobjects.greenspun.core.binary.Wasm
-import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.core.binary.*
 import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import kotlin.math.*
@@ -95,21 +94,76 @@ class Interpreter(
             WasmOpcode.TABLE_GET -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.TABLE_SET -> throw UnsupportedOperationException(opcode.name)
 
-            WasmOpcode.I32_LOAD -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_LOAD -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_LOAD -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_LOAD_8_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_LOAD_8_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_LOAD_16_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_LOAD_16_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD_8_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD_8_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD_16_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD_16_U -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD_32_S -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_LOAD_32_U -> throw UnsupportedOperationException(opcode.name)
-
+            WasmOpcode.I32_LOAD -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI32(localRuntimeContext.instance.memory.buffer.loadI32(offset + stack.popI32()))
+            }
+            WasmOpcode.I64_LOAD -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI64(localRuntimeContext.instance.memory.buffer.loadI64(offset + stack.popI32()))
+            }
+            WasmOpcode.F32_LOAD -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushF32(localRuntimeContext.instance.memory.buffer.loadF32(offset +stack.popI32()))
+            }
+            WasmOpcode.F64_LOAD -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushF64(localRuntimeContext.instance.memory.buffer.loadF64(offset +stack.popI32()))
+            }
+            WasmOpcode.I32_LOAD_8_S -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI32(localRuntimeContext.instance.memory.buffer[offset + stack.popI32()].toInt())
+            }
+            WasmOpcode.I32_LOAD_8_U -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushU32(localRuntimeContext.instance.memory.buffer[offset + stack.popI32()].toUByte().toUInt())
+            }
+            WasmOpcode.I32_LOAD_16_S -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI32(localRuntimeContext.instance.memory.buffer.loadI16(offset + stack.popI32()).toInt())
+            }
+            WasmOpcode.I32_LOAD_16_U -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushU32(localRuntimeContext.instance.memory.buffer.loadU16(offset + stack.popI32()).toUInt())
+            }
+            WasmOpcode.I64_LOAD_8_S -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI64(localRuntimeContext.instance.memory.buffer[offset + stack.popI32()].toLong())
+            }
+            WasmOpcode.I64_LOAD_8_U -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushU64(localRuntimeContext.instance.memory.buffer[offset + stack.popI32()].toULong())
+            }
+            WasmOpcode.I64_LOAD_16_S -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI64(localRuntimeContext.instance.memory.buffer.loadI16(offset + stack.popI32()).toLong())
+            }
+            WasmOpcode.I64_LOAD_16_U -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushU64(localRuntimeContext.instance.memory.buffer.loadU16(offset + stack.popI32()).toULong())
+            }
+            WasmOpcode.I64_LOAD_32_S -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushI64(localRuntimeContext.instance.memory.buffer.loadI32(offset + stack.popI32()).toLong())
+            }
+            WasmOpcode.I64_LOAD_32_U -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                stack.pushU64(localRuntimeContext.instance.memory.buffer.loadI32(offset + stack.popI32()).toULong())
+            }
             WasmOpcode.I32_STORE -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.I64_STORE -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.F32_STORE -> throw UnsupportedOperationException(opcode.name)
@@ -129,7 +183,15 @@ class Interpreter(
             WasmOpcode.F64_CONST -> stack.pushF64(Double.fromBits(immediateU64()))
 
             WasmOpcode.I32_EQZ -> stack.pushBool(stack.popI32() == 0)
-            WasmOpcode.I32_EQ -> stack.pushBool(stack.popI32() == stack.popI32())
+            WasmOpcode.I32_EQ -> {
+                val c2 = stack.popI32()
+                val c1 = stack.popI32()
+                val result = c1 == c2
+                if (!result) {
+                    println("******* $c1 != $c2")
+                }
+                stack.pushBool(result)
+            }
             WasmOpcode.I32_NE -> stack.pushBool(stack.popI32() != stack.popI32())
             WasmOpcode.I32_LT_S -> stack.replaceBool(2, stack.peekI32(1) < stack.peekI32(0))
             WasmOpcode.I32_LT_U -> stack.replaceBool(2, stack.peekU32(1) < stack.peekU32(0))

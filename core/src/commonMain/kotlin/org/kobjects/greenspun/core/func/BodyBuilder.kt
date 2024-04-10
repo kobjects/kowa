@@ -5,11 +5,10 @@ import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.global.GlobalReference
+import org.kobjects.greenspun.core.memory.MemoryInterface
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.table.TableInterface
-import org.kobjects.greenspun.core.type.Bool
-import org.kobjects.greenspun.core.type.I32
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.*
 
 open class BodyBuilder(
     val moduleBuilder: ModuleBuilder,
@@ -161,9 +160,6 @@ open class BodyBuilder(
         IfExpr(Expr.of(condition), Expr.of(then), Expr.of(otherwise))
 
 
-
-
-
     fun Set(variable: LocalReference, value: Any) {
         val valueExpr = Expr.of(value)
         require(valueExpr.returnType == variable.returnType) {
@@ -184,6 +180,49 @@ open class BodyBuilder(
         wasmWriter.writeU32(variable.global.index)
     }
 
+
+    fun MemoryInterface.store(value: Any, address: Any, align: Int, offset: Int) {
+        store("store", value, address, align, offset, mapOf(
+            Bool to WasmOpcode.I32_STORE,
+            I32 to WasmOpcode.I32_STORE,
+            I64 to WasmOpcode.I64_STORE,
+            F32 to WasmOpcode.F32_STORE,
+            F64 to WasmOpcode.F64_STORE))
+    }
+
+    fun MemoryInterface.store8(value: Any, address: Any, align: Int, offset: Int) {
+        store("store8", value, address, align, offset, mapOf(
+            Bool to WasmOpcode.I32_STORE_8,
+            I32 to WasmOpcode.I32_STORE_8,
+            I64 to WasmOpcode.I64_STORE_8))
+    }
+
+    fun MemoryInterface.store16(value: Any, address: Any, align: Int, offset: Int) {
+        store("store16", value, address, align, offset, mapOf(
+            Bool to WasmOpcode.I32_STORE_16,
+            I32 to WasmOpcode.I32_STORE_16,
+            I64 to WasmOpcode.I64_STORE_16))
+    }
+
+    fun MemoryInterface.store32(value: Any, address: Any, align: Int, offset: Int) {
+        store("store32", value, address, align, offset, mapOf(
+            I64 to WasmOpcode.I64_STORE_32))
+    }
+
+    private fun store(name: String, value: Any, address: Any, align: Int, offset: Int, opcodeMap: Map<Type, WasmOpcode>) {
+        val valueExpr = Expr.of(value)
+        val type = valueExpr.returnType
+
+        require (type.size == 1 && opcodeMap.containsKey(type.first())) {
+            "For this $name, the value type must be one of ${opcodeMap.keys}"
+        }
+
+        valueExpr.toWasm(wasmWriter)
+        Expr.of(address).toWasm(wasmWriter)
+        wasmWriter.write(opcodeMap[type.first()]!!)
+        wasmWriter.writeU32(align)
+        wasmWriter.writeU32(offset)
+    }
 
 
 

@@ -5,12 +5,15 @@ fun ByteArray.loadI16(offset: Int): Short =
     (this[offset].toUByte().toInt() or
             (this[offset + 1].toUByte().toInt() shl 8)).toShort()
 
+fun ByteArray.loadU16(offset: Int) = loadI16(offset).toUShort()
 
 fun ByteArray.loadI32(offset: Int): Int =
     (this[offset].toUByte().toInt() or
     (this[offset + 1].toUByte().toInt() shl 8) or
     (this[offset + 2].toUByte().toInt() shl 16) or
     (this[offset + 3].toUByte().toInt() shl 24))
+
+fun ByteArray.loadU32(offset: Int) = loadI32(offset).toUInt()
 
 
 fun ByteArray.loadI64(offset: Int): Long =
@@ -22,6 +25,12 @@ fun ByteArray.loadI64(offset: Int): Long =
     (this[offset + 5].toUByte().toLong() shl 40) or
     (this[offset + 6].toUByte().toLong() shl 48) or
     (this[offset + 7].toUByte().toLong() shl 56))
+
+fun ByteArray.loadU64(offset: Int) = loadI64(offset).toULong()
+
+fun ByteArray.loadF32(offset: Int) = Float.fromBits(loadI32(offset))
+
+fun ByteArray.loadF64(offset: Int) = Double.fromBits(loadI64(offset))
 
 
 fun ByteArray.storeI16(offset: Int, value: Int) {
