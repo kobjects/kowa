@@ -33,6 +33,9 @@ fun ByteArray.loadF32(offset: Int) = Float.fromBits(loadI32(offset))
 fun ByteArray.loadF64(offset: Int) = Double.fromBits(loadI64(offset))
 
 
+fun ByteArray.storeI16(offset: Int, value: Short) =
+    storeI16(offset, value.toInt())
+
 fun ByteArray.storeI16(offset: Int, value: Int) {
     this[offset] = (value and 255).toByte()
     this[offset + 1] = ((value shr 8) and 255).toByte()

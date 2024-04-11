@@ -2,6 +2,7 @@ package org.kobjects.greenspun
 
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.Bool
+import org.kobjects.greenspun.core.type.F64
 import org.kobjects.greenspun.core.type.I32
 import kotlin.test.*
 
@@ -68,7 +69,7 @@ class MemoryTest {
             mem.data(0, "ABC\u00a7D")
             mem.data(20, "WASM")
 
-            val data = Func(Bool) {
+            Export("data", Func(Bool) {
                 Return((mem.load8U(0).i32 Eq 65)
                         And (mem.load8U(3).i32 Eq 0x0c2)
                         And (mem.load8U(4).i32 Eq 0x0a7)
@@ -78,13 +79,23 @@ class MemoryTest {
                         And (mem.load8U(23).i32 Eq 77)
                         And (mem.load8U(24).i32 Eq 0)
                         And (mem.load8U(1023).i32 Eq 0))
-            }
+            })
 
-            Export("data", data)
+            Export("i32_load_8_s", Func(I32) {
+                val i = Param(I32)
+                mem.store8(8, i)
+                Return(mem.load8S(8).i32)
+            })
+
         }
 
         val instance = module.instantiate()
 
         assertEquals(1, instance.invoke("data"))
+
+        assertEquals(-1, instance.invoke("i32_load_8_s", -1))
+
+        assertEquals(100, instance.invoke("i32_load_8_s", 100))
+
     }
 }

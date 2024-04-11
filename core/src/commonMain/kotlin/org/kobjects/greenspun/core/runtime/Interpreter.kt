@@ -164,20 +164,61 @@ class Interpreter(
                 val offset = immediateU32()
                 stack.pushU64(localRuntimeContext.instance.memory.buffer.loadI32(offset + stack.popI32()).toULong())
             }
+
             WasmOpcode.I32_STORE -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI32()
                 localRuntimeContext.instance.memory.buffer.storeI32(offset + stack.popI32(), value)
             }
-            WasmOpcode.I64_STORE -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F32_STORE -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.F64_STORE -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_STORE_8 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I32_STORE_16 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_STORE_8 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_STORE_16 -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.I64_STORE_32 -> throw UnsupportedOperationException(opcode.name)
+            WasmOpcode.I64_STORE -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI64()
+                localRuntimeContext.instance.memory.buffer.storeI64(offset + stack.popI32(), value)
+            }
+            WasmOpcode.F32_STORE -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popF32()
+                localRuntimeContext.instance.memory.buffer.storeF32(offset + stack.popI32(), value)
+            }
+            WasmOpcode.F64_STORE -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popF64()
+                localRuntimeContext.instance.memory.buffer.storeF64(offset + stack.popI32(), value)
+            }
+            WasmOpcode.I32_STORE_8 -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI32().toByte()
+                localRuntimeContext.instance.memory.buffer[offset + stack.popI32()] = value
+            }
+            WasmOpcode.I32_STORE_16 -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI32().toShort()
+                localRuntimeContext.instance.memory.buffer.storeI16(offset + stack.popI32(), value)
+            }
+            WasmOpcode.I64_STORE_8 -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI64().toByte()
+                localRuntimeContext.instance.memory.buffer[offset + stack.popI32()] = value
+            }
+            WasmOpcode.I64_STORE_16 -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI64().toShort()
+                localRuntimeContext.instance.memory.buffer.storeI16(offset + stack.popI32(), value)
+            }
+            WasmOpcode.I64_STORE_32 -> {
+                val align = immediateU32()
+                val offset = immediateU32()
+                val value = stack.popI64().toInt()
+                localRuntimeContext.instance.memory.buffer.storeI32(offset + stack.popI32(), value)
+            }
 
             WasmOpcode.MEMORY_SIZE -> stack.pushI32(localRuntimeContext.instance.memory.buffer.size / 65536)
             WasmOpcode.MEMORY_GROW -> throw UnsupportedOperationException(opcode.name)

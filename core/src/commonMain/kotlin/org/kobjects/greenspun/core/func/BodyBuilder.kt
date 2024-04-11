@@ -258,8 +258,9 @@ open class BodyBuilder(
             "For this $name, the value type must be one of ${opcodeMap.keys}"
         }
 
-        valueExpr.toWasm(wasmWriter)
         Expr.of(address).toWasm(wasmWriter)
+        valueExpr.toWasm(wasmWriter)
+
         wasmWriter.write(opcodeMap[type.first()]!!)
         wasmWriter.writeU32(align)
         wasmWriter.writeU32(offset)
