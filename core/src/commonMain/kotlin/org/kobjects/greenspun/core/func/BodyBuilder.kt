@@ -6,6 +6,7 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.global.GlobalReference
 import org.kobjects.greenspun.core.memory.MemoryInterface
+import org.kobjects.greenspun.core.memory.MemoryView
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.type.*
@@ -180,88 +181,25 @@ open class BodyBuilder(
         wasmWriter.writeU32(global.index)
     }
 
-    operator fun MemoryInterface.set(address: Any, align: Int, value: Any) =
-        store(address, align, 0, value)
 
-    operator fun MemoryInterface.set(address: Any, value: Any) =
-        store(address, 0, 0, value)
+    operator fun MemoryView.set(address: Any, value: Any) =
+        set(address, 0, 0, value)
 
-    operator fun MemoryInterface.set(address: Any, align: Int, offset: Int, value: Any) =
-        store(address, 0, 0, value)
+    operator fun MemoryView.set(address: Any, align: Int, value: Any) =
+        set(address, align, 0, value)
 
-    fun MemoryInterface.store(address: Any, align: Int, value: Any) =
-        store(address, align, 0, value)
-
-    fun MemoryInterface.store(address: Any, value: Any) =
-        store(address, 0, 0, value)
-
-    fun MemoryInterface.store(address: Any, align: Int, offset: Int, value: Any) {
-        store(
-            "store", address, align, offset, value, mapOf(
-                Bool to WasmOpcode.I32_STORE,
-                I32 to WasmOpcode.I32_STORE,
-                I64 to WasmOpcode.I64_STORE,
-                F32 to WasmOpcode.F32_STORE,
-                F64 to WasmOpcode.F64_STORE)
-        )
-    }
-
-    fun MemoryInterface.store8(address: Any, value: Any) =
-        store8(address, 0, 0, value)
-
-    fun MemoryInterface.store8(address: Any, align: Int, value: Any) =
-        store8(address, align, 0, value)
-
-    fun MemoryInterface.store8(address: Any, align: Int, offset: Int, value: Any) {
-        store(
-            "store8", address, align, offset, value, mapOf(
-                Bool to WasmOpcode.I32_STORE_8,
-                I32 to WasmOpcode.I32_STORE_8,
-                I64 to WasmOpcode.I64_STORE_8)
-        )
-    }
-
-    fun MemoryInterface.store16(address: Any, value: Any) =
-        store16(address, 0, 0, value)
-
-    fun MemoryInterface.store16(address: Any, align: Int, value: Any) =
-        store16(address, align, 0, value)
-
-    fun MemoryInterface.store16(address: Any, align: Int, offset: Int, value: Any) {
-        store(
-            "store16", address, align, offset, value, mapOf(
-                Bool to WasmOpcode.I32_STORE_16,
-                I32 to WasmOpcode.I32_STORE_16,
-                I64 to WasmOpcode.I64_STORE_16)
-        )
-    }
-
-
-    fun MemoryInterface.store32(address: Any, value: Any) =
-        store32(address, 0, 0, value)
-
-    fun MemoryInterface.store32(address: Any, align: Int, value: Any) =
-        store32(address, align, 0, value)
-
-    fun MemoryInterface.store32(address: Any, align: Int, offset: Int, value: Any) {
-        store(
-            "store32", address, align, offset, value, mapOf(
-                I64 to WasmOpcode.I64_STORE_32)
-        )
-    }
-
-    private fun store(name: String, address: Any, align: Int, offset: Int, value: Any, opcodeMap: Map<Type, WasmOpcode>) {
+    operator fun MemoryView.set(address: Any, align: Int, offset: Int, value: Any) {
         val valueExpr = Expr.of(value)
-        val type = valueExpr.returnType
+        val valueType = valueExpr.returnType
 
-        require (type.size == 1 && opcodeMap.containsKey(type.first())) {
-            "For this $name, the value type must be one of ${opcodeMap.keys}"
+        require (valueType == listOf(type)) {
+            "For $name, the value type must be $type instead of $valueType"
         }
 
         Expr.of(address).toWasm(wasmWriter)
         valueExpr.toWasm(wasmWriter)
 
-        wasmWriter.write(opcodeMap[type.first()]!!)
+        wasmWriter.write(storeOpcode)
         wasmWriter.writeU32(align)
         wasmWriter.writeU32(offset)
     }
