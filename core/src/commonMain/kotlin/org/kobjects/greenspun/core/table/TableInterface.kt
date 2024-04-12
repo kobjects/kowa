@@ -3,6 +3,7 @@ package org.kobjects.greenspun.core.table
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.expr.CodeWriter
+import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.WasmType
 
 interface TableInterface : Exportable {
@@ -21,11 +22,4 @@ interface TableInterface : Exportable {
     }
 
 
-    operator fun get(i: Any, vararg returnType: WasmType) = EntryRef(this, i, returnType.toList())
-
-
-    class EntryRef(
-        val table: TableInterface, val i: Any, val returnType: List<WasmType>
-    )
-    
 }

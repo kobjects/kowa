@@ -9,6 +9,7 @@ import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.memory.*
 import org.kobjects.greenspun.core.table.*
 import org.kobjects.greenspun.core.expr.Expr
+import org.kobjects.greenspun.core.runtime.Func
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.core.type.WasmType
@@ -29,6 +30,13 @@ class ModuleBuilder {
 
 
     fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
+
+
+    fun Type(vararg returnType: WasmType, init:  ParamBuilder.() -> Unit): FuncType {
+        val paramBuilder = ParamBuilder()
+        paramBuilder.init()
+        return getFuncType(returnType.toList(), paramBuilder.build())
+    }
 
 
     /**

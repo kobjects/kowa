@@ -12,6 +12,7 @@ class ElementTest {
     fun indirectCallTest() {
         val module = Module {
             val table = Table(FuncRef, 10)
+            val outI32 = Type(I32) {}
 
             val constI32A = Func(I32) { Return(65) }
             val constI32B = Func(I32) { Return(66) }
@@ -20,10 +21,10 @@ class ElementTest {
             table.elem(9, constI32B)
 
             Export("call-7", Func(I32) {
-                Return(table[7, I32]())
+                Return(table(7, outI32))
             })
             Export("call-9", Func(I32) {
-                Return(table[9, I32]())
+                Return(table(9, outI32))
             })
         }
 

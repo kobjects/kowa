@@ -43,12 +43,19 @@ open class BodyBuilder(
     }
 
 
-    operator fun TableInterface.EntryRef.invoke(vararg param: Any): IndirectCallExpr {
+    operator fun TableInterface.invoke(i: Any, type: FuncType, vararg param: Any): Expr {
         val paramExpr = param.map { Expr.of(param) }
         val paramTypes = paramExpr.map { it.returnType }.flatten()
-        val funcType = moduleBuilder.getFuncType(returnType, paramTypes)
+        require(paramTypes == type.parameterTypes) {
+            "Actual parameter types ($paramTypes) do not match expected parameter types (${type.parameterTypes})"
+        }
 
-        return IndirectCallExpr(table.index, Expr.of(i), funcType, *paramExpr.toTypedArray())
+        val result = IndirectCallExpr(index, Expr.of(i), type, *paramExpr.toTypedArray())
+        if (type.returnType.isNotEmpty()) {
+            return result
+        }
+        result.toWasm(wasmWriter)
+        return InvalidExpr("Void function are expected to be used as statements.")
     }
 
     fun Loop(init: BodyBuilder.() -> Unit) {
