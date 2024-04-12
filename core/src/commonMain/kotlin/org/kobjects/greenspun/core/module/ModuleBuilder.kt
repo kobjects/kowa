@@ -26,7 +26,7 @@ class ModuleBuilder {
     var tables = mutableListOf<TableInterface>()
 
     private var memoryImplied = false
-    private var activeDataAddress = 0
+    private val activeDataAddress = mutableMapOf<MemoryInterface, Int>()
 
 
     fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
@@ -43,12 +43,12 @@ class ModuleBuilder {
      * Defines an active data block at the 'current' address, starting with 0, incrementing the current address
      * accordingly, returning an I32 const for the data start address.
      */
-    fun MemoryInterface.data(data: Any) = data(I32.Const(activeDataAddress), data)
+    fun MemoryInterface.data(data: Any) = data(I32.Const(activeDataAddress.get(this) ?: 0), data)
 
     fun MemoryInterface.data(offset: Int, data: Any) = data(Expr.of(offset), data)
     fun MemoryInterface.data(offset: Expr, data: Any): DataReference {
 
-        if (offset is I32.Const && offset.value < activeDataAddress) {
+        if (offset is I32.Const && offset.value < (activeDataAddress[this] ?: 0)) {
             throw IllegalArgumentException("Potentially overlapping data")
         }
 
@@ -60,14 +60,9 @@ class ModuleBuilder {
         val result = DataReference(offset, writer.size)
 
         if (offset is I32.Const) {
-            activeDataAddress = offset.value + writer.size
-            if (activeDataAddress > 65536 * (memory?.min ?: 0)) {
-                if (memory == null || memoryImplied) {
-                    memory = MemoryImpl((65535 + activeDataAddress) / 65536)
-                    memoryImplied = true
-                } else {
-                    throw IllegalArgumentException("Data offset exceeds minimum size")
-                }
+            activeDataAddress[this] = offset.value + writer.size
+            if ((activeDataAddress[this] ?: 0) > 65536 * (memory?.min ?: 0)) {
+                throw IllegalArgumentException("Data offset exceeds minimum size")
             }
         }
 
