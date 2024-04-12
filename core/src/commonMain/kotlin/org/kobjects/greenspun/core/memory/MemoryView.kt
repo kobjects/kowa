@@ -5,12 +5,12 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.I32
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.WasmType
 
 class MemoryView(
     val memory: MemoryInterface,
     val name: String,
-    val type: Type,
+    val type: WasmType,
     val loadOpcode: WasmOpcode,
     val storeOpcode: WasmOpcode,
     val defaultAlign: Int = 0,
@@ -23,7 +23,7 @@ class MemoryView(
 
     class Load(
         val name: String,
-        val type: Type,
+        val type: WasmType,
         val opcode: WasmOpcode,
         address: Any,
         val align: Int,
@@ -46,7 +46,7 @@ class MemoryView(
             writer.writeU32(offset)
         }
 
-        override val returnType: List<Type>
+        override val returnType: List<WasmType>
             get() = listOf(type)
 
     }

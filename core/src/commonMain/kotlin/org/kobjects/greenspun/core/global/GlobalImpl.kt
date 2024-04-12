@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.expr.Expr
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.WasmType
 
 class GlobalImpl(
     override val index: Int,
@@ -10,7 +10,7 @@ class GlobalImpl(
     val initializer: Expr
 
 ) : GlobalInterface {
-    override val type: Type
+    override val type: WasmType
         get() = initializer.returnType[0]
 
 

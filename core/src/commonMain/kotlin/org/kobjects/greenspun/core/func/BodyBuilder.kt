@@ -5,7 +5,6 @@ import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.global.GlobalReference
-import org.kobjects.greenspun.core.memory.MemoryInterface
 import org.kobjects.greenspun.core.memory.MemoryView
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.table.TableInterface
@@ -13,7 +12,7 @@ import org.kobjects.greenspun.core.type.*
 
 open class BodyBuilder(
     val moduleBuilder: ModuleBuilder,
-    val variables: MutableList<Type>,
+    val variables: MutableList<org.kobjects.greenspun.core.type.WasmType>,
     val wasmWriter: WasmWriter) {
 
     private fun local(mutable: Boolean, initializer: Any): LocalReference {

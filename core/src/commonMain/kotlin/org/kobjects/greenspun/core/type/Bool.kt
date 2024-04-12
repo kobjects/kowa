@@ -1,12 +1,11 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
 
-object Bool : Type {
+object Bool : org.kobjects.greenspun.core.type.WasmType {
 
     val False = Const(false)
 
@@ -41,7 +40,7 @@ object Bool : Type {
             writer.write(if (value) "True" else "False")
         }
 
-        override val returnType: List<Type>
+        override val returnType: List<org.kobjects.greenspun.core.type.WasmType>
             get() = listOf(Bool)
 
         override fun toWasm(writer: WasmWriter) {

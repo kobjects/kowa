@@ -3,7 +3,7 @@ package org.kobjects.greenspun.core.expr
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.Bool
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.WasmType
 
 class Select(vararg children: Any) : Expr(children) {
 
@@ -22,7 +22,7 @@ class Select(vararg children: Any) : Expr(children) {
     override fun toString(writer: CodeWriter) =
         stringifyChildren(writer, "Select(")
 
-    override val returnType: List<Type>
+    override val returnType: List<WasmType>
         get() = children.first().returnType
 
 

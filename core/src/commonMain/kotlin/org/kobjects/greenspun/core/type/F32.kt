@@ -1,19 +1,14 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.sqrt
-import kotlin.math.truncate
 
 /**
  * F32 type & builtin operations.
  */
-object F32 : Type {
+object F32 : org.kobjects.greenspun.core.type.WasmType {
 
     operator fun invoke(value: Float) = Const(value)
 
@@ -59,7 +54,7 @@ object F32 : Type {
             writer.writeF32(value)
         }
 
-        override val returnType: List<Type>
+        override val returnType: List<org.kobjects.greenspun.core.type.WasmType>
             get() = listOf(F32)
     }
 

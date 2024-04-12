@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.expr.RelationalOperator
 import org.kobjects.greenspun.core.expr.UnaryOperator
 
 
-interface Type {
+interface WasmType {
 
     fun createConstant(value: Any): Expr = throw UnsupportedOperationException()
     fun createBinaryOperation(operator: BinaryOperator, leftOperand: Expr, rightOperand: Expr): Expr = throw UnsupportedOperationException()

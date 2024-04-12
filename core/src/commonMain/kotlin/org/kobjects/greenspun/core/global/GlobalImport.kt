@@ -3,14 +3,14 @@ package org.kobjects.greenspun.core.global
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Imported
 import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.WasmType
 
 class GlobalImport(
     override val index: Int,
     override val module: String,
     override val name: String,
     override val mutable: Boolean,
-    override val type: Type
+    override val type: WasmType
 ) : GlobalInterface, Imported {
 
     override fun writeImportDescription(writer: WasmWriter) {

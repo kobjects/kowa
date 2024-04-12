@@ -1,18 +1,14 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmType
 import org.kobjects.greenspun.core.binary.WasmWriter
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sign
 
 /**
  *  I64 type & builtin operations.
  */
-object I64 : Type {
+object I64 : org.kobjects.greenspun.core.type.WasmType {
 
     operator fun invoke(value: Long) = Const(value)
 
@@ -48,7 +44,7 @@ object I64 : Type {
             writer.writeI64(value)
         }
 
-        override val returnType: List<Type>
+        override val returnType: List<org.kobjects.greenspun.core.type.WasmType>
             get() = listOf(I64)
     }
 

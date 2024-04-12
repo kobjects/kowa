@@ -6,9 +6,9 @@ import org.kobjects.greenspun.core.expr.Expr
 
 data class FuncType(
     val index: Int,
-    val returnType: List<Type>,
-    val parameterTypes: List<Type>,
-) : Type {
+    val returnType: List<org.kobjects.greenspun.core.type.WasmType>,
+    val parameterTypes: List<org.kobjects.greenspun.core.type.WasmType>,
+) : org.kobjects.greenspun.core.type.WasmType {
 
     override fun createConstant(value: Any): Expr {
         throw UnsupportedOperationException("TODO: Re-Implement when FuncInterface is a node")
@@ -26,7 +26,7 @@ data class FuncType(
         }
     }
 
-    fun matches(returnType: List<Type>, parameterTypes: List<Type>) =
+    fun matches(returnType: List<org.kobjects.greenspun.core.type.WasmType>, parameterTypes: List<org.kobjects.greenspun.core.type.WasmType>) =
         this.returnType == returnType && this.parameterTypes == parameterTypes
 
 }

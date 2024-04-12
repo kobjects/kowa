@@ -41,7 +41,7 @@ interface MemoryInterface : Exportable {
 
         override fun toWasm(writer: WasmWriter) = writer.write(WasmOpcode.MEMORY_SIZE)
 
-        override val returnType: List<Type>
+        override val returnType: List<WasmType>
             get() = listOf(I32)
     }
 

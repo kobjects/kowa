@@ -3,7 +3,7 @@ package org.kobjects.greenspun.core.expr
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.runtime.Interpreter
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.WasmType
 
 
 abstract class Expr(vararg child: Any) {
@@ -38,7 +38,7 @@ abstract class Expr(vararg child: Any) {
         writer.write(suffix)
     }
 
-    abstract val returnType: List<Type>
+    abstract val returnType: List<WasmType>
 
     operator fun plus(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.ADD, this, of(other))
     operator fun minus(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.SUB, this, of(other))
@@ -78,9 +78,9 @@ abstract class Expr(vararg child: Any) {
 
 
     companion object {
-        fun of(value: Any): Expr = if (value is Expr) value else Type.of(value).createConstant(value)
+        fun of(value: Any): Expr = if (value is Expr) value else WasmType.of(value).createConstant(value)
 
-        fun Not(value: Any): Expr = (if (value is Expr) value.returnType.first() else Type.of(value)).createUnaryOperation(UnaryOperator.NOT, Expr.of(value))
+        fun Not(value: Any): Expr = (if (value is Expr) value.returnType.first() else WasmType.of(value)).createUnaryOperation(UnaryOperator.NOT, Expr.of(value))
 
 
     }

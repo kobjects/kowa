@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.type.Type
+import org.kobjects.greenspun.core.type.WasmType
 
 class Drop(vararg children: Any) : Expr(*children) {
 
@@ -16,7 +16,7 @@ class Drop(vararg children: Any) : Expr(*children) {
         stringifyChildren(writer, "Drop(", ", ")
     }
 
-    override val returnType: List<Type>
+    override val returnType: List<WasmType>
         get() = parameterTypes().subList(0, parameterTypes().size - 2)
 
 

@@ -63,7 +63,7 @@ class Instance(
         }
 
         for (element in module.elements) {
-            element.funcs.copyInto(tables[element.tableIdx].elements, element.offset.evalI32(rootContext))
+            element.funcs.copyInto(tables[element.table.index].elements, element.offset.evalI32(rootContext))
         }
 
         for (data in module.datas) {

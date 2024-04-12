@@ -123,7 +123,7 @@ class Module(
         if (elements.isNotEmpty()) {
             writer.writeU32(elements.size)
             for (element in elements) {
-                writer.writeU32(element.tableIdx)
+                writer.writeU32(element.table.index)
                 element.offset.toWasm(writer)
                 writer.write(WasmOpcode.END)
                 writer.writeU32(element.funcs.size)
