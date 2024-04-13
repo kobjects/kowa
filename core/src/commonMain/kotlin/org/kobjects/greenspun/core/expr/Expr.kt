@@ -1,5 +1,6 @@
 package org.kobjects.greenspun.core.expr
 
+import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.runtime.Interpreter
@@ -12,6 +13,11 @@ abstract class Expr(vararg child: Any) {
 
     fun parameterTypes() = children.map { it.returnType }.flatten()
 
+    fun toWasm(): Wasm {
+        val writer = WasmWriter()
+        toWasm(writer)
+        return writer.toWasm()
+    }
 
     abstract fun toString(writer: CodeWriter)
 
@@ -87,16 +93,4 @@ abstract class Expr(vararg child: Any) {
 
     fun Max(left: Expr, right: Any) = left.returnType.first().createBinaryOperation(BinaryOperator.MAX, left, of(right))
     fun Min(left: Expr, right: Any) = left.returnType.first().createBinaryOperation(BinaryOperator.MIN, left, of(right))
-
-
-    fun eval(context: LocalRuntimeContext): Any {
-        val wasmWriter = WasmWriter()
-        toWasm(wasmWriter)
-        val wasm = wasmWriter.toWasm()
-        return Interpreter(wasm, context).run()
-    }
-
-    fun evalI32(context: LocalRuntimeContext) = eval(context) as Int
-
-
 }

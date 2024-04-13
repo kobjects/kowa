@@ -83,6 +83,8 @@ open class WasmWriter {
         }
     }
 
+    fun writeWasm(wasm: Wasm) = writeBytes(wasm.code)
+
     fun writeU32(value: UInt) = writeU32(value.toInt())
 
 

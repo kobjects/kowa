@@ -29,7 +29,7 @@ class Instance(
     val globalImportCount = module.globals.filterIsInstance<GlobalImport>().size
     val globalValues = Array(module.globals.size - globalImportCount) {
         val global = module.globals[it + globalImportCount]
-        if (global is GlobalImpl) global.initializer.eval(rootContext) else Unit
+        if (global is GlobalImpl) Interpreter(global.initializer, rootContext).run() else Unit
     }
 
     /** func imports bound to this instance */
@@ -63,12 +63,12 @@ class Instance(
         }
 
         for (element in module.elements) {
-            element.funcs.copyInto(tables[element.table.index].elements, element.offset.evalI32(rootContext))
+            element.funcs.copyInto(tables[element.table.index].elements, Interpreter(element.offset, rootContext).run() as Int)
         }
 
         for (data in module.datas) {
             if (data.offset != null) {
-                data.data.copyInto(memory.bytes, data.offset.evalI32(rootContext))
+                data.data.copyInto(memory.bytes, Interpreter(data.offset, rootContext).run() as Int)
             }
         }
 

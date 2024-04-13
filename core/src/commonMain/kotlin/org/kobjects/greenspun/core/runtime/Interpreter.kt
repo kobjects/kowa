@@ -221,7 +221,7 @@ class Interpreter(
             }
 
             WasmOpcode.MEMORY_SIZE -> stack.pushI32(localRuntimeContext.instance.memory.bytes.size / 65536)
-            WasmOpcode.MEMORY_GROW -> throw UnsupportedOperationException(opcode.name)
+            WasmOpcode.MEMORY_GROW -> localRuntimeContext.instance.memory.growBy(stack.popI32())
 
             WasmOpcode.I32_CONST -> stack.pushI32(immediateI32())
             WasmOpcode.I64_CONST -> stack.pushI64(immediateI64())

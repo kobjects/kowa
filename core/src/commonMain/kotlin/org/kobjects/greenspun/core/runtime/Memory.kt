@@ -6,7 +6,7 @@ class Memory(
 
     var bytes = ByteArray(initial * 65536)
 
-    fun grow(by: Int) {
+    fun growBy(by: Int) {
         bytes = bytes.copyOf(bytes.size + by * 65536)
     }
 }

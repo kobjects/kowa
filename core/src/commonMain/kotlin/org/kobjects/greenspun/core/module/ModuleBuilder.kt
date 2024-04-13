@@ -54,7 +54,7 @@ class ModuleBuilder {
         val writer = WasmWriter()
         writer.writeAny(data)
 
-        datas.add(DataImpl(offset, writer.toByteArray()))
+        datas.add(DataImpl(offset.toWasm(), writer.toByteArray()))
 
         val result = DataReference(offset, writer.size)
 
@@ -70,7 +70,10 @@ class ModuleBuilder {
 
     fun TableInterface.elem(offset: Any, vararg funcs: FuncInterface): ElementImpl {
         val offsetExpr = Expr.of(offset)
-        val result = ElementImpl(this, offsetExpr, *funcs)
+        require(offsetExpr.returnType == listOf(I32)) {
+            "Offset expression must be of type I32, but is ${offsetExpr.returnType}"
+        }
+        val result = ElementImpl(this, offsetExpr.toWasm(), *funcs)
         elements.add(result)
         return result
     }
@@ -211,7 +214,10 @@ class ModuleBuilder {
 
     private fun global(name: String?, mutable: Boolean, initializerOrValue: Any): GlobalReference {
         val initializer = Expr.of(initializerOrValue)
-        val global = GlobalImpl(globals.size, mutable, initializer)
+        require(initializer.returnType.size == 1) {
+            "Initializer expression must yield a single value, but the return type is ${initializer.returnType}"
+        }
+        val global = GlobalImpl(globals.size, mutable, initializer.returnType.first(), initializer.toWasm())
         globals.add(global)
         if (name != null) {
             exports.put(name, Export(name, global))
