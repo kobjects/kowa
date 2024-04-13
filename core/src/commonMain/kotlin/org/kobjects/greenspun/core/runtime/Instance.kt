@@ -68,7 +68,7 @@ class Instance(
 
         for (data in module.datas) {
             if (data.offset != null) {
-                data.data.copyInto(memory.buffer, data.offset.evalI32(rootContext))
+                data.data.copyInto(memory.bytes, data.offset.evalI32(rootContext))
             }
         }
 

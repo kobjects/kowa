@@ -55,7 +55,7 @@ class FizzBuzzTest {
         importObject.addFunc("console", "logStr") { params ->
             val memPos = params[0] as Int
             val size = params[1] as Int
-            val bytes = memory.buffer.copyOfRange(memPos, memPos + size)
+            val bytes = memory.bytes.copyOfRange(memPos, memPos + size)
             result.add(bytes.decodeToString())
         }
 

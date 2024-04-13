@@ -25,7 +25,6 @@ class ModuleBuilder {
     var memory: MemoryInterface? = null
     var tables = mutableListOf<TableInterface>()
 
-    private var memoryImplied = false
     private val activeDataAddress = mutableMapOf<MemoryInterface, Int>()
 
 
