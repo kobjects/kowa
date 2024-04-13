@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.Expr
 
@@ -15,7 +15,7 @@ data class FuncType(
     }
 
     override fun toWasm(writer: WasmWriter) {
-        writer.write(WasmType.FUNC)
+        writer.writeTypeCode(WasmTypeCode.FUNC)
         writer.writeU32(parameterTypes.size)
         for (t in parameterTypes) {
             t.toWasm(writer)

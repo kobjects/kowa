@@ -2,8 +2,7 @@ package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.type.Bool
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.*
 
 class Select(vararg children: Any) : Expr(children) {
 
@@ -28,6 +27,11 @@ class Select(vararg children: Any) : Expr(children) {
 
     override fun toWasm(writer: WasmWriter) {
         super.toWasm(writer)
-        writer.write(WasmOpcode.SELECT)
+        if (listOf(I32, I64, F32, F64, Bool).contains(parameterTypes().first())) {
+            writer.writeOpcode(WasmOpcode.SELECT)
+        } else {
+            writer.writeOpcode(WasmOpcode.SELECT_T)
+            parameterTypes().first().toWasm(writer)
+        }
     }
 }

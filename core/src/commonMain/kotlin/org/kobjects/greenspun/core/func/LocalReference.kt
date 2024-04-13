@@ -19,7 +19,7 @@ class LocalReference(
         writer.write("local$index")
 
     override fun toWasm(writer: WasmWriter) {
-        writer.write(WasmOpcode.LOCAL_GET)
+        writer.writeOpcode(WasmOpcode.LOCAL_GET)
         writer.writeU32(index)
     }
 }

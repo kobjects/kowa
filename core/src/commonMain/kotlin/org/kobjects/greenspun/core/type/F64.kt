@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 /**
@@ -31,7 +31,7 @@ object F64 : org.kobjects.greenspun.core.type.WasmType {
     }
 
     override fun toWasm(writer: WasmWriter) {
-        writer.write(WasmType.F64)
+        writer.writeTypeCode(WasmTypeCode.F64)
     }
 
     override fun toString() = "F64"
@@ -47,7 +47,7 @@ object F64 : org.kobjects.greenspun.core.type.WasmType {
         }
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(WasmOpcode.F64_CONST)
+            writer.writeOpcode(WasmOpcode.F64_CONST)
             writer.writeF64(value)
         }
 
@@ -63,7 +63,7 @@ object F64 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(when(operator) {
+            writer.writeOpcode(when(operator) {
                 BinaryOperator.ADD -> WasmOpcode.F64_ADD
                 BinaryOperator.SUB -> WasmOpcode.F64_SUB
                 BinaryOperator.MUL -> WasmOpcode.F64_MUL
@@ -95,7 +95,7 @@ object F64 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(when (operator) {
+            writer.writeOpcode(when (operator) {
                 UnaryOperator.ABS -> WasmOpcode.F64_ABS
                 UnaryOperator.CEIL -> WasmOpcode.F64_CEIL
                 UnaryOperator.DEMOTE -> WasmOpcode.F32_DEMOTE_F64
@@ -136,7 +136,7 @@ object F64 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(when(operator) {
+            writer.writeOpcode(when(operator) {
                 RelationalOperator.EQ -> WasmOpcode.F64_EQ
                 RelationalOperator.GE -> WasmOpcode.F64_GE
                 RelationalOperator.GT -> WasmOpcode.F64_GT

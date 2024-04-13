@@ -23,7 +23,7 @@ class IndirectCallExpr(
 
     override fun toWasm(writer: WasmWriter) {
         super.toWasm(writer)
-        writer.write(WasmOpcode.CALL_INDIRECT)
+        writer.writeOpcode(WasmOpcode.CALL_INDIRECT)
         writer.writeU32(funcType.index)
         writer.writeU32(table)
     }

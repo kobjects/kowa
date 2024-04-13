@@ -9,7 +9,7 @@ import org.kobjects.greenspun.core.expr.Expr
 class FuncBuilder(
     moduleBuilder: ModuleBuilder,
     val returnType: List<WasmType>
-) : BodyBuilder(moduleBuilder, mutableListOf(), WasmWriter()) {
+) : BodyBuilder(moduleBuilder, BlockType.FUNCTION, null, mutableListOf(), WasmWriter()) {
 
     internal var paramCount = 0
 
@@ -39,13 +39,16 @@ class FuncBuilder(
         for (child in children) {
             child.toWasm(wasmWriter)
         }
-        wasmWriter.write(WasmOpcode.RETURN)
+        wasmWriter.writeOpcode(WasmOpcode.RETURN)
+        unreachableCodePosition = wasmWriter.size
     }
 
-    internal fun build() = FuncImpl(
-        index = moduleBuilder.funcs.size,
-        type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),
-        locals = variables.subList(paramCount, variables.size),
-        body = wasmWriter.toWasm()
-    )
+    internal fun build(): FuncImpl {
+        close(returnType)
+        return FuncImpl(
+            index = moduleBuilder.funcs.size,
+            type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),
+            locals = variables.subList(paramCount, variables.size),
+            body = wasmWriter.toWasm())
+    }
 }

@@ -40,7 +40,7 @@ class CallExpr(
 
     override fun toWasm(writer: WasmWriter) {
         super.toWasm(writer)
-        writer.write(WasmOpcode.CALL)
+        writer.writeOpcode(WasmOpcode.CALL)
         writer.writeU32(callable.index)
     }
 

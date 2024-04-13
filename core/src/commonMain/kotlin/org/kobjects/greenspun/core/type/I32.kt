@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 /**
@@ -30,7 +30,7 @@ object I32 : org.kobjects.greenspun.core.type.WasmType {
 
     override fun toString() = "I32"
 
-    override fun toWasm(writer: WasmWriter) = writer.write(WasmType.I32)
+    override fun toWasm(writer: WasmWriter) = writer.writeTypeCode(WasmTypeCode.I32)
 
     class Const(
         val value: Int
@@ -40,7 +40,7 @@ object I32 : org.kobjects.greenspun.core.type.WasmType {
             writer.write("I32($value)")
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(WasmOpcode.I32_CONST)
+            writer.writeOpcode(WasmOpcode.I32_CONST)
             writer.writeI32(value)
         }
 
@@ -61,7 +61,7 @@ object I32 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(
+            writer.writeOpcode(
                 when (operator) {
                     BinaryOperator.ADD -> WasmOpcode.I32_ADD
                     BinaryOperator.SUB -> WasmOpcode.I32_SUB
@@ -93,14 +93,14 @@ object I32 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             if (operator == UnaryOperator.NEG) {
-                writer.write(WasmOpcode.I32_CONST)
+                writer.writeOpcode(WasmOpcode.I32_CONST)
                 writer.writeI32(0)
             } else if (operator == UnaryOperator.NOT) {
-                writer.write(WasmOpcode.I32_CONST)
+                writer.writeOpcode(WasmOpcode.I32_CONST)
                 writer.writeI32(-1)
             }
             children[0].toWasm(writer)
-            writer.write(
+            writer.writeOpcode(
                 when (operator) {
                     UnaryOperator.ABS -> throw UnsupportedOperationException()
                     UnaryOperator.CEIL -> throw UnsupportedOperationException()
@@ -145,7 +145,7 @@ object I32 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(
+            writer.writeOpcode(
                 when (operator) {
                     RelationalOperator.EQ -> WasmOpcode.I32_EQ
                     RelationalOperator.GE -> WasmOpcode.I32_GE_S

@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 /**
@@ -34,7 +34,7 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
     }
 
     override fun toWasm(writer: WasmWriter) {
-        writer.write(WasmType.F32)
+        writer.writeTypeCode(WasmTypeCode.F32)
     }
 
     override fun toString() = "F32"
@@ -50,7 +50,7 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
         }
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(WasmOpcode.F32_CONST)
+            writer.writeOpcode(WasmOpcode.F32_CONST)
             writer.writeF32(value)
         }
 
@@ -65,7 +65,7 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(when(operator) {
+            writer.writeOpcode(when(operator) {
                 BinaryOperator.ADD -> WasmOpcode.F32_ADD
                 BinaryOperator.SUB -> WasmOpcode.F32_SUB
                 BinaryOperator.MUL -> WasmOpcode.F32_MUL
@@ -97,7 +97,7 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
 
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(when (operator) {
+            writer.writeOpcode(when (operator) {
                 UnaryOperator.ABS -> WasmOpcode.F32_ABS
                 UnaryOperator.CEIL -> WasmOpcode.F32_CEIL
                 UnaryOperator.FLOOR -> WasmOpcode.F32_FLOOR
@@ -139,7 +139,7 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(when(operator) {
+            writer.writeOpcode(when(operator) {
                 RelationalOperator.EQ -> WasmOpcode.F32_EQ
                 RelationalOperator.GE -> WasmOpcode.F32_GE
                 RelationalOperator.GT -> WasmOpcode.F32_GT

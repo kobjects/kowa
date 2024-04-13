@@ -54,7 +54,7 @@ class FuncImpl(
             local.toWasm(writer)
         }
         writer.writeBytes(body.code)
-        writer.write(WasmOpcode.END)
+        writer.writeOpcode(WasmOpcode.END)
     }
 
 

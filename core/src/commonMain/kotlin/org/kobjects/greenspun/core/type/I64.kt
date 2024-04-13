@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 /**
@@ -31,7 +31,7 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
     override fun toString() = "I64"
 
     override fun toWasm(writer: WasmWriter) =
-        writer.write(WasmType.I64)
+        writer.writeTypeCode(WasmTypeCode.I64)
 
     class Const(
         val value: Long
@@ -40,7 +40,7 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
             writer.write("I64($value)")
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(WasmOpcode.I64_CONST)
+            writer.writeOpcode(WasmOpcode.I64_CONST)
             writer.writeI64(value)
         }
 
@@ -55,7 +55,7 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(
+            writer.writeOpcode(
                 when (operator) {
                     BinaryOperator.ADD -> WasmOpcode.I64_ADD
                     BinaryOperator.SUB -> WasmOpcode.I64_SUB
@@ -88,14 +88,14 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             if (operator == UnaryOperator.NEG) {
-                writer.write(WasmOpcode.I64_CONST)
+                writer.writeOpcode(WasmOpcode.I64_CONST)
                 writer.writeI64(0)
             } else if (operator == UnaryOperator.NOT) {
-                writer.write(WasmOpcode.I64_CONST)
+                writer.writeOpcode(WasmOpcode.I64_CONST)
                 writer.writeI64(-1)
             }
             super.toWasm(writer)
-            writer.write(
+            writer.writeOpcode(
                 when (operator) {
                     UnaryOperator.CLZ -> WasmOpcode.I64_CLZ
                     UnaryOperator.CTZ -> WasmOpcode.I64_CTZ
@@ -137,7 +137,7 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(
+            writer.writeOpcode(
                 when (operator) {
                     RelationalOperator.EQ -> WasmOpcode.I64_EQ
                     RelationalOperator.GE -> WasmOpcode.I64_GE_S

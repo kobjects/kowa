@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.binary
 
-enum class WasmType(val code: Byte) {
+enum class WasmTypeCode(val code: Byte) {
     VOID(0x40),
     I32(0x7f),
     I64(0x7e),

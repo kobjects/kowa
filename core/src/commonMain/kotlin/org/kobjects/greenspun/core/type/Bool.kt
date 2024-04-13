@@ -2,10 +2,10 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.expr.*
 import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmType
+import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
-object Bool : org.kobjects.greenspun.core.type.WasmType {
+object Bool : WasmType {
 
     val False = Const(false)
 
@@ -28,7 +28,7 @@ object Bool : org.kobjects.greenspun.core.type.WasmType {
     }
 
     override fun toWasm(writer: WasmWriter) {
-        writer.writeByte(WasmType.I32.code)
+        writer.writeByte(WasmTypeCode.I32.code)
     }
 
 
@@ -44,7 +44,7 @@ object Bool : org.kobjects.greenspun.core.type.WasmType {
             get() = listOf(Bool)
 
         override fun toWasm(writer: WasmWriter) {
-            writer.write(WasmOpcode.I32_CONST)
+            writer.writeOpcode(WasmOpcode.I32_CONST)
             writer.writeI32(if (value) 1 else 0)
         }
     }
@@ -59,23 +59,23 @@ object Bool : org.kobjects.greenspun.core.type.WasmType {
             when(operator) {
                 BinaryOperator.OR -> {
                     children[0].toWasm(writer)
-                    writer.write(WasmOpcode.IF)
+                    writer.writeOpcode(WasmOpcode.IF)
                     Bool.toWasm(writer)
-                    writer.write(WasmOpcode.I32_CONST)
+                    writer.writeOpcode(WasmOpcode.I32_CONST)
                     writer.writeI32(1)
-                    writer.write(WasmOpcode.ELSE)
+                    writer.writeOpcode(WasmOpcode.ELSE)
                     children[1].toWasm(writer)
-                    writer.write(WasmOpcode.END)
+                    writer.writeOpcode(WasmOpcode.END)
                 }
                 BinaryOperator.AND -> {
                     children[0].toWasm(writer)
-                    writer.write(WasmOpcode.IF)
+                    writer.writeOpcode(WasmOpcode.IF)
                     Bool.toWasm(writer)
                     children[1].toWasm(writer)
-                    writer.write(WasmOpcode.ELSE)
-                    writer.write(WasmOpcode.I32_CONST)
+                    writer.writeOpcode(WasmOpcode.ELSE)
+                    writer.writeOpcode(WasmOpcode.I32_CONST)
                     writer.writeI32(0)
-                    writer.write(WasmOpcode.END)
+                    writer.writeOpcode(WasmOpcode.END)
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -92,7 +92,7 @@ object Bool : org.kobjects.greenspun.core.type.WasmType {
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
             when (operator) {
-                UnaryOperator.NOT -> writer.write(WasmOpcode.I32_EQZ)
+                UnaryOperator.NOT -> writer.writeOpcode(WasmOpcode.I32_EQZ)
                 else -> throw UnsupportedOperationException()
             }
         }

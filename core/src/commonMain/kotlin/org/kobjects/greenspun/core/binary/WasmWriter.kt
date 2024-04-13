@@ -63,11 +63,11 @@ open class WasmWriter {
     }
 
 
-    fun write(type: WasmType) {
+    fun writeTypeCode(type: WasmTypeCode) {
         writeByte(type.code)
     }
 
-    fun write(opcode: WasmOpcode) {
+    fun writeOpcode(opcode: WasmOpcode) {
         when (opcode) {
             WasmOpcode.IF,
             WasmOpcode.BLOCK,

@@ -27,12 +27,12 @@ class IfExpr(
 
     override fun toWasm(writer: WasmWriter) {
         children[0].toWasm(writer)
-        writer.write(WasmOpcode.IF)
+        writer.writeOpcode(WasmOpcode.IF)
         returnType[0].toWasm(writer)
         children[1].toWasm(writer)
-        writer.write(WasmOpcode.ELSE)
+        writer.writeOpcode(WasmOpcode.ELSE)
         children[2].toWasm(writer)
-        writer.write(WasmOpcode.END)
+        writer.writeOpcode(WasmOpcode.END)
     }
 
     override val returnType: List<WasmType>

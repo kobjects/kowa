@@ -41,7 +41,7 @@ class MemoryView(
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
-            writer.write(opcode)
+            writer.writeOpcode(opcode)
             writer.writeU32(align)
             writer.writeU32(offset)
         }

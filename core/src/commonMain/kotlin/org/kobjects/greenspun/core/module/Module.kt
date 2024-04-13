@@ -101,7 +101,7 @@ class Module(
                 global.type.toWasm(writer)
                 writer.writeByte(if (global.mutable) 1 else 0)
                 writer.writeBytes(global.initializer.code)
-                writer.write(WasmOpcode.END)
+                writer.writeOpcode(WasmOpcode.END)
             }
         }
     }
@@ -125,7 +125,7 @@ class Module(
             for (element in elements) {
                 writer.writeU32(element.table.index)
                 writer.writeWasm(element.offset)
-                writer.write(WasmOpcode.END)
+                writer.writeOpcode(WasmOpcode.END)
                 writer.writeU32(element.funcs.size)
                 for (func in element.funcs) {
                     writer.writeU32(func.index)
@@ -143,7 +143,7 @@ class Module(
                 } else {
                     writer.writeU32(0)
                     writer.writeWasm(data.offset)
-                    writer.write(WasmOpcode.END)
+                    writer.writeOpcode(WasmOpcode.END)
                 }
                 writer.writeU32(data.data.size)
                 writer.writeBytes(data.data)
