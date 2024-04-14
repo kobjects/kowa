@@ -22,4 +22,26 @@ class LocalReference(
         writer.writeOpcode(WasmOpcode.LOCAL_GET)
         writer.writeU32(index)
     }
+
+    fun tee(value: Any): Expr {
+        val valueExpr = Expr.of(value)
+        require(valueExpr.returnType == listOf(type)) {
+            "Value type (${valueExpr.returnType}) does not match variable type ($type)."
+        }
+        return TeeImpl(valueExpr)
+    }
+
+    inner class TeeImpl(expr: Expr) : Expr(expr) {
+        override fun toString(writer: CodeWriter) {
+            writer.write(this@LocalReference, ".tee(", children.first(), ")")
+        }
+
+        override val returnType: List<WasmType>
+            get() = listOf(type)
+
+        override fun toWasm(writer: WasmWriter) {
+            super.toWasm(writer)
+            writer.writeOpcode(WasmOpcode.LOCAL_TEE)
+        }
+    }
 }

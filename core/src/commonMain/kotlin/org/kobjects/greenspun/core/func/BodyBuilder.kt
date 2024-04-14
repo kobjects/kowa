@@ -133,6 +133,29 @@ open class BodyBuilder(
         unreachableCodePosition = wasmWriter.size
     }
 
+    fun BrTable(index: Any, defaultLabel: Label, vararg labels: Label) {
+        checkStackForJumpTarget(defaultLabel.target!!)
+        val defaultIndex = defaultLabel.distanceFrom(this)
+        val indices = IntArray(labels.size) {
+            val label = labels[it]
+            checkStackForJumpTarget(label.target!!)
+            label.distanceFrom(this)
+        }
+
+        val indexExpr = Expr.of(index)
+        require(indexExpr.returnType == listOf(I32)) {
+            "I32 index expression required, but actual type is ${indexExpr.returnType}"
+        }
+        indexExpr.toWasm(wasmWriter)
+
+        wasmWriter.writeOpcode(WasmOpcode.BR_TABLE)
+        wasmWriter.writeU32(indices.size)
+        for (index in indices) {
+            wasmWriter.writeU32(index)
+        }
+        wasmWriter.writeU32(defaultIndex)
+    }
+
 
     operator fun TableInterface.invoke(i: Any, type: FuncType, vararg param: Any): Expr {
         val paramExpr = param.map { Expr.of(param) }
