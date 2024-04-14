@@ -198,23 +198,7 @@ enum class WasmOpcode(val code: Int) {
     I32_REINTERPRET_F32(0xBC),
     I64_REINTERPRET_F64(0xBD),
     F32_REINTERPRET_I32(0xBE),
-    F64_REINTERPRET_I64(0xBF),
-
-    REF_NULL(0xD0),
-    REF_IS_NULL(0xD1),
-    REF_FUNC(0xD2),
-
-    MEMORY_INIT(0xFC08),
-    DATA_DROP(0xFC09),
-    MEMORY_COPY(0xFC10),
-    MEMORY_FILL(0xFC11),
-
-    TABLE_INIT(0xFC12),
-    TABLE_DROP(0xFC13),
-    TABLE_COPY(0xFC14),
-    TABLE_GROW(0xFC15),
-    TABLE_SIZE(0xFC16),
-    TABLE_FILL(0xFC17);
+    F64_REINTERPRET_I64(0xBF);
 
 
     companion object {

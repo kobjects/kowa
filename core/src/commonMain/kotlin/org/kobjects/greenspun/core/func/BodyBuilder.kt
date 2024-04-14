@@ -25,13 +25,7 @@ open class BodyBuilder(
     var pendingLabel: Label? = null
 
     init {
-        label = parent?.pendingLabel
-        if (label != null) {
-            require(label.position == wasmWriter.size) {
-                "Invalid label position"
-            }
-            parent!!.pendingLabel = null
-        }
+        label = parent?.pendingLabel?.attach(this)
     }
 
 
@@ -117,7 +111,7 @@ open class BodyBuilder(
             stackTypes.addAll(valueExpr.returnType)
         }
 
-        checkStackForJumpTarget(target.bodyBuilder())
+        checkStackForJumpTarget(target.target!!)
 
         wasmWriter.writeOpcode(WasmOpcode.BR)
         wasmWriter.writeU32(depth)
@@ -127,7 +121,7 @@ open class BodyBuilder(
     fun BrIf(target: Label, condition: Any) {
         var depth = target.distanceFrom(this)
 
-        checkStackForJumpTarget(target.bodyBuilder())
+        checkStackForJumpTarget(target.target!!)
 
         val conditionExpr = Expr.of(condition)
         require(conditionExpr.returnType == listOf(Bool) || conditionExpr.returnType == listOf(I32)) {
@@ -139,7 +133,7 @@ open class BodyBuilder(
         unreachableCodePosition = wasmWriter.size
     }
 
-    
+
     operator fun TableInterface.invoke(i: Any, type: FuncType, vararg param: Any): Expr {
         val paramExpr = param.map { Expr.of(param) }
         val paramTypes = paramExpr.map { it.returnType }.flatten()
@@ -353,12 +347,25 @@ open class BodyBuilder(
 
     inner class Label() {
         val position = wasmWriter.size
+        var target: BodyBuilder? = null
 
         init {
             pendingLabel = this
         }
 
-        fun bodyBuilder() = this@BodyBuilder
+
+        fun attach(target: BodyBuilder): Label {
+            require (this.target == null) {
+                "Label is already attached to ${this.target}"
+            }
+            require(position == target.wasmWriter.size) {
+                 "Invalid label position"
+            }
+            pendingLabel = null
+            this.target = target
+            return this
+        }
+
 
         fun distanceFrom(source: BodyBuilder): Int {
             var distance = 0
@@ -370,7 +377,7 @@ open class BodyBuilder(
                 }
                 current = current.parent!!
             }
-            require(current == this@BodyBuilder) {
+            require(current == target) {
                 "Internal inconsistency"
             }
             return distance

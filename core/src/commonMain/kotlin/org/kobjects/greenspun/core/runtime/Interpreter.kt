@@ -370,19 +370,6 @@ class Interpreter(
             WasmOpcode.F32_REINTERPRET_I32 -> stack.pushF32(Float.fromBits(stack.popI32()))
             WasmOpcode.F64_REINTERPRET_I64 -> stack.pushF64(Double.fromBits(stack.popI64()))
 
-            WasmOpcode.REF_NULL -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.REF_IS_NULL -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.REF_FUNC -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.MEMORY_INIT -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.DATA_DROP -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.MEMORY_COPY -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.MEMORY_FILL -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.TABLE_INIT -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.TABLE_DROP -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.TABLE_COPY -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.TABLE_GROW -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.TABLE_SIZE -> throw UnsupportedOperationException(opcode.name)
-            WasmOpcode.TABLE_FILL -> throw UnsupportedOperationException(opcode.name)
         }
 
 
