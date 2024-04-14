@@ -46,7 +46,7 @@ val sqr = Func(I32) {
 }
 ```
 
-### Exports
+### Function Exports
 
 Functions (and other constructs) can be exported using `Export()`. A full example for 
 a WebAssembly module exporting a function "sqr" for calculating the square of 32 bit integers is:
@@ -60,14 +60,18 @@ val module = Module {
 }
 ```
 
-### Instances and Invocation from Kotlin
+### Invocation from Kotlin
 
-The example module exporting `sqr()` can be invoked from Kotlin by instanciating the module and
+The exported `sqr()`-function can be invoked from Kotlin by instantiating the module and
 then invoking the exported function: 
 
 ```
-val instance = module.
+val instance = module.instantiate()
+val sqr4 = instance.invoke("sqr", 4)
+println("The square of 4 is: $sqr4")
+```
 
 
+## More Examples 
 
-
+More examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
