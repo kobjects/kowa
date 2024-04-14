@@ -141,9 +141,13 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
                 when (operator) {
                     RelationalOperator.EQ -> WasmOpcode.I64_EQ
                     RelationalOperator.GE -> WasmOpcode.I64_GE_S
+                    RelationalOperator.GE_U -> WasmOpcode.I64_GE_U
                     RelationalOperator.GT -> WasmOpcode.I64_GT_S
+                    RelationalOperator.GT_U -> WasmOpcode.I64_GT_U
                     RelationalOperator.LE -> WasmOpcode.I64_LE_S
+                    RelationalOperator.LE_U -> WasmOpcode.I64_LE_U
                     RelationalOperator.LT -> WasmOpcode.I64_LT_S
+                    RelationalOperator.LT_U -> WasmOpcode.I64_LT_U
                     RelationalOperator.NE -> WasmOpcode.I64_NE
                 }
             )

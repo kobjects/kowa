@@ -146,6 +146,10 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
                 RelationalOperator.LE -> WasmOpcode.F32_LE
                 RelationalOperator.LT -> WasmOpcode.F32_LT
                 RelationalOperator.NE -> WasmOpcode.F32_NE
+                RelationalOperator.GE_U,
+                RelationalOperator.GT_U,
+                RelationalOperator.LE_U,
+                RelationalOperator.LT_U -> throw UnsupportedOperationException("$operator for F32")
             })
         }
     }

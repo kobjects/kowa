@@ -72,11 +72,11 @@ abstract class Expr(vararg child: Any) {
     infix fun Le(other: Any) = returnType.first().createRelationalOperation(RelationalOperator.LE, this, of(other))
     infix fun Lt(other: Any) = returnType.first().createRelationalOperation(RelationalOperator.LT, this, of(other))
 
-   /* infix fun GeU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.GE_U, this, of(other))
-    infix fun GtU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.GT, this, of(other))
-    infix fun LeU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.LE, this, of(other))
-    infix fun LtU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.LT, this, of(other))
-*/
+    infix fun GeU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.GE_U, this, of(other))
+    infix fun GtU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.GT_U, this, of(other))
+    infix fun LeU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.LE_U, this, of(other))
+    infix fun LtU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.LT_U, this, of(other))
+
 
     fun DivU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.DIV_U, this, of(other))
     fun RemU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.REM_U, this, of(other))

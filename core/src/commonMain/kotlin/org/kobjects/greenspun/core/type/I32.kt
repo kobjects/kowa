@@ -149,10 +149,15 @@ object I32 : org.kobjects.greenspun.core.type.WasmType {
                 when (operator) {
                     RelationalOperator.EQ -> WasmOpcode.I32_EQ
                     RelationalOperator.GE -> WasmOpcode.I32_GE_S
+                    RelationalOperator.GE_U -> WasmOpcode.I32_GE_U
                     RelationalOperator.GT -> WasmOpcode.I32_GT_S
+                    RelationalOperator.GT_U -> WasmOpcode.I32_GT_U
                     RelationalOperator.LE -> WasmOpcode.I32_LE_S
+                    RelationalOperator.LE_U -> WasmOpcode.I32_LE_U
                     RelationalOperator.LT -> WasmOpcode.I32_LT_S
+                    RelationalOperator.LT_U -> WasmOpcode.I32_LT_U
                     RelationalOperator.NE -> WasmOpcode.I32_NE
+
                 }
             )
         }

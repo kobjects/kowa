@@ -74,20 +74,66 @@ open class BodyBuilder(
         stackTypes.addAll(expr.returnType)
     }
 
-    fun Block(vararg returnType: WasmType, init: BodyBuilder.() -> Unit) {
-        require (returnType.size <= 1) {
-            "More than one return values are not supported"
-        }
-        val builder = BodyBuilder(moduleBuilder, BlockType.BLOCK,this, variables, wasmWriter, returnType.toList())
+    operator fun Expr.unaryPlus() {
+        Push(this)
+    }
+
+    fun Block(init: BodyBuilder.() -> Unit) {
+        val builder = BodyBuilder(moduleBuilder, BlockType.BLOCK,this, variables, wasmWriter)
         wasmWriter.writeOpcode(WasmOpcode.BLOCK)
-        if (returnType.isEmpty()) {
-            wasmWriter.writeTypeCode(WasmTypeCode.VOID)
-        } else {
-            returnType.first().toWasm(wasmWriter)
-        }
+        wasmWriter.writeTypeCode(WasmTypeCode.VOID)
         builder.init()
-        stackTypes.addAll(builder.close())
+        builder.close()
         wasmWriter.writeOpcode(WasmOpcode.END)
+    }
+
+    fun Block(returnType: WasmType, init: BodyBuilder.() -> Unit) =
+        BlockExpr(
+            WasmOpcode.BLOCK,
+            init,
+            BodyBuilder(moduleBuilder,
+                BlockType.BLOCK,
+                this,
+                variables,
+                wasmWriter,
+                listOf(returnType)))
+
+    fun Loop(returnType: WasmType, init: BodyBuilder.() -> Unit) =
+        BlockExpr(
+            WasmOpcode.LOOP,
+            init,
+            BodyBuilder(moduleBuilder,
+                BlockType.LOOP,
+                this,
+                variables,
+                wasmWriter,
+                listOf(returnType)))
+
+
+    class BlockExpr(
+        val opcode: WasmOpcode,
+        val init: BodyBuilder.() -> Unit,
+        val builder: BodyBuilder
+    ) : Expr() {
+
+        override fun toString(writer: CodeWriter) {
+           writer.write(opcode.name, "(", returnType.first(), ")")
+           writer.write("{")
+           writer.write(builder)
+           writer.write("}")
+        }
+
+        override val returnType: List<WasmType>
+            get() = builder.expectedReturnType
+
+        override fun toWasm(writer: WasmWriter) {
+            super.toWasm(writer)
+            writer.writeOpcode(opcode)
+            returnType.first().toWasm(writer)
+            builder.init()
+            builder.close()
+            writer.writeOpcode(WasmOpcode.END)
+        }
     }
 
     fun checkStackForJumpTarget(target: BodyBuilder) {
@@ -130,7 +176,6 @@ open class BodyBuilder(
         conditionExpr.toWasm(wasmWriter)
         wasmWriter.writeOpcode(WasmOpcode.BR_IF)
         wasmWriter.writeU32(depth)
-        unreachableCodePosition = wasmWriter.size
     }
 
     fun BrTable(index: Any, defaultLabel: Label, vararg labels: Label) {
@@ -154,6 +199,7 @@ open class BodyBuilder(
             wasmWriter.writeU32(index)
         }
         wasmWriter.writeU32(defaultIndex)
+        unreachableCodePosition = wasmWriter.size
     }
 
 
@@ -172,19 +218,12 @@ open class BodyBuilder(
         return InvalidExpr("Void function are expected to be used as statements.")
     }
 
-    fun Loop(vararg returnType: WasmType, init: BodyBuilder.() -> Unit) {
-        require (returnType.size <= 1) {
-            "More than one return values are not supported"
-        }
-        val builder = BodyBuilder(moduleBuilder, BlockType.LOOP, this, variables, wasmWriter, returnType.toList())
+    fun Loop(init: BodyBuilder.() -> Unit) {
+        val builder = BodyBuilder(moduleBuilder, BlockType.LOOP, this, variables, wasmWriter)
         wasmWriter.writeOpcode(WasmOpcode.LOOP)
-        if (returnType.isEmpty()) {
-            wasmWriter.writeTypeCode(WasmTypeCode.VOID)
-        } else {
-            returnType.first().toWasm(wasmWriter)
-        }
+        wasmWriter.writeTypeCode(WasmTypeCode.VOID)
         builder.init()
-        stackTypes.addAll(builder.close())
+        builder.close()
         wasmWriter.writeOpcode(WasmOpcode.END)
     }
 
@@ -340,7 +379,7 @@ open class BodyBuilder(
 
     fun close(): List<WasmType> {
         require(unreachableCodePosition != -1 || expectedReturnType == stackTypes) {
-            "Stack contents ($stackTypes) do not match expected types ($expectedReturnType)"
+            "Stack contents ($stackTypes) do not match expected types ($expectedReturnType) at $blockType end"
         }
 
         require (pendingLabel == null) {

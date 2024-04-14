@@ -143,6 +143,10 @@ object F64 : org.kobjects.greenspun.core.type.WasmType {
                 RelationalOperator.LE -> WasmOpcode.F64_LE
                 RelationalOperator.LT -> WasmOpcode.F64_LT
                 RelationalOperator.NE -> WasmOpcode.F64_NE
+                RelationalOperator.GE_U,
+                RelationalOperator.GT_U,
+                RelationalOperator.LE_U,
+                RelationalOperator.LT_U -> throw UnsupportedOperationException("$operator for F64")
             })
         }
     }
