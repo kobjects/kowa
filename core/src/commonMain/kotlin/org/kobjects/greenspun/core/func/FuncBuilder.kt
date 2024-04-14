@@ -9,7 +9,7 @@ import org.kobjects.greenspun.core.expr.Expr
 class FuncBuilder(
     moduleBuilder: ModuleBuilder,
     val returnType: List<WasmType>
-) : BodyBuilder(moduleBuilder, BlockType.FUNCTION, null, mutableListOf(), WasmWriter()) {
+) : BodyBuilder(moduleBuilder, BlockType.FUNCTION, null, mutableListOf(), WasmWriter(), returnType) {
 
     internal var paramCount = 0
 
@@ -44,7 +44,7 @@ class FuncBuilder(
     }
 
     internal fun build(): FuncImpl {
-        close(returnType)
+        close()
         return FuncImpl(
             index = moduleBuilder.funcs.size,
             type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),

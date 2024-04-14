@@ -56,12 +56,22 @@ open class BodyBuilder(
 
     fun Const(value: Any) = local(true, value)
 
-    fun Drop() {
-        require(stackTypes.isNotEmpty()) {
-            "Nothing to drop"
+    fun Drop(vararg values: Any) {
+        if (values.isEmpty()) {
+            require(stackTypes.isNotEmpty()) {
+                "Nothing to drop"
+            }
+            wasmWriter.writeOpcode(WasmOpcode.DROP)
+            stackTypes.removeLast()
+        } else {
+            for (value in values) {
+                val valueExpr = Expr.of(value)
+                valueExpr.toWasm(wasmWriter)
+                for (type in valueExpr.returnType) {
+                    wasmWriter.writeOpcode(WasmOpcode.DROP)
+                }
+            }
         }
-        wasmWriter.writeOpcode(WasmOpcode.DROP)
-        stackTypes.removeLast()
     }
 
     fun Push(value: Any) {
@@ -70,37 +80,66 @@ open class BodyBuilder(
         stackTypes.addAll(expr.returnType)
     }
 
-    fun Block(init: BodyBuilder.() -> Unit) {
-        val builder = BodyBuilder(moduleBuilder, BlockType.BLOCK,this, variables, wasmWriter)
+    fun Block(vararg returnType: WasmType, init: BodyBuilder.() -> Unit) {
+        require (returnType.size <= 1) {
+            "More than one return values are not supported"
+        }
+        val builder = BodyBuilder(moduleBuilder, BlockType.BLOCK,this, variables, wasmWriter, returnType.toList())
+        wasmWriter.writeOpcode(WasmOpcode.BLOCK)
+        if (returnType.isEmpty()) {
+            wasmWriter.writeTypeCode(WasmTypeCode.VOID)
+        } else {
+            returnType.first().toWasm(wasmWriter)
+        }
         builder.init()
+        stackTypes.addAll(builder.close())
+        wasmWriter.writeOpcode(WasmOpcode.END)
     }
 
-    fun Br(target: Label) {
-        var targetBlockBuilder: BodyBuilder = this
-        var depth = 0
-        while (targetBlockBuilder.label != target) {
-            depth++
-            require (targetBlockBuilder.parent != null) {
-                "Label not found."
-            }
-            targetBlockBuilder = targetBlockBuilder.parent!!
-        }
-
-        if (targetBlockBuilder.blockType == BlockType.LOOP) {
+    fun checkStackForJumpTarget(target: BodyBuilder) {
+        if (target.blockType == BlockType.LOOP) {
             require(stackTypes.isEmpty()) {
                 "Empty stack expected for loop target"
             }
         } else {
-            require(stackTypes == targetBlockBuilder.expectedReturnType) {
-                "Stack contents ($stackTypes) do not match expectations for target block (${targetBlockBuilder.expectedReturnType})"
+            require(stackTypes == target.expectedReturnType) {
+                "Stack contents ($stackTypes) do not match expectations for target block (${target.expectedReturnType})"
             }
         }
+    }
+
+    fun Br(target: Label, vararg returnValue: Any) {
+        var depth = target.distanceFrom(this)
+
+        for (value in returnValue) {
+            val valueExpr = Expr.of(value)
+            valueExpr.toWasm(wasmWriter)
+            stackTypes.addAll(valueExpr.returnType)
+        }
+
+        checkStackForJumpTarget(target.bodyBuilder())
 
         wasmWriter.writeOpcode(WasmOpcode.BR)
         wasmWriter.writeU32(depth)
         unreachableCodePosition = wasmWriter.size
     }
 
+    fun BrIf(target: Label, condition: Any) {
+        var depth = target.distanceFrom(this)
+
+        checkStackForJumpTarget(target.bodyBuilder())
+
+        val conditionExpr = Expr.of(condition)
+        require(conditionExpr.returnType == listOf(Bool) || conditionExpr.returnType == listOf(I32)) {
+            "Condition type must be Bool or I32, but was ${conditionExpr.returnType}"
+        }
+        conditionExpr.toWasm(wasmWriter)
+        wasmWriter.writeOpcode(WasmOpcode.BR_IF)
+        wasmWriter.writeU32(depth)
+        unreachableCodePosition = wasmWriter.size
+    }
+
+    
     operator fun TableInterface.invoke(i: Any, type: FuncType, vararg param: Any): Expr {
         val paramExpr = param.map { Expr.of(param) }
         val paramTypes = paramExpr.map { it.returnType }.flatten()
@@ -116,10 +155,19 @@ open class BodyBuilder(
         return InvalidExpr("Void function are expected to be used as statements.")
     }
 
-    fun Loop(init: BodyBuilder.() -> Unit) {
+    fun Loop(vararg returnType: WasmType, init: BodyBuilder.() -> Unit) {
+        require (returnType.size <= 1) {
+            "More than one return values are not supported"
+        }
+        val builder = BodyBuilder(moduleBuilder, BlockType.LOOP, this, variables, wasmWriter, returnType.toList())
         wasmWriter.writeOpcode(WasmOpcode.LOOP)
-        val builder = BodyBuilder(moduleBuilder, BlockType.LOOP, this, variables, wasmWriter)
+        if (returnType.isEmpty()) {
+            wasmWriter.writeTypeCode(WasmTypeCode.VOID)
+        } else {
+            returnType.first().toWasm(wasmWriter)
+        }
         builder.init()
+        stackTypes.addAll(builder.close())
         wasmWriter.writeOpcode(WasmOpcode.END)
     }
 
@@ -273,16 +321,16 @@ open class BodyBuilder(
     }
 
 
-    fun close(expectedStackTypes: List<WasmType> = emptyList()): List<WasmType> {
-        require(wasmWriter.size == unreachableCodePosition || expectedStackTypes == stackTypes) {
-            "Stack contents ($stackTypes) do not match expected types ($expectedStackTypes)"
+    fun close(): List<WasmType> {
+        require(unreachableCodePosition != -1 || expectedReturnType == stackTypes) {
+            "Stack contents ($stackTypes) do not match expected types ($expectedReturnType)"
         }
 
         require (pendingLabel == null) {
             "Invalid label position. Labels must immediately precede blocks."
         }
 
-        return expectedStackTypes
+        return expectedReturnType
     }
 
 
@@ -309,6 +357,25 @@ open class BodyBuilder(
         init {
             pendingLabel = this
         }
+
+        fun bodyBuilder() = this@BodyBuilder
+
+        fun distanceFrom(source: BodyBuilder): Int {
+            var distance = 0
+            var current = source
+            while (current.label != this) {
+                distance++
+                require (current.parent != null) {
+                    "Label not found."
+                }
+                current = current.parent!!
+            }
+            require(current == this@BodyBuilder) {
+                "Internal inconsistency"
+            }
+            return distance
+        }
+
     }
 
 
