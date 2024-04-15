@@ -2,8 +2,6 @@ package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
-import org.kobjects.greenspun.core.runtime.Interpreter
 import org.kobjects.greenspun.core.type.WasmType
 
 
@@ -57,7 +55,7 @@ abstract class Expr(vararg child: Any) {
     infix fun Xor(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.XOR, this, of(other))
 
     infix fun Shl(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.SHL, this, of(other))
-    infix fun ShrS(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.SHR_S, this, of(other))
+    infix fun Shr(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.SHR_S, this, of(other))
 
     infix fun ShrU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.SHR_U, this, of(other))
 
@@ -78,8 +76,8 @@ abstract class Expr(vararg child: Any) {
     infix fun LtU(other: Any) = returnType[0].createRelationalOperation(RelationalOperator.LT_U, this, of(other))
 
 
-    fun DivU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.DIV_U, this, of(other))
-    fun RemU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.REM_U, this, of(other))
+    infix fun DivU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.DIV_U, this, of(other))
+    infix fun RemU(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.REM_U, this, of(other))
 
 
 
