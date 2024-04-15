@@ -73,7 +73,13 @@ val sqr4 = instance.invoke("sqr", 4)
 println("The square of 4 is: $sqr4")
 ```
 
-### Instructions
+#### Local Variables 
+
+Local variables are declared similar to parameters using `Var()` or `Const()`.
+Instead of the type argument, they take an expression defining the initial value. 
+
+
+### Instructions, Expressions and Statements
 
 For mapping Wasm instructions to our DSL, we divide them into two groups:
 
@@ -102,6 +108,7 @@ Literal values -- or kotlin numbers in general -- are mapped as follows to Wasm 
 Typically, Kotlin numbers can be used directly and will be converted to expressions implicitly.
 The main exception is the first parameter of an operator: in this case, they need to be wrapped 
 in a `Const` call. 
+
 
 #### Mathematical and bitwise operations
 
@@ -200,15 +207,59 @@ I32 that only can hold the values 0 (false) and 1 (true) named `Bool`.
 | -DSL      | ConvertToF32S     | ConvertToF32S     |                     | Demote              |
 |           | F32.convert_i32_u | F32.convert_i64_u |                     |                     |
 |           | ConvertToF32U     | ConvertToF32U     |                     |                     |
-| F64       | F64.convert_i32_s | F64.convert_i64_s |                     | F32.demote_f64      |
-| -DSL      | ConvertToF64S     | ConvertToF64S     |                     | Demote              |
-|           | F64.convert_i32_u | F64.convert_i64_u | F64.promote_f32     |                     |
-|           | ConvertToF64U     | ConvertToF64U     | Promote             |                     |
+| F64       | F64.convert_i32_s | F64.convert_i64_s | F63.promote_f32     |                     |
+| -DSL      | ConvertToF64S     | ConvertToF64S     | Promote             |                     |
+|           | F64.convert_i32_u | F64.convert_i64_u |                     |                     |
+|           | ConvertToF64U     | ConvertToF64U     |                     |                     |
 
 
-### Factorial Example
+#### Blocks and Control instructions
 
-The mappings described so far allow us to port a more complex 
+
+
+##### Convenience Control instructions
+
+In addition to the Wasm `Loop` block, our DSL provides convenience `While()` and `For()` blocks.
+
+`While()` will iterate the following block of instructions until the condition expression is false.
+
+`For()` takes two to three arguments:
+
+- The initial loop variable value
+- The maximum loop variable value. The iteration will continue until this value is reached, exluding the maximum value.
+- An optional step value
+
+
+#### Memory and table instructions
+
+We'll discuss memory and table instruction in the context of the corresponding module
+sections below.
+
+
+
+### Iterative Factorial Example
+
+The mappings described so far allow us to port a more complex example from the Wasm test suite:
+
+```kt
+val facIterNamed = Func(I64) {
+    val n = Param(I64)
+
+    val i = Var(n)
+    val res = Var(1L)
+
+    While(i Gt 1L) {
+        res.set(res * i)
+        i.set(i - 1L)
+    }
+    Return(res)
+}
+```
+
+
+### Recursion 
+
+
 
 
 ## More Examples 
