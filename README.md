@@ -4,14 +4,16 @@
 
 The initial motivation for this project was just to see how far one can take Kotlin DSLs.
 
-That said, it might actually be useful for situations where one needs to generate Wasm code
-in a general Kotlin context. 
+That said, it might be useful for situations where one needs to generate Wasm code in a general Kotlin context. 
+
+In a way, this project constitutes a Wasm "macro assembler" with
+the Kotlin as the "macro language" -- at the price of an "unusual" syntax.
 
 
 ## General
 
-To avoid confusion with "regular" Kotlin, all top level constructs use camel case 
-starting with an uppercase letter.
+To avoid confusion with "regular" Kotlin, all top level constructs use camel case starting with an uppercase letter, e.g. Wasm `if` becomes
+`If` in the DSL
 
 ## Modules
 
@@ -82,6 +84,13 @@ property is checked by the DSL only.
 
 Mutable local variables can be assigned new values by calling `.set()`.
 
+### Function imports
+
+Functions can be imported using the `ImportFunc()` function.
+
+```kt
+  val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
+```
 
 ## Instructions, Expressions and Statements
 
@@ -230,6 +239,88 @@ Implementation(factorialRecursive) {
   Return(If(n Eq 0L, 1L, n * factorialRecursive(n - 1L)))
 }
 ```
+
+
+## Memory and Data
+
+Memory is declared using the `Memory` function, taking the
+minimum and optional maximum size as parameters.
+
+Although there is currently only one "memory", all memory access
+is based on the reference returned from the memory declaration,
+so it makes sense to keep hold of it in a variable.
+
+```kt
+val module = Module {
+  val mem = Memory(1)
+}
+```
+
+### Data
+
+Memory can be statically initialized with data. If no 
+offset is provided, the end of the previous data will
+be used as the start offset. The reference returned from
+the data declaration will refer to its offset. This
+reference also has a "len" property which will provide
+the byte size of the corrsponding data item.
+
+```kt
+val module = Module {
+  val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
+
+  val mem = Memory(1)
+
+  val message = mem.data("FizzBuzz")
+
+  val f = Func() {
+    LogStr(message, message.len)
+  }
+}
+```
+
+### Memory access instructions
+
+Wasm memory `load` and `store` instructions are mapped to array access
+on a memory property indicating the access width, offset and align.
+
+The following example implements two functions providing bytewise
+memory read and write acces via `peek` and `poke` functions.
+
+```kt
+val module = Module {
+  val mem = Memory(1)
+
+  val peek = Func(I32) {
+    val address = Param(I32)
+    Return (mem.i32U8[address])
+  }
+
+  val poke = Func() {
+    val address = Param(I32)
+    val value = Param(I32)
+    mem.i32U8[address] = value
+  }
+} 
+
+```
+
+It's possible to hold on to references with a given width,
+align and offset:
+
+```kt
+val mem8 = mem.i32U8(offset = 1000)
+```
+
+It's also possible to provide an alignment and offset on access.
+The access alignment overrides the general offset of the access type
+property while the two offsets are added.
+
+
+## Tables
+
+
+## Imports
 
 
 ## More Examples 
