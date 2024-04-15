@@ -139,10 +139,54 @@ starting with an uppercase letter.
 | Floor   |            |            | F32.floor | F64.floor |
 | Popcnt  | I32.popcnt | I64.popcnt |           |           |      
 
+*) Mapped to multiple Wasm instructions for convenience.
+
 
 #### Relational Operations
 
-#### Conversion Operations
+Unfortunately, Kotlin operator overloading for relational operations
+doesn't allow us to change the return type, so we map them to infix
+functions named after the corresponding Wasm instructions.
+
+
+| Kt DSL | Wasm I32 | Wasm I64 | Wasm F32 | Wasm F64 |
+|--------|----------|----------|----------|----------|
+| Eq     | I32.eq   | I64.eq   | F32.eq   | F64.eq   |
+| Ge     | I32.ge_s | I64.ge_s | F32.ge   | F64.ge   |
+| GeU    | I32.ge_u | I64.ge_u |          |          |
+| Gt     | I32.gt_s | I64.gt_s | F32.gt   | F64.gt   |
+| GtU    | I32.gt_u | I64.gt_u |          |          |
+| Le     | I32.le_s | I64.le_s | F32.le   | F64.le   |
+| LeU    | I32.le_u | I64.le_u |          |          |
+| Lt     | I32.lt_s | I64.lt_s | F32.lt   | F64.lt   |
+| LtU    | I32.lt_u | I64.lt_u |          |          |
+| Ne     | I32.ne   | I64.ne   | F32.ne   | F64.ne   |
+
+
+#### Type Conversions
+
+| To \ From | I32               | I64               | F32                 | F64                 |
+|-----------|-------------------|-------------------|---------------------|---------------------|
+| I32       |                   | I32.wrap_i64      | I32.Reinterpret_f32 |                     |
+| - DSL     |                   | Wrap              | Reinterpret         |                     |
+| I32 (S)   |                   |                   | I32.trunc_f32_s     | I32.trunc_f64_s     |
+| - DSL     |                   |                   | TruncToI32S         | TruncToI32S         |
+| I32 (U)   |                   |                   | I32.trunc_f32_u     | I32.trunc_f64_u     |
+| - DSL     |                   |                   | TruncToI32U         | TruncToI32U         |
+| I64       |                   |                   |                     | I64.Reinterpret_f64 | 
+| - DSL     |                   |                   |                     | Reinterpret         |
+| I64 (S)   | I64.extend_i32_s  | I32.wrap_i64      | I64.trunc_f32_s     | I64.trunc_f64_s     |
+| - DSL     |                   | Wrap              | TruncToI64S         | TruncToI64S         |
+| I64 (U)   | I64.extend_i32_u  |                   | I64.trunc_f32_u     | I64.trunc_f64_u     |
+| - DSL     |                   |                   | TruncToI64U         | TruncToI64U         |
+| F32       | F32.convert_i32_s | F32.convert_i64_s |                     | F32.demote_f64      |
+| -DSL      | ConvertToF32S     | ConvertToF32S     |                     | Demote              |
+|           | F32.convert_i32_u | F32.convert_i64_u |                     |                     |
+|           | ConvertToF32U     | ConvertToF32U     |                     |                     |
+| F64       | F64.convert_i32_s | F64.convert_i64_s |                     | F32.demote_f64      |
+| -DSL      | ConvertToF64S     | ConvertToF64S     |                     | Demote              |
+|           | F64.convert_i32_u | F64.convert_i64_u | F64.promote_f32     |                     |
+|           | ConvertToF64U     | ConvertToF64U     | Promote             |                     |
 
 
 ## More Examples 
