@@ -19,7 +19,7 @@ starting with an uppercase letter.
 Modules are declared using the "Module" function. The DSL parameter contains the declarations
 of all the sections. Example:
 
-```
+```kt
 val module = Module {
 }
 ```
@@ -29,7 +29,7 @@ val module = Module {
 Functions are declared using the "Func" function inside a module, taking the return value type as a direct 
 argument and the function body as a DSL parameter. Example: 
 
-```
+```kt
 val module = Module {
   val answer = Func(I32) {
     Return (42)
@@ -39,7 +39,7 @@ val module = Module {
 
 Function parameters are declared inside the "body" using the "Param" function. Example:
 
-```
+```kt
 val sqr = Func(I32) {
   val x = Param(I32) 
   Return (x * x) 
@@ -51,7 +51,7 @@ val sqr = Func(I32) {
 Functions (and other constructs) can be exported using `Export()`. A full example for 
 a WebAssembly module exporting a function "sqr" for calculating the square of 32 bit integers is:
 
-```
+```kt
 val module = Module {
   Export("sqr", Func(I32) {
     val x = Param(I32)
@@ -65,7 +65,7 @@ val module = Module {
 The exported `sqr()`-function can be invoked from Kotlin by instantiating the module and
 then invoking the exported function: 
 
-```
+```kt
 val instance = module.instantiate()
 val sqr4 = instance.invoke("sqr", 4)
 println("The square of 4 is: $sqr4")
