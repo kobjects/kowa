@@ -19,13 +19,9 @@ class FactorialTest {
 
         val facIterNamed = Func(I64) {
             val n = Param(I64)
-
-            val i = Var(n)
-            val res = Var(1L)
-
-            While(i Gt 1L) {
-                res.set(res * i)
-                i.set(i - 1L)
+            val res = Var(n)
+            For (2L, n) {
+                res.set(res * it)
             }
             Return(res)
         }

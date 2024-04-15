@@ -234,6 +234,9 @@ open class BodyBuilder(
             "While condition must be boolean"
         }
 
+        // We need to create the builder before the firs write to capture a potential label correctly.
+        val outerBuilder = BodyBuilder(moduleBuilder, BlockType.BLOCK, this, variables, wasmWriter)
+
         wasmWriter.writeOpcode(WasmOpcode.BLOCK)
         wasmWriter.writeTypeCode(WasmTypeCode.VOID)
 
@@ -246,7 +249,6 @@ open class BodyBuilder(
         wasmWriter.writeOpcode(WasmOpcode.BR_IF)
         wasmWriter.writeU32(1)
 
-        val outerBuilder = BodyBuilder(moduleBuilder, BlockType.BLOCK, this, variables, wasmWriter)
         val builder = BodyBuilder(moduleBuilder, BlockType.LOOP, outerBuilder, variables, wasmWriter)
         builder.init()
         builder.close()
@@ -258,39 +260,41 @@ open class BodyBuilder(
         wasmWriter.writeOpcode(WasmOpcode.END)
     }
 
-    fun For(initialValue: Any, until: Any, step: Any = I32.Const(1), init: BodyBuilder.(Expr) -> Unit) {
-        val initialValueNode = Expr.of(initialValue)
-        val untilNode = Expr.of(until)
-        val stepNode = Expr.of(step)
+    fun For(initialValue: Any, until: Any, step: Any? = null, init: BodyBuilder.(Expr) -> Unit) {
+        val initialValueExpr = Expr.of(initialValue)
+        val untilExpr = Expr.of(until)
+        val type = initialValueExpr.returnType.first()
+        val stepExpr = Expr.of(step ?: if (type == I32) Const(1) else Const(1L))
 
-        require(initialValueNode.returnType == listOf(I32)) {
-            "I32 expected for initial value."
+        require(type == I32 || type == I64) {
+            "I32 or I64 expected for initial value."
         }
-        require(untilNode.returnType == listOf(I32)) {
-            "I32 expected for target value."
+        require(untilExpr.returnType == initialValueExpr.returnType) {
+            "${initialValueExpr.returnType} expected for target value instead of ${untilExpr.returnType}."
         }
-        require(stepNode.returnType == listOf(I32)) {
-            "I32 expected for step value."
+        require(stepExpr.returnType == initialValueExpr.returnType) {
+            "${initialValueExpr.returnType} expected for step value instead of ${stepExpr.returnType}."
         }
 
         // Creates init
-        val loopVar = Var(initialValueNode)
+        val loopVar = Var(initialValueExpr)
 
+        // We need to create the builder before the firs write to capture a potential label correctly.
+        val outerBuilder = BodyBuilder(moduleBuilder, BlockType.BLOCK, this, variables, wasmWriter)
         wasmWriter.writeOpcode(WasmOpcode.BLOCK)
         wasmWriter.writeTypeCode(WasmTypeCode.VOID)
 
         wasmWriter.writeOpcode(WasmOpcode.LOOP)
         wasmWriter.writeTypeCode(WasmTypeCode.VOID)
 
-        (loopVar Ge untilNode).toWasm(wasmWriter)
+        (loopVar Ge untilExpr).toWasm(wasmWriter)
         wasmWriter.writeOpcode(WasmOpcode.BR_IF)
         wasmWriter.writeU32(1)
 
-        val outerBuilder = BodyBuilder(moduleBuilder, BlockType.BLOCK, this, variables, wasmWriter)
         val builder = BodyBuilder(moduleBuilder, BlockType.LOOP, outerBuilder, variables, wasmWriter)
         builder.init(loopVar)
 
-        loopVar.set(loopVar + 1)
+        loopVar.set(loopVar + stepExpr)
 
         wasmWriter.writeOpcode(WasmOpcode.BR)
         wasmWriter.writeU32(0)

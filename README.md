@@ -7,14 +7,13 @@ The initial motivation for this project was just to see how far one can take Kot
 That said, it might actually be useful for situations where one needs to generate Wasm code
 in a general Kotlin context. 
 
-## Overview
 
-### General
+## General
 
 To avoid confusion with "regular" Kotlin, all top level constructs use camel case 
 starting with an uppercase letter.
 
-### Modules
+## Modules
 
 Modules are declared using the "Module" function. The DSL parameter contains the declarations
 of all the sections. Example:
@@ -24,7 +23,7 @@ val module = Module {
 }
 ```
 
-### Functions
+## Functions
 
 Functions are declared using the "Func" function inside a module, taking the return value type as a direct 
 argument and the function body as a DSL parameter. Example: 
@@ -37,7 +36,7 @@ val module = Module {
 }
 ```
 
-#### Function Parameters
+### Function Parameters
 
 Function parameters are declared inside the "body" using the "Param" function. Example:
 
@@ -48,7 +47,7 @@ val sqr = Func(I32) {
 }
 ```
 
-#### Function Exports
+### Function Exports
 
 Functions (and other constructs) can be exported using `Export()`. A full example for 
 a WebAssembly module exporting a function "sqr" for calculating the square of 32 bit integers is:
@@ -62,7 +61,7 @@ val module = Module {
 }
 ```
 
-#### Invocation from Kotlin
+### Invocation from Kotlin
 
 The exported `sqr()`-function can be invoked from Kotlin by instantiating the module and
 then invoking the exported function: 
@@ -73,13 +72,18 @@ val sqr4 = instance.invoke("sqr", 4)
 println("The square of 4 is: $sqr4")
 ```
 
-#### Local Variables 
+### Local Variables 
 
 Local variables are declared similar to parameters using `Var()` or `Const()`.
 Instead of the type argument, they take an expression defining the initial value. 
 
+Immutable local variables are not supported by Wasm directly -- the mutability
+property is checked by the DSL only. 
 
-### Instructions, Expressions and Statements
+Mutable local variables can be assigned new values by calling `.set()`.
+
+
+## Instructions, Expressions and Statements
 
 For mapping Wasm instructions to our DSL, we divide them into two groups:
 
@@ -91,26 +95,27 @@ a line of code always has to be a statement.
 
 Expressions can be turned into statements by either dropping their return value
 using the `Drop()` statement -- or by putting their return value on the
-stack using `Push()`. `Push()` isn't really a Wasm instructions, it just makes pushing the result of
-an expression on the stack explicit for our Kotlin DSL.  Unary plus can be used as a shorthand for `Push()`.
+stack using `Push()`. Push isn't really a Wasm instructions, it just makes pushing the result of
+an expression on the stack explicit for our Kotlin DSL. The unary plus operator can be used as a 
+shorthand for `Push()`.
 
-#### Literals and number types
+### Literals and number types
 
 Literal values -- or kotlin numbers in general -- are mapped as follows to Wasm types:
 
-| Kotlin type | Wasm type |
-|-------------|-----------|
-| Int         | I32       |
-| Long        | I64       |
-| Float       | F32       |
-| Double      | F64       |
+| Kotlin type  | Wasm type |
+|--------------|-----------|
+| Boolean, Int | I32       |
+| Long         | I64       |
+| Float        | F32       |
+| Double       | F64       |
 
 Typically, Kotlin numbers can be used directly and will be converted to expressions implicitly.
 The main exception is the first parameter of an operator: in this case, they need to be wrapped 
-in a `Const` call. 
+in a `Const()` call. 
 
 
-#### Mathematical and bitwise operations
+### Mathematical and bitwise operations
 
 Mathematical operations that match an overloadable Kotlin operator are mapped accordingly.
 If there are signed and unsigned variants of the operation, the signed variant is mapped to the
@@ -121,7 +126,122 @@ We have already seen `I32.mul` mapped to the multiplication operator in the squa
 Other binary operations such as `shl`, `xor` and `or` are mapped to kotlin infix operations,
 starting with an uppercase letter.
 
-##### Built-in infix functions
+
+
+### Relational Operations and `Bool`
+
+Unfortunately, Kotlin operator overloading for relational operations
+doesn't allow us to change the return type, so we map them to infix
+functions named after the corresponding Wasm instructions.
+
+To simplify combining comparisons, we provide a special type named `Bool`
+that maps to I32 but only can hold the values 0 (false) and 1 (true) .
+
+
+### Blocks and Control instructions
+
+Blocks are mapped to Kotlin functions with "builder" parameters. Branch labels
+are created using the `Label()` constructor immediately preceding the target block.
+
+For instance, a simple loop counting a variable `i` down looks as follows:
+
+```kt
+val i = Var(5)
+val cont = Label()
+Loop {
+  i.set(i - 1)
+  BrIf (cont, i Gt 1)
+}
+```
+
+#### Conditions
+
+
+For conditional statements, an optional else block can be provided via the `.Else()` method:
+
+```kt
+If (condition) {
+  // Do something
+}.Else {
+  // Do something else
+}
+```
+
+#### Blocks returning a value
+
+Blocks returning a value take the return type as a parameter and are treated as expressions:
+
+```kt
+Return (Block(I32) {
+  Push(42)
+})
+```
+
+For "If", there is an "expression" variant that doesn't have an explicit return type but works much like ternaries in other languages:
+
+```kt
+Return (If(condition, 42, 43))
+```
+
+#### Convenience Control instructions: `While` and `For`
+
+In addition to the Wasm `Loop` block, our DSL provides convenience `While()` and `For()` functions.
+
+`While()` will iterate the following block of instructions until the condition expression is false.
+
+`For()` takes two to three arguments:
+
+- The initial loop variable value
+- The maximum loop variable value. The iteration will continue until this value is reached, exluding the maximum value.
+- An optional step value
+
+Both constructs will map to a Wasm `loop` inside a `block` with some additional instructions for
+the condition and correspdonding branch.  
+
+
+
+## Forward Declarations
+
+
+The mappings described so far allow us to port a slightly more complex example than `sqr()`from the 
+Wasm test suite:
+
+```kt
+val factorialIterative = Func(I64) {
+  val n = Param(I64)
+  val res = Var(n)
+  For (2L, n) {
+    res.set(res * it)
+  }
+  Return(res)
+}
+```
+
+
+Unfortuantely, assigning function declarations to kotlin variables means that the variable is not
+available inside the function declaration. We need to use forward declarations to work around this
+limitation:
+
+```kt
+val factorialRecursive = ForwardDecl(I64) { Param(I64) }
+
+Implementation(factorialRecursive) {
+  val n = Param(I64)
+  Return(If(n Eq 0L, 1L, n * factorialRecursive(n - 1L)))
+}
+```
+
+
+## More Examples 
+
+More examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
+
+
+## Appendix
+
+### Appendix A: Instruction Name Mapping
+
+#### Built-in infix functions
 
 | Kt DSL | Wasm I32  | Wasm I64  | Wasm F32 | Wasm F64 |
 |--------|-----------|-----------|----------|----------|
@@ -140,7 +260,7 @@ starting with an uppercase letter.
 | ShrU   | I32.shr_u | I64.shr_u |          |          |
 | Xor    | I32.xor   | I64.xor   |          |          |
 
-##### Built-in functions with two arguments
+#### Built-in functions with two arguments
 
 | Kt DSL   | F32          | F64          |
 |----------|--------------|--------------|
@@ -149,7 +269,7 @@ starting with an uppercase letter.
 | Min      | F32.min      | F64.min      |
 
 
-##### Built-in single argument operator and functions
+#### Built-in single argument operator and functions
 
 | Kt DSL  | Wasm I32   | Wasm I64   | Wasm F32  | Wasm F64  |
 |---------|------------|------------|-----------|-----------|
@@ -163,12 +283,7 @@ starting with an uppercase letter.
 
 *) Mapped to multiple Wasm instructions for convenience.
 
-
-#### Relational Operations and `Bool`
-
-Unfortunately, Kotlin operator overloading for relational operations
-doesn't allow us to change the return type, so we map them to infix
-functions named after the corresponding Wasm instructions.
+#### Relational Operations
 
 | Kt DSL | Wasm I32 | Wasm I64 | Wasm F32 | Wasm F64 |
 |--------|----------|----------|----------|----------|
@@ -183,9 +298,6 @@ functions named after the corresponding Wasm instructions.
 | LtU    | I32.lt_u | I64.lt_u |          |          |
 | Ne     | I32.ne   | I64.ne   | F32.ne   | F64.ne   |
 
-To simplify combining comparisons, we define a special type for 
-I32 that only can hold the values 0 (false) and 1 (true) named `Bool`.
-
 
 #### Type Conversions
 
@@ -194,74 +306,21 @@ I32 that only can hold the values 0 (false) and 1 (true) named `Bool`.
 | I32       |                   | I32.wrap_i64      | I32.Reinterpret_f32 |                     |
 | - DSL     |                   | Wrap              | Reinterpret         |                     |
 | I32 (S)   |                   |                   | I32.trunc_f32_s     | I32.trunc_f64_s     |
-| - DSL     |                   |                   | TruncToI32S         | TruncToI32S         |
+| - DSL     |                   |                   | TruncToI32          | TruncToI32          |
 | I32 (U)   |                   |                   | I32.trunc_f32_u     | I32.trunc_f64_u     |
 | - DSL     |                   |                   | TruncToI32U         | TruncToI32U         |
 | I64       |                   |                   |                     | I64.Reinterpret_f64 | 
 | - DSL     |                   |                   |                     | Reinterpret         |
-| I64 (S)   | I64.extend_i32_s  | I32.wrap_i64      | I64.trunc_f32_s     | I64.trunc_f64_s     |
-| - DSL     |                   | Wrap              | TruncToI64S         | TruncToI64S         |
+| I64 (S)   | I64.extend_i32_s  |                   | I64.trunc_f32_s     | I64.trunc_f64_s     |
+| - DSL     |                   |                   | TruncToI64          | TruncToI64          |
 | I64 (U)   | I64.extend_i32_u  |                   | I64.trunc_f32_u     | I64.trunc_f64_u     |
 | - DSL     |                   |                   | TruncToI64U         | TruncToI64U         |
 | F32       | F32.convert_i32_s | F32.convert_i64_s |                     | F32.demote_f64      |
-| -DSL      | ConvertToF32S     | ConvertToF32S     |                     | Demote              |
+| -DSL      | ConvertToF32      | ConvertToF32      |                     | Demote              |
 |           | F32.convert_i32_u | F32.convert_i64_u |                     |                     |
 |           | ConvertToF32U     | ConvertToF32U     |                     |                     |
 | F64       | F64.convert_i32_s | F64.convert_i64_s | F63.promote_f32     |                     |
-| -DSL      | ConvertToF64S     | ConvertToF64S     | Promote             |                     |
+| -DSL      | ConvertToF64      | ConvertToF64      | Promote             |                     |
 |           | F64.convert_i32_u | F64.convert_i64_u |                     |                     |
 |           | ConvertToF64U     | ConvertToF64U     |                     |                     |
 
-
-#### Blocks and Control instructions
-
-
-
-##### Convenience Control instructions
-
-In addition to the Wasm `Loop` block, our DSL provides convenience `While()` and `For()` blocks.
-
-`While()` will iterate the following block of instructions until the condition expression is false.
-
-`For()` takes two to three arguments:
-
-- The initial loop variable value
-- The maximum loop variable value. The iteration will continue until this value is reached, exluding the maximum value.
-- An optional step value
-
-
-#### Memory and table instructions
-
-We'll discuss memory and table instruction in the context of the corresponding module
-sections below.
-
-
-
-### Iterative Factorial Example
-
-The mappings described so far allow us to port a more complex example from the Wasm test suite:
-
-```kt
-val facIterNamed = Func(I64) {
-    val n = Param(I64)
-
-    val i = Var(n)
-    val res = Var(1L)
-
-    While(i Gt 1L) {
-        res.set(res * i)
-        i.set(i - 1L)
-    }
-    Return(res)
-}
-```
-
-
-### Recursion 
-
-
-
-
-## More Examples 
-
-More examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
