@@ -5,7 +5,7 @@
 The initial motivation for this project was just to see how far one can take Kotlin DSLs.
 
 That said, it might actually be useful for situations where one needs to generate Wasm code
-in a general kotlin context.
+in a general Kotlin context. 
 
 ## Overview
 
@@ -88,6 +88,21 @@ using the `Drop()` statement -- or by putting their return value on the
 stack using `Push()`. `Push()` isn't really a Wasm instructions, it just makes pushing the result of
 an expression on the stack explicit for our Kotlin DSL.  Unary plus can be used as a shorthand for `Push()`.
 
+#### Literals and number types
+
+Literal values -- or kotlin numbers in general -- are mapped as follows to Wasm types:
+
+| Kotlin type | Wasm type |
+|-------------|-----------|
+| Int         | I32       |
+| Long        | I64       |
+| Float       | F32       |
+| Double      | F64       |
+
+Typically, Kotlin numbers can be used directly and will be converted to expressions implicitly.
+The main exception is the first parameter of an operator: in this case, they need to be wrapped 
+in a `Const` call. 
+
 #### Mathematical and bitwise operations
 
 Mathematical operations that match an overloadable Kotlin operator are mapped accordingly.
@@ -142,12 +157,11 @@ starting with an uppercase letter.
 *) Mapped to multiple Wasm instructions for convenience.
 
 
-#### Relational Operations
+#### Relational Operations and `Bool`
 
 Unfortunately, Kotlin operator overloading for relational operations
 doesn't allow us to change the return type, so we map them to infix
 functions named after the corresponding Wasm instructions.
-
 
 | Kt DSL | Wasm I32 | Wasm I64 | Wasm F32 | Wasm F64 |
 |--------|----------|----------|----------|----------|
@@ -161,6 +175,9 @@ functions named after the corresponding Wasm instructions.
 | Lt     | I32.lt_s | I64.lt_s | F32.lt   | F64.lt   |
 | LtU    | I32.lt_u | I64.lt_u |          |          |
 | Ne     | I32.ne   | I64.ne   | F32.ne   | F64.ne   |
+
+To simplify combining comparisons, we define a special type for 
+I32 that only can hold the values 0 (false) and 1 (true) named `Bool`.
 
 
 #### Type Conversions
@@ -187,6 +204,11 @@ functions named after the corresponding Wasm instructions.
 | -DSL      | ConvertToF64S     | ConvertToF64S     |                     | Demote              |
 |           | F64.convert_i32_u | F64.convert_i64_u | F64.promote_f32     |                     |
 |           | ConvertToF64U     | ConvertToF64U     | Promote             |                     |
+
+
+### Factorial Example
+
+The mappings described so far allow us to port a more complex 
 
 
 ## More Examples 
