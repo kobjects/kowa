@@ -49,7 +49,7 @@ val sqr = Func(I32) {
 }
 ```
 
-### Function Exports and Imports
+### Function Exports
 
 Functions (and other constructs) can be exported using `Export()`. A full example for 
 a WebAssembly module exporting a function "sqr" for calculating the square of 32 bit integers is:
@@ -61,12 +61,6 @@ val module = Module {
     Return (x * x)
   })
 }
-```
-
-Functions can be imported using the `ImportFunc()` function.
-
-```kt
-  val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
 ```
 
 ### Invocation from Kotlin
@@ -90,6 +84,13 @@ property is checked by the DSL only.
 
 Mutable local variables can be assigned new values by calling `.set()`.
 
+### Function imports
+
+Functions can be imported using the `ImportFunc()` function.
+
+```kt
+  val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
+```
 
 ## Instructions, Expressions and Statements
 
@@ -352,7 +353,7 @@ val call7 = Func(I32) {
 
 ## Examples 
 
-Usage examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
+Usage Examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
 
 
 ## Appendix
