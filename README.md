@@ -279,7 +279,7 @@ val module = Module {
 }
 ```
 
-### Memory access instructions
+### Memory Access Instructions
 
 Wasm memory `load` and `store` instructions are mapped to array access
 on a memory property indicating the access width, offset and align.
@@ -355,6 +355,19 @@ val call7 = Func(I32) {
 
 Usage Examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
 
+
+## Known Issues 
+
+- There are no releases yet that can be directly referenced from Maven / Gradle. Given that there are
+very likely still some serious bugs in Wasm binary code
+generation, it's probably best to check out the 
+full project anyway, simplifying fixes.
+
+## Plan
+
+- Port more Wasm tests
+- Find a nice clean way to test the generated binary code
+- Add Wasm 2.0 features (one by one)
 
 ## Appendix
 
