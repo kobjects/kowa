@@ -83,7 +83,21 @@ open class WasmWriter {
         }
     }
 
-    fun writeWasm(wasm: Wasm) = writeBytes(wasm.code)
+    /**
+     * Transfers the given wasm code fragment to this writer, mapping the
+     * end and else positions by adding the current size.
+     */
+    fun writeWasm(wasm: Wasm) {
+        val offset = size
+        writeBytes(wasm.code)
+
+        for (entry in wasm.endPositions) {
+            endPositions[entry.key + offset] = entry.value + offset
+        }
+        for (entry in wasm.elsePositions) {
+            elsePositions[entry.key + offset] = entry.value + offset
+        }
+    }
 
     fun writeU32(value: UInt) = writeU32(value.toInt())
 
