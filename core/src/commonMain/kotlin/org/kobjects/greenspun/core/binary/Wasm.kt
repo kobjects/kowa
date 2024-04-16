@@ -1,5 +1,9 @@
 package org.kobjects.greenspun.core.binary
 
+/**
+ * A block of Wasm code, including maps from block start positions to the corresponding
+ * else and end positions.
+ */
 class Wasm(
     val code: ByteArray,
 
