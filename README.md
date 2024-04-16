@@ -49,7 +49,7 @@ val sqr = Func(I32) {
 }
 ```
 
-### Function Exports
+### Function Exports and Imports
 
 Functions (and other constructs) can be exported using `Export()`. A full example for 
 a WebAssembly module exporting a function "sqr" for calculating the square of 32 bit integers is:
@@ -61,6 +61,12 @@ val module = Module {
     Return (x * x)
   })
 }
+```
+
+Functions can be imported using the `ImportFunc()` function.
+
+```kt
+  val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
 ```
 
 ### Invocation from Kotlin
@@ -84,13 +90,6 @@ property is checked by the DSL only.
 
 Mutable local variables can be assigned new values by calling `.set()`.
 
-### Function imports
-
-Functions can be imported using the `ImportFunc()` function.
-
-```kt
-  val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
-```
 
 ## Instructions, Expressions and Statements
 
@@ -317,15 +316,43 @@ The access alignment overrides the general offset of the access type
 property while the two offsets are added.
 
 
-## Tables
+## Tables and Elements
 
+Tables declarations are similar to memory declarations, but they take an additional type parameter --
+which is required to be `FuncRef` for Wasm 1.
 
-## Imports
+```kt
+val table = Table(FuncRef, 10)
+```
 
+Similar to data declarations, the `elem` method on table references can be used to pre-fill table
+elements:
 
-## More Examples 
+```
+val constI32A = Func(I32) { Return(65) }
+table.elem(7, constI32A)
+```
 
-More examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
+In order to call functions stored in tables, their type must be supplied explicitly.
+For this purpose, we declare a function type returning an I32 value and not taking
+any parameters:
+
+```kt
+val outI32 = Type(I32) {}
+```
+
+We can now call this function by invoking the table with the function index, the 
+expected type and the function parameters (which we don't have in this simple case):
+
+```kt
+val call7 = Func(I32) {
+  Return(table(7, outI32))
+}
+```
+
+## Examples 
+
+Usage examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
 
 
 ## Appendix
