@@ -3,12 +3,12 @@ package org.kobjects.greenspun.core.global
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 interface GlobalInterface : Exportable {
     val index: Int
     val mutable: Boolean
-    val type: WasmType
+    val type: Type
 
 
     override fun writeExportDescription(writer: WasmWriter) {

@@ -3,16 +3,16 @@ package org.kobjects.greenspun.core.func
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.expr.Expr
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmWriter
 
 class LocalReference(
     val index: Int,
     val mutable: Boolean,
-    val type: WasmType
+    val type: Type
 ) : Expr() {
 
-    override val returnType: List<WasmType>
+    override val returnType: List<Type>
         get() = listOf(type)
 
     override fun toString(writer: CodeWriter) =
@@ -36,7 +36,7 @@ class LocalReference(
             writer.write(this@LocalReference, ".tee(", children.first(), ")")
         }
 
-        override val returnType: List<WasmType>
+        override val returnType: List<Type>
             get() = listOf(type)
 
         override fun toWasm(writer: WasmWriter) {

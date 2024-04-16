@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 /**
  *  I64 type & builtin operations.
  */
-object I64 : org.kobjects.greenspun.core.type.WasmType {
+object I64 : ValueType {
 
     operator fun invoke(value: Long) = Const(value)
 
@@ -44,7 +44,7 @@ object I64 : org.kobjects.greenspun.core.type.WasmType {
             writer.writeI64(value)
         }
 
-        override val returnType: List<org.kobjects.greenspun.core.type.WasmType>
+        override val returnType: List<org.kobjects.greenspun.core.type.Type>
             get() = listOf(I64)
     }
 

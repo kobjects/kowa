@@ -14,11 +14,11 @@ open class BodyBuilder(
     val moduleBuilder: ModuleBuilder,
     val blockType: BlockType,
     val parent: BodyBuilder?,
-    val variables: MutableList<WasmType>,
+    val variables: MutableList<Type>,
     val wasmWriter: WasmWriter,
-    val expectedReturnType: List<WasmType> = emptyList()
+    val expectedReturnType: List<Type> = emptyList()
 ) {
-    val stackTypes = mutableListOf<WasmType>()
+    val stackTypes = mutableListOf<Type>()
     var unreachableCodePosition = -1
     val label: Label?
 
@@ -87,7 +87,7 @@ open class BodyBuilder(
         wasmWriter.writeOpcode(WasmOpcode.END)
     }
 
-    fun Block(returnType: WasmType, init: BodyBuilder.() -> Unit) =
+    fun Block(returnType: Type, init: BodyBuilder.() -> Unit) =
         BlockExpr(
             WasmOpcode.BLOCK,
             init,
@@ -98,7 +98,7 @@ open class BodyBuilder(
                 wasmWriter,
                 listOf(returnType)))
 
-    fun Loop(returnType: WasmType, init: BodyBuilder.() -> Unit) =
+    fun Loop(returnType: Type, init: BodyBuilder.() -> Unit) =
         BlockExpr(
             WasmOpcode.LOOP,
             init,
@@ -123,7 +123,7 @@ open class BodyBuilder(
            writer.write("}")
         }
 
-        override val returnType: List<WasmType>
+        override val returnType: List<Type>
             get() = builder.expectedReturnType
 
         override fun toWasm(writer: WasmWriter) {
@@ -381,7 +381,7 @@ open class BodyBuilder(
     }
 
 
-    fun close(): List<WasmType> {
+    fun close(): List<Type> {
         require(unreachableCodePosition != -1 || expectedReturnType == stackTypes) {
             "Stack contents ($stackTypes) do not match expected types ($expectedReturnType) at $blockType end"
         }

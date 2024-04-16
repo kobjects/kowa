@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.type.Bool
@@ -35,7 +35,7 @@ class IfExpr(
         writer.writeOpcode(WasmOpcode.END)
     }
 
-    override val returnType: List<WasmType>
+    override val returnType: List<Type>
         get() = children[1].returnType
 
 }

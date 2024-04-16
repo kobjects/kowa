@@ -2,13 +2,12 @@ package org.kobjects.greenspun.core.global
 
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.expr.Expr
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 class GlobalImpl(
     override val index: Int,
     override val mutable: Boolean,
-    override val type: WasmType,
+    override val type: Type,
     val initializer: Wasm
 
 ) : GlobalInterface {

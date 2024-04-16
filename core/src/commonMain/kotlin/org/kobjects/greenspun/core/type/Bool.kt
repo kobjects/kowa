@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
 
-object Bool : WasmType {
+object Bool : ValueType {
 
     val False = Const(false)
 
@@ -40,7 +40,7 @@ object Bool : WasmType {
             writer.write(if (value) "True" else "False")
         }
 
-        override val returnType: List<org.kobjects.greenspun.core.type.WasmType>
+        override val returnType: List<org.kobjects.greenspun.core.type.Type>
             get() = listOf(Bool)
 
         override fun toWasm(writer: WasmWriter) {

@@ -1,16 +1,16 @@
 package org.kobjects.greenspun.core.module
 
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 class ParamBuilder {
 
-    internal val paramTypes = mutableListOf<WasmType>()
+    internal val paramTypes = mutableListOf<Type>()
 
 
-    fun Param(vararg type: WasmType) {
+    fun Param(vararg type: Type) {
         paramTypes.addAll(type)
     }
 
-    fun build(): List<WasmType> = paramTypes.toList()
+    fun build(): List<Type> = paramTypes.toList()
 
 }

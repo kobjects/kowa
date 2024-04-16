@@ -3,8 +3,8 @@ package org.kobjects.greenspun.core.expr
 import org.kobjects.greenspun.core.type.*
 
 enum class UnaryOperator(
-    val deviantResultType: WasmType? = null,
-    vararg val supportedTypes: WasmType
+    val deviantResultType: Type? = null,
+    vararg val supportedTypes: Type
 ) {
     ABS(null, F32, F64),
 

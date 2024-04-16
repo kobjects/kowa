@@ -1,9 +1,9 @@
 package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractBinaryOperation(
-    val type: WasmType,
+    val type: Type,
     val operator: BinaryOperator,
     vararg children: Any,
 ) : Expr(*children) {
@@ -24,7 +24,7 @@ abstract class AbstractBinaryOperation(
                 stringifyChildren(writer, "(", " $operator ", ")")
         }
 
-    final override val returnType: List<WasmType>
+    final override val returnType: List<Type>
         get() = listOf(type)
 
 }

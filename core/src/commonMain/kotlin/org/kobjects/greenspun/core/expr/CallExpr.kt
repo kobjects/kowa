@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncInterface
@@ -44,6 +44,6 @@ class CallExpr(
         writer.writeU32(callable.index)
     }
 
-    override val returnType: List<WasmType>
+    override val returnType: List<Type>
         get() = callable.type.returnType
 }

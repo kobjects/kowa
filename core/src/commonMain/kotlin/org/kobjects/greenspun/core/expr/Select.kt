@@ -21,7 +21,7 @@ class Select(vararg children: Any) : Expr(children) {
     override fun toString(writer: CodeWriter) =
         stringifyChildren(writer, "Select(")
 
-    override val returnType: List<WasmType>
+    override val returnType: List<Type>
         get() = children.first().returnType
 
 

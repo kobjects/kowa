@@ -1,9 +1,9 @@
 package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 abstract class AbstractUnaryOperation(
-    val type: WasmType,
+    val type: Type,
     val operator: UnaryOperator,
     operand: Any
 ) : Expr(operand) {
@@ -17,7 +17,7 @@ abstract class AbstractUnaryOperation(
         }
     }
 
-    final override val returnType: List<WasmType>
+    final override val returnType: List<Type>
         get() = listOf(if (operator.deviantResultType != null) operator.deviantResultType else type)
 
 

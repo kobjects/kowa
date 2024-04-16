@@ -8,7 +8,7 @@ import org.kobjects.greenspun.core.binary.WasmWriter
 /**
  * F32 type & builtin operations.
  */
-object F32 : org.kobjects.greenspun.core.type.WasmType {
+object F32 : ValueType {
 
     operator fun invoke(value: Float) = Const(value)
 
@@ -54,7 +54,7 @@ object F32 : org.kobjects.greenspun.core.type.WasmType {
             writer.writeF32(value)
         }
 
-        override val returnType: List<org.kobjects.greenspun.core.type.WasmType>
+        override val returnType: List<org.kobjects.greenspun.core.type.Type>
             get() = listOf(F32)
     }
 

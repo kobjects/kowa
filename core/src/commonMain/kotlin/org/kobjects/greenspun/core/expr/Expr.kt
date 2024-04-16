@@ -2,7 +2,7 @@ package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.Wasm
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 
 abstract class Expr(vararg child: Any) {
@@ -42,7 +42,7 @@ abstract class Expr(vararg child: Any) {
         writer.write(suffix)
     }
 
-    abstract val returnType: List<WasmType>
+    abstract val returnType: List<Type>
 
     operator fun plus(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.ADD, this, of(other))
     operator fun minus(other: Any) = returnType.first().createBinaryOperation(BinaryOperator.SUB, this, of(other))
@@ -82,36 +82,36 @@ abstract class Expr(vararg child: Any) {
 
 
     companion object {
-        fun of(value: Any): Expr = if (value is Expr) value else WasmType.of(value).createConstant(value)
+        fun of(value: Any): Expr = if (value is Expr) value else Type.of(value).createConstant(value)
 
-        fun Abs(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.ABS, Expr.of(value))
-        fun Ceil(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CEIL, Expr.of(value))
-        fun Clz(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CLZ, Expr.of(value))
-        fun Ctz(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CTZ, Expr.of(value))
-        fun Floor(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.FLOOR, Expr.of(value))
-        fun Popcnt(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.POPCNT, Expr.of(value))
-        fun Neg(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.NEG, Expr.of(value))
-        fun Nearest(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.NEAREST, Expr.of(value))
-        fun Sqrt(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.SQRT, Expr.of(value))
-        fun Trunc(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.TRUNC, Expr.of(value))
-        fun Extend(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.EXTEND_S, Expr.of(value))
-        fun ExtendU(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.EXTEND_U, Expr.of(value))
-        fun TruncToI32(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I32_S, Expr.of(value))
-        fun TruncToI32U(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I32_U, Expr.of(value))
-        fun TruncToI64(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I64_S, Expr.of(value))
-        fun TruncToI64U(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I64_U, Expr.of(value))
-        fun Wrap(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.WRAP, Expr.of(value))
-        fun Promote(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.PROMOTE, Expr.of(value))
-        fun Demote(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.DEMOTE, Expr.of(value))
-        fun ConvertToF32(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F32_S, Expr.of(value))
-        fun ConvertToF32U(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F32_U, Expr.of(value))
-        fun ConvertToF64(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F64_S, Expr.of(value))
-        fun ConvertToF64U(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F64_U, Expr.of(value))
-        fun Reinterpret(value: Any): Expr = WasmType.of(value).createUnaryOperation(UnaryOperator.REINTERPRET, Expr.of(value))
+        fun Abs(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.ABS, Expr.of(value))
+        fun Ceil(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CEIL, Expr.of(value))
+        fun Clz(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CLZ, Expr.of(value))
+        fun Ctz(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CTZ, Expr.of(value))
+        fun Floor(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.FLOOR, Expr.of(value))
+        fun Popcnt(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.POPCNT, Expr.of(value))
+        fun Neg(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.NEG, Expr.of(value))
+        fun Nearest(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.NEAREST, Expr.of(value))
+        fun Sqrt(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.SQRT, Expr.of(value))
+        fun Trunc(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.TRUNC, Expr.of(value))
+        fun Extend(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.EXTEND_S, Expr.of(value))
+        fun ExtendU(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.EXTEND_U, Expr.of(value))
+        fun TruncToI32(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I32_S, Expr.of(value))
+        fun TruncToI32U(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I32_U, Expr.of(value))
+        fun TruncToI64(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I64_S, Expr.of(value))
+        fun TruncToI64U(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.TRUNC_TO_I64_U, Expr.of(value))
+        fun Wrap(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.WRAP, Expr.of(value))
+        fun Promote(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.PROMOTE, Expr.of(value))
+        fun Demote(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.DEMOTE, Expr.of(value))
+        fun ConvertToF32(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F32_S, Expr.of(value))
+        fun ConvertToF32U(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F32_U, Expr.of(value))
+        fun ConvertToF64(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F64_S, Expr.of(value))
+        fun ConvertToF64U(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.CONVERT_TO_F64_U, Expr.of(value))
+        fun Reinterpret(value: Any): Expr = Type.of(value).createUnaryOperation(UnaryOperator.REINTERPRET, Expr.of(value))
         fun Max(left: Expr, right: Any) = left.returnType.first().createBinaryOperation(BinaryOperator.MAX, left, of(right))
         fun Min(left: Expr, right: Any) = left.returnType.first().createBinaryOperation(BinaryOperator.MIN, left, of(right))
 
-        fun Not(value: Any): Expr = (if (value is Expr) value.returnType.first() else WasmType.of(value)).createUnaryOperation(UnaryOperator.NOT, Expr.of(value))
+        fun Not(value: Any): Expr = (if (value is Expr) value.returnType.first() else Type.of(value)).createUnaryOperation(UnaryOperator.NOT, Expr.of(value))
 
     }
 }

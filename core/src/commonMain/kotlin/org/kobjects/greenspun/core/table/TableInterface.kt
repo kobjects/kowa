@@ -3,12 +3,11 @@ package org.kobjects.greenspun.core.table
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.type.FuncType
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 interface TableInterface : Exportable {
     val index: Int
-    val type: WasmType
+    val type: Type
     val min: Int
     val max: Int?
 

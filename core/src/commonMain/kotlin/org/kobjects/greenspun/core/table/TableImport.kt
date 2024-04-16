@@ -3,13 +3,13 @@ package org.kobjects.greenspun.core.table
 import org.kobjects.greenspun.core.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Imported
 import org.kobjects.greenspun.core.expr.CodeWriter
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 class TableImport(
     override val index: Int,
     override val module: String,
     override val name: String,
-    override val type: WasmType,
+    override val type: Type,
     override val min: Int,
     override val max: Int?
 

@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.expr
 
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 class InvalidExpr(val errorMessage: String) : Expr() {
 
@@ -13,6 +13,6 @@ class InvalidExpr(val errorMessage: String) : Expr() {
         throw IllegalStateException(errorMessage)
     }
 
-    override val returnType: List<WasmType>
+    override val returnType: List<Type>
         get() = emptyList()
 }

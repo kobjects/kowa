@@ -9,10 +9,9 @@ import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.memory.*
 import org.kobjects.greenspun.core.table.*
 import org.kobjects.greenspun.core.expr.Expr
-import org.kobjects.greenspun.core.runtime.Func
 import org.kobjects.greenspun.core.type.FuncType
 import org.kobjects.greenspun.core.type.I32
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 
 class ModuleBuilder {
     val types = mutableListOf<FuncType>()
@@ -31,7 +30,7 @@ class ModuleBuilder {
     fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
 
 
-    fun Type(vararg returnType: WasmType, init:  ParamBuilder.() -> Unit): FuncType {
+    fun Type(vararg returnType: Type, init:  ParamBuilder.() -> Unit): FuncType {
         val paramBuilder = ParamBuilder()
         paramBuilder.init()
         return getFuncType(returnType.toList(), paramBuilder.build())
@@ -94,7 +93,7 @@ class ModuleBuilder {
         return globalReference
     }
 
-    fun ForwardDecl(vararg returnType: WasmType, init: ParamBuilder.() -> Unit): ForwardDeclaration {
+    fun ForwardDecl(vararg returnType: Type, init: ParamBuilder.() -> Unit): ForwardDeclaration {
         val paramBuilder = ParamBuilder()
         paramBuilder.init()
         val f = ForwardDeclaration(funcs.size, getFuncType(returnType.toList(), paramBuilder.build()))
@@ -102,7 +101,7 @@ class ModuleBuilder {
         return f
     }
 
-    fun Func(vararg returnType: WasmType, init: FuncBuilder.() -> Unit): FuncImpl {
+    fun Func(vararg returnType: Type, init: FuncBuilder.() -> Unit): FuncImpl {
         val builder = FuncBuilder(this, returnType.toList())
         builder.init()
         val f = builder.build()
@@ -129,11 +128,11 @@ class ModuleBuilder {
     }
 
 
-    fun ImportGlobal(module: String, name: String, type: WasmType) = importGlobal(module, name, true, type)
+    fun ImportGlobal(module: String, name: String, type: Type) = importGlobal(module, name, true, type)
 
-    fun ImportConst(module: String, name : String, type: WasmType) = importGlobal(module, name, false, type)
+    fun ImportConst(module: String, name : String, type: Type) = importGlobal(module, name, false, type)
 
-    fun ImportFunc(module: String, name: String, vararg returnType: WasmType, init: ParamBuilder.() -> Unit): FuncImport {
+    fun ImportFunc(module: String, name: String, vararg returnType: Type, init: ParamBuilder.() -> Unit): FuncImport {
         require (funcs.lastOrNull() !is FuncImpl) {
             "All func imports need to be declared before any function declaration."
         }
@@ -147,7 +146,7 @@ class ModuleBuilder {
     }
 
 
-    fun ImportTable(module: String, name: String, type: WasmType, min: Int, max: Int?): TableImport {
+    fun ImportTable(module: String, name: String, type: Type, min: Int, max: Int?): TableImport {
         require (tables.lastOrNull() !is TableImpl) {
             "Import tables before table declarations."
         }
@@ -166,7 +165,7 @@ class ModuleBuilder {
         return result
     }
 
-    fun ImportVar(module: String, name : String, type: WasmType) = importGlobal(module, name, true, type)
+    fun ImportVar(module: String, name : String, type: Type) = importGlobal(module, name, true, type)
 
     fun Memory(min: Int, max: Int? = null): MemoryImpl {
         if (memory != null) {
@@ -183,7 +182,7 @@ class ModuleBuilder {
     }
 
 
-    fun Table(type: WasmType, min: Int, max: Int? = null): TableImpl {
+    fun Table(type: Type, min: Int, max: Int? = null): TableImpl {
         val index = tables.size
         val table = TableImpl(index, type, min, max)
         tables.add(table)
@@ -224,7 +223,7 @@ class ModuleBuilder {
         }
         return GlobalReference(global)
     }
-    private fun importGlobal(module: String, name: String, mutable: Boolean, type: WasmType): GlobalReference {
+    private fun importGlobal(module: String, name: String, mutable: Boolean, type: Type): GlobalReference {
         require(globals.lastOrNull() !is GlobalImpl) {
             "All global imports must be declared before declaring global variables."
         }
@@ -234,7 +233,7 @@ class ModuleBuilder {
     }
 
 
-    internal fun getFuncType(returnType: List<WasmType>, paramTypes: List<WasmType>): FuncType {
+    internal fun getFuncType(returnType: List<Type>, paramTypes: List<Type>): FuncType {
         for (candidate in types) {
             if (candidate.matches(returnType, paramTypes)) {
                 return candidate

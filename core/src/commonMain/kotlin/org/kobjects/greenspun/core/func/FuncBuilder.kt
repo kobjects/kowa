@@ -2,18 +2,18 @@ package org.kobjects.greenspun.core.func
 
 import org.kobjects.greenspun.core.binary.WasmOpcode
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.type.WasmType
+import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.expr.Expr
 
 class FuncBuilder(
     moduleBuilder: ModuleBuilder,
-    val returnType: List<WasmType>
+    val returnType: List<Type>
 ) : BodyBuilder(moduleBuilder, BlockType.FUNCTION, null, mutableListOf(), WasmWriter(), returnType) {
 
     internal var paramCount = 0
 
-    fun Param(type: WasmType): LocalReference {
+    fun Param(type: Type): LocalReference {
 
         if (paramCount != variables.size) {
             throw IllegalStateException("Parameters can't be declared after local variables.")

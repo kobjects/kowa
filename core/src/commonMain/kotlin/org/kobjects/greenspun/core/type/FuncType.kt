@@ -2,17 +2,12 @@ package org.kobjects.greenspun.core.type
 
 import org.kobjects.greenspun.core.binary.WasmTypeCode
 import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.expr.Expr
 
 data class FuncType(
     val index: Int,
-    val returnType: List<org.kobjects.greenspun.core.type.WasmType>,
-    val parameterTypes: List<org.kobjects.greenspun.core.type.WasmType>,
-) : org.kobjects.greenspun.core.type.WasmType {
-
-    override fun createConstant(value: Any): Expr {
-        throw UnsupportedOperationException("TODO: Re-Implement when FuncInterface is a node")
-    }
+    val returnType: List<Type>,
+    val parameterTypes: List<Type>,
+) : Type {
 
     override fun toWasm(writer: WasmWriter) {
         writer.writeTypeCode(WasmTypeCode.FUNC)
@@ -26,7 +21,7 @@ data class FuncType(
         }
     }
 
-    fun matches(returnType: List<org.kobjects.greenspun.core.type.WasmType>, parameterTypes: List<org.kobjects.greenspun.core.type.WasmType>) =
+    fun matches(returnType: List<Type>, parameterTypes: List<Type>) =
         this.returnType == returnType && this.parameterTypes == parameterTypes
 
 }
