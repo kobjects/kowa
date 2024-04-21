@@ -7,7 +7,6 @@ import kotlin.test.assertEquals
 
 class FactorialTest {
 
-
     val module = Module {
 
         val facRecNamed = ForwardDecl(I64) { Param(I64) }

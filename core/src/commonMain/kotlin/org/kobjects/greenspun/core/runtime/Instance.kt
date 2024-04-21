@@ -33,7 +33,7 @@ class Instance(
     }
 
     /** func imports bound to this instance */
-    val funcImports: List<Func>
+    val funcImports: List<org.kobjects.greenspun.core.runtime.FuncImport>
     val globalImports: List<Global>
 
     val funcExports = module.exports
@@ -103,9 +103,9 @@ class Instance(
             set(value) = setGlobal(index, value)
     }
 
-    inner class FuncExport(val func: FuncInterface) : Func {
+    inner class FuncExport(val func: FuncInterface)  {
 
-        override operator fun invoke(vararg param: Any): Any {
+        operator fun invoke(vararg param: Any): Any {
             return func.call(rootContext, *param)
         }
     }

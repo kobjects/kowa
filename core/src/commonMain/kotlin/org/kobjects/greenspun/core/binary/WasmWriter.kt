@@ -73,6 +73,7 @@ open class WasmWriter {
             WasmOpcode.BLOCK,
             WasmOpcode.LOOP ->
                 openBlocks.add(size)
+            else -> {}
         }
         writeByte(opcode.code.toByte())
         when (opcode) {
@@ -80,6 +81,7 @@ open class WasmWriter {
                 elsePositions[openBlocks.last()] = size
             WasmOpcode.END ->
                 endPositions[openBlocks.removeLast()] = size
+            else -> {}
         }
     }
 

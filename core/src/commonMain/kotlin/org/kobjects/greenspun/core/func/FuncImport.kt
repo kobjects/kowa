@@ -14,7 +14,7 @@ class FuncImport(
 
 
     override fun call(context: LocalRuntimeContext, vararg params: Any) =
-        context.instance.funcImports[index](*params)
+        context.instance.funcImports[index](context.instance, *params)
 
     override fun writeImport(writer: CodeWriter) {
         writer.newLine()

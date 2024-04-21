@@ -1,12 +1,12 @@
 package org.kobjects.greenspun.core.runtime
 
 class ImportObject {
-    val funcs = mutableMapOf<Pair<String, String>, Func>()
+    val funcs = mutableMapOf<Pair<String, String>, FuncImport>()
     val memories = mutableMapOf<Pair<String, String>, Memory>()
     val globals = mutableMapOf<Pair<String, String>, Global>()
     val tables = mutableMapOf<Pair<String, String>, Table>()
 
-    fun addFunc(module: String, name: String, func: Func) {
+    fun addFunc(module: String, name: String, func: FuncImport) {
         funcs[module to name] = func
     }
 
