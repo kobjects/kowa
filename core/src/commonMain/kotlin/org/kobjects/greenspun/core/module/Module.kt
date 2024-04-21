@@ -1,16 +1,16 @@
 package org.kobjects.greenspun.core.module
 
-import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmSection
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmOpcode
+import org.kobjects.greenspun.binary.WasmSection
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.FuncImpl
 import org.kobjects.greenspun.core.func.FuncImport
 import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.global.GlobalInterface
 import org.kobjects.greenspun.core.global.GlobalImport
-import org.kobjects.greenspun.core.runtime.ImportObject
-import org.kobjects.greenspun.core.runtime.Instance
+import org.kobjects.greenspun.runtime.ImportObject
+import org.kobjects.greenspun.runtime.Instance
 import org.kobjects.greenspun.core.memory.DataImpl
 import org.kobjects.greenspun.core.memory.MemoryImpl
 import org.kobjects.greenspun.core.memory.MemoryImport

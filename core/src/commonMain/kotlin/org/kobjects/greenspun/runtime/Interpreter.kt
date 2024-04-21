@@ -1,6 +1,6 @@
-package org.kobjects.greenspun.core.runtime
+package org.kobjects.greenspun.runtime
 
-import org.kobjects.greenspun.core.binary.*
+import org.kobjects.greenspun.binary.*
 import org.kobjects.greenspun.core.func.FuncInterface
 import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import kotlin.math.*

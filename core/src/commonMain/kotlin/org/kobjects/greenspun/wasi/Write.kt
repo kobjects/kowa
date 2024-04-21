@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.wasi
 
-import org.kobjects.greenspun.core.binary.storeI32
-import org.kobjects.greenspun.core.runtime.ImportObject
+import org.kobjects.greenspun.binary.storeI32
+import org.kobjects.greenspun.runtime.ImportObject
 
 fun ImportObject.addStdIoImpl() {
 

@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.table
 
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Exportable
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.type.Type

@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmOpcode
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.type.*
 
 class Select(vararg children: Any) : Expr(children) {

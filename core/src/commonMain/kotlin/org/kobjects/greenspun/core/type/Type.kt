@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.BinaryOperator
 import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.expr.RelationalOperator

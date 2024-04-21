@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.binary
+package org.kobjects.greenspun.binary
 
 
 fun ByteArray.loadI16(offset: Int): Short =

@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.binary
+package org.kobjects.greenspun.binary
 
 enum class WasmTypeCode(val code: Byte) {
     VOID(0x40),

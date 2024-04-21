@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.runtime
+package org.kobjects.greenspun.runtime
 
 import org.kobjects.greenspun.core.func.FuncImport
 import org.kobjects.greenspun.core.func.FuncInterface
@@ -33,7 +33,7 @@ class Instance(
     }
 
     /** func imports bound to this instance */
-    val funcImports: List<org.kobjects.greenspun.core.runtime.FuncImport>
+    val funcImports: List<org.kobjects.greenspun.runtime.FuncImport>
     val globalImports: List<Global>
 
     val funcExports = module.exports

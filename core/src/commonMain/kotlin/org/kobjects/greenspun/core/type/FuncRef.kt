@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.type
 
-import org.kobjects.greenspun.core.binary.WasmTypeCode
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmTypeCode
+import org.kobjects.greenspun.binary.WasmWriter
 
 object FuncRef : org.kobjects.greenspun.core.type.Type {
     override fun toWasm(writer: WasmWriter) {

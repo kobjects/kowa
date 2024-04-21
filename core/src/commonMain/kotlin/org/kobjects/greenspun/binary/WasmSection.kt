@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.binary
+package org.kobjects.greenspun.binary
 
 enum class WasmSection(val id: Byte) {
     CUSTOM(0),

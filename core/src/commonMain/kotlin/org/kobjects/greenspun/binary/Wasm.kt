@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.binary
+package org.kobjects.greenspun.binary
 
 /**
  * A block of Wasm code, including maps from block start positions to the corresponding

@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.memory
 
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Imported
 import org.kobjects.greenspun.core.expr.CodeWriter
 

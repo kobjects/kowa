@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.memory
 
-import org.kobjects.greenspun.core.binary.WasmOpcode
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmOpcode
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.expr.Expr
 import org.kobjects.greenspun.core.type.I32

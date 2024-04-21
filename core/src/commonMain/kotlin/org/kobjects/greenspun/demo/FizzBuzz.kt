@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.demo
 
 
-import org.kobjects.greenspun.core.runtime.ImportObject
+import org.kobjects.greenspun.runtime.ImportObject
 import org.kobjects.greenspun.core.module.Module
 import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32

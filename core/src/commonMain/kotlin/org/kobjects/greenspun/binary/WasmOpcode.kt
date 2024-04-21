@@ -1,4 +1,4 @@
-package org.kobjects.greenspun.core.binary
+package org.kobjects.greenspun.binary
 
 enum class WasmOpcode(val code: Int) {
     UNREACHABLE(0),

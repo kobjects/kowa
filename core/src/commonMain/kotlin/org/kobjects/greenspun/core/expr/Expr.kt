@@ -1,7 +1,7 @@
 package org.kobjects.greenspun.core.expr
 
-import org.kobjects.greenspun.core.binary.Wasm
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.Wasm
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.type.Type
 
 

@@ -1,11 +1,11 @@
 package org.kobjects.greenspun.core.func
 
-import org.kobjects.greenspun.core.binary.Wasm
-import org.kobjects.greenspun.core.binary.WasmOpcode
+import org.kobjects.greenspun.binary.Wasm
+import org.kobjects.greenspun.binary.WasmOpcode
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.type.Type
-import org.kobjects.greenspun.core.binary.WasmWriter
-import org.kobjects.greenspun.core.runtime.Interpreter
+import org.kobjects.greenspun.binary.WasmWriter
+import org.kobjects.greenspun.runtime.Interpreter
 import org.kobjects.greenspun.core.type.FuncType
 
 class FuncImpl(

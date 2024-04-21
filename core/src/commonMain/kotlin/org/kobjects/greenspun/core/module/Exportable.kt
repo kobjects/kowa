@@ -1,6 +1,6 @@
 package org.kobjects.greenspun.core.module
 
-import org.kobjects.greenspun.core.binary.WasmWriter
+import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.expr.CodeWriter
 
 interface Exportable {
