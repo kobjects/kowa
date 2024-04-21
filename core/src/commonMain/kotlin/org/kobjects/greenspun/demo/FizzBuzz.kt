@@ -7,14 +7,14 @@ import org.kobjects.greenspun.core.type.Bool
 import org.kobjects.greenspun.core.type.I32
 import org.kobjects.greenspun.wasi.addStdIoImpl
 
+@OptIn(ExperimentalStdlibApi::class)
 fun main(argv: Array<String>) {
 
     val fizzBuzzModule = Module {
 
         val memory = Memory(1)
 
-        // Print helpers
-        val newline = memory.data("\n")
+        // Helpers for printing strings and numbers via fd_write
         val digit = memory.data("0")
         val write_result = memory.data("1234")
 
@@ -43,10 +43,11 @@ fun main(argv: Array<String>) {
             PrintI32Inner(i, true)
         }
 
-        // FizzBuzz
+        // "Actual" FizzBuzz
 
         val fizz = memory.data("Fizz")
         val buzz = memory.data("Buzz")
+        val newline = memory.data("\n")
 
         val fizzBuzzFunc = Func {
             For(1, 21) { count ->
@@ -66,14 +67,27 @@ fun main(argv: Array<String>) {
             }
         }
 
-        Export("fizzBuzz", fizzBuzzFunc)
+        Start(fizzBuzzFunc)
+        // Export("fizzBuzz", fizzBuzzFunc)
     }
+
+    println("FizzBuzz wasm binary code:")
+    println(fizzBuzzModule.toWasm().toHexString(HexFormat {
+        bytes.bytesPerLine = 32
+        bytes.bytesPerGroup = 16
+        bytes.groupSeparator = "  "
+    }))
+
+    println()
+    println("Instantiating module:")
+    println()
 
     val importObject = ImportObject()
     importObject.addStdIoImpl()
 
-    val fizzBuzzInstance = fizzBuzzModule.instantiate(importObject)
+    fizzBuzzModule.instantiate(importObject)
 
-    fizzBuzzInstance.funcExports["fizzBuzz"]!!()
+    // val fizzBuzzInstance = fizzBuzzModule.instantiate(importObject)
+    // fizzBuzzInstance.funcExports["fizzBuzz"]!!()
 }
 

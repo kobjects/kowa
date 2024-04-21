@@ -37,7 +37,7 @@ class Module(
             funcs.filterIsInstance<FuncImport>() +
                     globals.filterIsInstance<MemoryImport>() +
                     tables.filterIsInstance<TableImport>() +
-                    (if (memory == null) emptyList() else listOf(memory))
+                    (if (memory is MemoryImport) listOf(memory) else emptyList())
             ) as List<Imported>
 
 

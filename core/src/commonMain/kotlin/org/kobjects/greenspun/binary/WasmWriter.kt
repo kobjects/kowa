@@ -76,12 +76,16 @@ open class WasmWriter {
             else -> {}
         }
         writeByte(opcode.code.toByte())
-        when (opcode) {
-            WasmOpcode.ELSE ->
-                elsePositions[openBlocks.last()] = size
-            WasmOpcode.END ->
-                endPositions[openBlocks.removeLast()] = size
-            else -> {}
+        if (openBlocks.isNotEmpty()) {
+            when (opcode) {
+                WasmOpcode.ELSE ->
+                    elsePositions[openBlocks.last()] = size
+
+                WasmOpcode.END ->
+                    endPositions[openBlocks.removeLast()] = size
+
+                else -> {}
+            }
         }
     }
 
