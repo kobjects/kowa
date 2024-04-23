@@ -15,15 +15,16 @@ fun main(argv: Array<String>) {
         val memory = Memory(1)
 
         // Helpers for printing strings and numbers via fd_write
+
         val digit = memory.data("0")
         val write_result = memory.data("1234")
 
-        val FdWrite = ImportFunc("wasi_snapshot_preview1", "fd_write", I32) { Param(I32, I32, I32, I32) }
+        val fd_write = ImportFunc("wasi_snapshot_preview1", "fd_write", I32) { Param(I32, I32, I32, I32) }
 
         val Print = Func {
             val address = Param(I32)
             val len = Param(I32)
-            Drop(FdWrite(1, address, len, write_result))
+            Drop(fd_write(1, address, len, write_result))
         }
 
         val PrintI32Inner = ForwardDecl() { Param(I32, Bool) }
@@ -31,6 +32,7 @@ fun main(argv: Array<String>) {
         Implementation(PrintI32Inner) {
             val i = Param(I32)
             val uncoditional = Param(Bool)
+
             If ((i Gt 0) Or uncoditional) {
                 PrintI32Inner(i / 10, false)
                 memory.u8i32[digit] = i % 10 + 48
@@ -68,26 +70,19 @@ fun main(argv: Array<String>) {
         }
 
         Start(fizzBuzzFunc)
-        // Export("fizzBuzz", fizzBuzzFunc)
     }
 
-    println("FizzBuzz wasm binary code:")
+    println("Instantiating module:\n")
+
+    val importObject = ImportObject()
+    importObject.addStdIoImpl()
+    fizzBuzzModule.instantiate(importObject)
+
+    println("\n\nFizzBuzz wasm binary code:\n")
     println(fizzBuzzModule.toWasm().toHexString(HexFormat {
         bytes.bytesPerLine = 32
         bytes.bytesPerGroup = 16
         bytes.groupSeparator = "  "
     }))
-
-    println()
-    println("Instantiating module:")
-    println()
-
-    val importObject = ImportObject()
-    importObject.addStdIoImpl()
-
-    fizzBuzzModule.instantiate(importObject)
-
-    // val fizzBuzzInstance = fizzBuzzModule.instantiate(importObject)
-    // fizzBuzzInstance.funcExports["fizzBuzz"]!!()
 }
 

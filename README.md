@@ -9,13 +9,139 @@ That said, it might be useful for situations where one needs to generate Wasm co
 In a way, this project constitutes a Wasm "macro assembler" with
 the Kotlin as the "macro language" -- at the price of an "unusual" syntax.
 
+## Hello World
 
-## General
+To run our "Hello World" example, start with checking out
+the project from github using the following command:
 
-To avoid confusion with "regular" Kotlin, all top level constructs use camel case starting with an uppercase letter, e.g. Wasm `if` becomes
-`If` in the DSL
+```sh
+git clone https://github.com/kobjects/greenspun.git
+```
 
-## Modules
+To check that everything works as expected, run the "HelloWorld" demo 
+using the following command line:
+
+```kt
+./gradlew jvmRun -DmainClass=org.kobjects.greenspun.demo.HelloWorldKt
+```
+
+The output should look as follows:
+
+```
+Instantiating module:
+
+Hello World
+
+
+HelloWorld wasm binary code:
+
+0061736d01000000010c0260047f7f7f  7f017f60000002230116776173695f73
+6e617073686f745f7072657669657731  0866645f777269746500000302010105
+030100010c01020a0f010d0041014100  410c410c10001a0b0b1b020041000b0c
+48656c6c6f20576f726c640a00410c0b  0431323334
+```
+
+### Examining the Example
+
+To play with the example, open the project in a Kotlin IDE, e.g. IntelliJ or Android Studio.
+
+The "Hello World" example is located in 
+
+```
+core/src/commonMain/kotlin/org/kobjects/greenspun/demo
+```
+
+
+The core of this example looks as follows:
+
+```kt
+val module = Module {
+  val memory = Memory(1)
+
+  val helloWorld = memory.data("Hello World\n")
+  val write_result = memory.data("1234")
+
+  val fd_write = ImportFunc("wasi_snapshot_preview1", "fd_write", I32) { 
+    Param(I32, I32, I32, I32) 
+  }
+
+  val PrintHelloWorld = Func {
+    Drop(fd_write(1, helloWorld, helloWorld.len, write_result))
+  }
+
+  Start(PrintHelloWorld)
+}
+```
+
+Here, we first declare memory and then use the data method to declare some
+pre-filled memory locations.
+
+Next, we import the `fd_write`-function form WASI in order to be able to
+write to stdout. The funtion takes four I32 parameters: The file descriptor
+(1 for stdout), the address of the string to write, the length of the
+string to write and an address to store the numbers of bytes written. The
+return value is an error code -- which is zero if there was no error.
+
+Then we declare our own `PrintHelloWorld` function which uses `fd_write`
+to print our "Hello World" string to stdout.
+
+Finally, we declare that `PrintHelloWorld` is the "start" function of the 
+module -- which means that it's automatically run on instantiation.
+
+
+### Running "Hello World" with the built-in Wasm Interpreter
+
+The simplest way to run the example is to use the built-in interpreter:
+
+```
+val importObject = ImportObject()
+importObject.addStdIoImpl()
+module.instantiate(importObject)
+```
+
+To use our WASI stdout implementation, we first need to add it to the
+import object. As our "Hello World" function is the "start" function
+of our module, it will run automatically when we instnantiate the module.
+
+To run the example from the command line, use the following command in
+the project root directory:
+
+
+### Getting the WASM code out and running it elsewhere
+
+The example used the following lines to print the binary
+wasm code:
+
+```
+0061736d01000000010c0260047f7f7f  7f017f60000002230116776173695f73
+6e617073686f745f7072657669657731  0866645f777269746500000302010105
+030100010c01020a0f010d0041014100  410c410c10001a0b0b1b020041000b0c
+48656c6c6f20576f726c640a00410c0b  0431323334
+```
+
+When disassembling this code (e.g. using [wasm2wat](https://webassembly.github.io/wabt/demo/wasm2wat/)), we get the following output in regulare Wasm text format:
+
+```wat
+(module
+  (type $t0 (func (param i32 i32 i32 i32) (result i32)))
+  (type $t1 (func))
+  (import "wasi_snapshot_preview1" "fd_write" (func $wasi_snapshot_preview1.fd_write (type $t0)))
+  (func $f1 (type $t1)
+    (drop
+      (call $wasi_snapshot_preview1.fd_write
+        (i32.const 1)
+        (i32.const 0)
+        (i32.const 12)
+        (i32.const 12))))
+  (memory $M0 1)
+  (data $d0 (i32.const 0) "Hello World\0a")
+  (data $d1 (i32.const 12) "1234"))
+```
+
+## DSL Description
+
+
+### Modules
 
 Modules are declared using the "Module" function. The DSL parameter contains the declarations
 of all the sections. Example:
@@ -25,7 +151,7 @@ val module = Module {
 }
 ```
 
-## Functions
+### Functions
 
 Functions are declared using the "Func" function inside a module, taking the return value type as a direct 
 argument and the function body as a DSL parameter. Example: 
@@ -38,7 +164,7 @@ val module = Module {
 }
 ```
 
-### Function Parameters
+#### Function Parameters
 
 Function parameters are declared inside the "body" using the "Param" function. Example:
 
@@ -49,7 +175,7 @@ val sqr = Func(I32) {
 }
 ```
 
-### Function Exports
+#### Function Exports
 
 Functions (and other constructs) can be exported using `Export()`. A full example for 
 a WebAssembly module exporting a function "sqr" for calculating the square of 32 bit integers is:
@@ -63,7 +189,7 @@ val module = Module {
 }
 ```
 
-### Invocation from Kotlin
+#### Invocation from Kotlin
 
 The exported `sqr()`-function can be invoked from Kotlin by instantiating the module and
 then invoking the exported function: 
@@ -74,7 +200,7 @@ val sqr4 = instance.invoke("sqr", 4)
 println("The square of 4 is: $sqr4")
 ```
 
-### Local Variables 
+#### Local Variables 
 
 Local variables are declared similar to parameters using `Var()` or `Const()`.
 Instead of the type argument, they take an expression defining the initial value. 
@@ -84,7 +210,7 @@ property is checked by the DSL only.
 
 Mutable local variables can be assigned new values by calling `.set()`.
 
-### Function imports
+#### Function imports
 
 Functions can be imported using the `ImportFunc()` function.
 
@@ -92,7 +218,10 @@ Functions can be imported using the `ImportFunc()` function.
   val LogStr = ImportFunc("console", "logStr") { Param(I32, I32) } 
 ```
 
-## Instructions, Expressions and Statements
+### Instructions, Expressions and Statements
+
+To avoid confusion with "regular" Kotlin, all top level constructs use camel case starting with an uppercase
+letter, e.g. Wasm `if` becomes `If` in the DSL.
 
 For mapping Wasm instructions to our DSL, we divide them into two groups:
 
@@ -108,7 +237,7 @@ stack using `Push()`. Push isn't really a Wasm instructions, it just makes pushi
 an expression on the stack explicit for our Kotlin DSL. The unary plus operator can be used as a 
 shorthand for `Push()`.
 
-### Literals and number types
+#### Literals and number types
 
 Literal values -- or kotlin numbers in general -- are mapped as follows to Wasm types:
 
@@ -124,7 +253,7 @@ The main exception is the first parameter of an operator: in this case, they nee
 in a `Const()` call. 
 
 
-### Mathematical and bitwise operations
+#### Mathematical and bitwise operations
 
 Mathematical operations that match an overloadable Kotlin operator are mapped accordingly.
 If there are signed and unsigned variants of the operation, the signed variant is mapped to the
@@ -137,7 +266,7 @@ starting with an uppercase letter.
 
 
 
-### Relational Operations and `Bool`
+#### Relational Operations and `Bool`
 
 Unfortunately, Kotlin operator overloading for relational operations
 doesn't allow us to change the return type, so we map them to infix
@@ -147,7 +276,7 @@ To simplify combining comparisons, we provide a special type named `Bool`
 that maps to I32 but only can hold the values 0 (false) and 1 (true) .
 
 
-### Blocks and Control instructions
+#### Blocks and Control instructions
 
 Blocks are mapped to Kotlin functions with "builder" parameters. Branch labels
 are created using the `Label()` constructor immediately preceding the target block.
@@ -163,7 +292,7 @@ Loop {
 }
 ```
 
-#### Conditions
+##### Conditions
 
 
 For conditional statements, an optional else block can be provided via the `.Else()` method:
@@ -176,7 +305,7 @@ If (condition) {
 }
 ```
 
-#### Blocks returning a value
+##### Blocks returning a value
 
 Blocks returning a value take the return type as a parameter and are treated as expressions:
 
@@ -192,7 +321,7 @@ For "If", there is an "expression" variant that doesn't have an explicit return 
 Return (If(condition, 42, 43))
 ```
 
-#### Convenience Control instructions: `While` and `For`
+##### Convenience Control instructions: `While` and `For`
 
 In addition to the Wasm `Loop` block, our DSL provides convenience `While()` and `For()` functions.
 
@@ -208,8 +337,7 @@ Both constructs will map to a Wasm `loop` inside a `block` with some additional 
 the condition and correspdonding branch.  
 
 
-
-## Forward Declarations
+### Forward Declarations
 
 
 The mappings described so far allow us to port a slightly more complex example than `sqr()`from the 
@@ -241,7 +369,7 @@ Implementation(factorialRecursive) {
 ```
 
 
-## Memory and Data
+### Memory and Data
 
 Memory is declared using the `Memory` function, taking the
 minimum and optional maximum size as parameters.
@@ -256,7 +384,7 @@ val module = Module {
 }
 ```
 
-### Data
+#### Data
 
 Memory can be statically initialized with data. If no 
 offset is provided, the end of the previous data will
@@ -279,7 +407,7 @@ val module = Module {
 }
 ```
 
-### Memory Access Instructions
+#### Memory Access Instructions
 
 Wasm memory `load` and `store` instructions are mapped to array access
 on a memory property indicating the access width, offset and align.
@@ -317,7 +445,7 @@ The access alignment overrides the general offset of the access type
 property while the two offsets are added.
 
 
-## Tables and Elements
+### Tables and Elements
 
 Tables declarations are similar to memory declarations, but they take an additional type parameter --
 which is required to be `FuncRef` for Wasm 1.
@@ -351,7 +479,7 @@ val call7 = Func(I32) {
 }
 ```
 
-## Examples 
+## More Examples 
 
 Usage Examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
 
