@@ -170,6 +170,12 @@ class Module(
         }
     }
 
+    private fun writeStart(writer: WasmWriter) {
+        if (start != null) {
+            writer.writeU32(start)
+        }
+    }
+
     private fun writeSection(writer: WasmWriter, section: WasmSection, writeSection: (WasmWriter) -> Unit) {
         val sectionWriter = WasmWriter()
         writeSection(sectionWriter)
@@ -203,8 +209,8 @@ class Module(
         writeSection(writer, WasmSection.MEMORY, ::writeMemory)
         writeSection(writer, WasmSection.GLOBAL, ::writeGlobals)
         writeSection(writer, WasmSection.EXPORT, ::writeExports)
-        // Start
-        // Elements
+        writeSection(writer, WasmSection.START, ::writeStart)
+        writeSection(writer, WasmSection.ELEMENT, ::writeElements)
         writeSection(writer, WasmSection.DATA_COUNT, ::writeDataCount)
         writeSection(writer, WasmSection.CODE, ::writeCode)
         writeSection(writer, WasmSection.DATA, ::writeDatas)
