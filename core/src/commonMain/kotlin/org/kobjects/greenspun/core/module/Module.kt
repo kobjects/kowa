@@ -27,7 +27,7 @@ class Module(
     val tables: List<TableInterface>,
     val memory: MemoryInterface?,
     val globals: List<GlobalInterface>,
-    val exports: List<Export>,
+    val exports: List<ExportImpl>,
     val start: Int?,
     val elements: List<ElementImpl>,
     val datas: List<DataImpl>,

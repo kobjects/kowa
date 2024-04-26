@@ -19,7 +19,7 @@ class ModuleBuilder {
     val datas = mutableListOf<DataImpl>()
     var start: Int? = null
     var globals = mutableListOf<GlobalInterface>()
-    val exports = mutableMapOf<String, Export>()
+    val exports = mutableMapOf<String, ExportImpl>()
     var elements = mutableListOf<ElementImpl>()
     var memory: MemoryInterface? = null
     var tables = mutableListOf<TableInterface>()
@@ -27,7 +27,7 @@ class ModuleBuilder {
     private val activeDataAddress = mutableMapOf<MemoryInterface, Int>()
 
 
-    fun Const(initializerOrValue: Any) = global(null, false, initializerOrValue)
+    fun Const(initializerOrValue: Any) = global(false, initializerOrValue)
 
 
     fun Type(vararg returnType: Type, init:  ParamBuilder.() -> Unit): FuncType {
@@ -77,22 +77,6 @@ class ModuleBuilder {
         return result
     }
 
-    fun Export(name: String, funcReference: FuncInterface): FuncInterface {
-        export(name, funcReference)
-        return funcReference
-    }
-
-    fun Export(name: String, funcReference: ForwardDeclaration): ForwardDeclaration {
-        export(name, funcReference)
-        return funcReference
-    }
-
-
-    fun Export(name: String, globalReference: GlobalReference): GlobalReference {
-        export(name, globalReference.global)
-        return globalReference
-    }
-
     fun ForwardDecl(vararg returnType: Type, init: ParamBuilder.() -> Unit): ForwardDeclaration {
         val paramBuilder = ParamBuilder()
         paramBuilder.init()
@@ -108,9 +92,6 @@ class ModuleBuilder {
         funcs.add(f)
         return f
     }
-
-    fun Global(initializerOrValue: Any) = global(null, true, initializerOrValue)
-
 
     fun Implementation(forwardDeclaration: ForwardDeclaration, init: FuncBuilder.() -> Unit): FuncImpl {
         require(funcs[forwardDeclaration.index] == forwardDeclaration) {
@@ -189,7 +170,7 @@ class ModuleBuilder {
         return table
     }
 
-    fun Var(initializerOrValue: Any) = global(null, true, initializerOrValue)
+    fun Var(initializerOrValue: Any) = global(true, initializerOrValue)
 
 
     fun build() = Module(
@@ -204,23 +185,21 @@ class ModuleBuilder {
         datas.toList(),
     )
 
-    private fun export(name: String, exportable: Exportable) {
+    fun <T:Exportable> Export(name: String, exportable: T): T {
         require(!exports.containsKey(name)) {
             "Export '$name' already defined."
         }
-        exports.put(name, Export(name, exportable))
+        exports.put(name, ExportImpl(name, exportable))
+        return exportable
     }
 
-    private fun global(name: String?, mutable: Boolean, initializerOrValue: Any): GlobalReference {
+    private fun global(mutable: Boolean, initializerOrValue: Any): GlobalReference {
         val initializer = Expr.of(initializerOrValue)
         require(initializer.returnType.size == 1) {
             "Initializer expression must yield a single value, but the return type is ${initializer.returnType}"
         }
         val global = GlobalImpl(globals.size, mutable, initializer.returnType.first(), initializer.toWasm())
         globals.add(global)
-        if (name != null) {
-            exports.put(name, Export(name, global))
-        }
         return GlobalReference(global)
     }
     private fun importGlobal(module: String, name: String, mutable: Boolean, type: Type): GlobalReference {

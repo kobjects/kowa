@@ -1,5 +1,6 @@
 package org.kobjects.greenspun.wasi
 
+import org.kobjects.greenspun.binary.loadI32
 import org.kobjects.greenspun.binary.storeI32
 import org.kobjects.greenspun.runtime.ImportObject
 
@@ -10,13 +11,18 @@ fun ImportObject.addStdIoImpl() {
         require(fd == 1) {
             "Currently, only fd 1 (stdout) is supported for fd_write."
         }
-        val memPos = params[1] as Int
-        val len = params[2] as Int
-        val nwritten = params[3] as Int
-        val bytes = instance.memory.bytes.copyOfRange(memPos, memPos + len)
-        instance.memory.bytes.storeI32(nwritten, len)
-        print(bytes.decodeToString())
-        len
+        val ioVector = params[1] as Int
+        val count = params[2] as Int
+        var nwritten = 0
+        for (i in 0 until count) {
+            val address = instance.memory.bytes.loadI32(ioVector + i * 8)
+            val len = instance.memory.bytes.loadI32(ioVector + i * 8 + 4)
+            val bytes = instance.memory.bytes.copyOfRange(address, address + len)
+            print(bytes.decodeToString())
+            nwritten += bytes.size
+        }
+        instance.memory.bytes.storeI32(params[3] as Int, nwritten)
+        0
     }
 
 }

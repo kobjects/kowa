@@ -13,7 +13,7 @@ interface MemoryInterface : Exportable {
 
     override fun writeExportDescription(writer: WasmWriter) {
         writer.writeByte(2)
-        writeType(writer)
+        writer.writeByte(0)
     }
 
     override fun writeExportDescription(writer: CodeWriter) {

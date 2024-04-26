@@ -16,15 +16,18 @@ fun main(argv: Array<String>) {
 
         // Helpers for printing strings and numbers via fd_write
 
-        val digit = memory.data("0")
-        val write_result = memory.data("1234")
+        // Reserve 16 bytes space for fd_write data
+        val digit = memory.data(16, "0")
 
         val fd_write = ImportFunc("wasi_snapshot_preview1", "fd_write", I32) { Param(I32, I32, I32, I32) }
 
         val Print = Func {
             val address = Param(I32)
             val len = Param(I32)
-            Drop(fd_write(1, address, len, write_result))
+
+            memory.i32[0] = address
+            memory.i32[4] = len
+            Drop(fd_write(1, 0, 1, 8))
         }
 
         val PrintI32Inner = ForwardDecl() { Param(I32, Bool) }
