@@ -12,7 +12,7 @@ fun main(argv: Array<String>) {
 
     val fizzBuzzModule = Module {
 
-        val memory = Memory(1)
+        val memory = Export("memory", Memory(1))
 
         // Helpers for printing strings and numbers via fd_write
 
