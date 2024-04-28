@@ -45,6 +45,10 @@ class FuncBuilder(
 
     internal fun build(): FuncImpl {
         close()
+        require(wasmWriter.openBlocks.isEmpty()) {
+            "Unexpected open block"
+        }
+        wasmWriter.writeOpcode(WasmOpcode.END)
         return FuncImpl(
             index = moduleBuilder.funcs.size,
             type = moduleBuilder.getFuncType(returnType, variables.subList(0, paramCount)),

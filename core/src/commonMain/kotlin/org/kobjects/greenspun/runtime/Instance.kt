@@ -2,7 +2,6 @@ package org.kobjects.greenspun.runtime
 
 import org.kobjects.greenspun.core.func.FuncImport
 import org.kobjects.greenspun.core.func.FuncInterface
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import org.kobjects.greenspun.core.global.GlobalImpl
 import org.kobjects.greenspun.core.global.GlobalImport
 import org.kobjects.greenspun.core.global.GlobalInterface
@@ -14,8 +13,6 @@ class Instance(
     val module: Module,
     val importObject: ImportObject
 ) {
-    val rootContext = LocalRuntimeContext(this)
-
     val tables = Array<Table>(module.tables.size) {
         val table = module.tables[it]
         if (table is TableImport) importObject.tables[table.module to table.name]!!
@@ -29,7 +26,7 @@ class Instance(
     val globalImportCount = module.globals.filterIsInstance<GlobalImport>().size
     val globalValues = Array(module.globals.size - globalImportCount) {
         val global = module.globals[it + globalImportCount]
-        if (global is GlobalImpl) Interpreter(global.initializer, rootContext).run1() else Unit
+        if (global is GlobalImpl) Interpreter(global.initializer, Stack(this)).run1() else Unit
     }
 
     /** func imports bound to this instance */
@@ -48,6 +45,8 @@ class Instance(
 
 
     init {
+        val rootContext = Stack(this)
+
         val moduleFuncImports = module.funcs.filterIsInstance<FuncImport>()
         funcImports = List(moduleFuncImports.size) {
             val funcImport = moduleFuncImports[it]
@@ -106,15 +105,13 @@ class Instance(
     inner class FuncExport(val func: FuncInterface)  {
 
         operator fun invoke(vararg params: Any): Any {
-            require(rootContext.stack.stack.isEmpty()) {
-                "Root context stack is expected to be empty."
-            }
+            val rootContext = Stack(this@Instance)
             val type = func.type
             require(params.size == type.parameterTypes.size) {
                 "Parameter count (${params.size} does not match expectation ${func.type.parameterTypes.size})"
             }
             for (param in params) {
-                rootContext.stack.pushAny(param)
+                rootContext.pushAny(param)
             }
             func.call(rootContext)
             require(rootContext.stack.size == func.type.returnType.size) {
@@ -122,10 +119,9 @@ class Instance(
             }
             return when (func.type.returnType.size) {
                 0 -> Unit
-                1 -> rootContext.stack.popAny()
+                1 -> rootContext.popAny()
                 else -> {
-                    val result = Array<Any>(func.type.returnType.size) { rootContext.stack.stack[it] }
-                    rootContext.stack.stack.clear()
+                    val result = Array<Any>(func.type.returnType.size) { rootContext.stack[it] }
                     result
                 }
             }

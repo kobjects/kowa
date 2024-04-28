@@ -8,7 +8,7 @@ open class WasmWriter {
 
     val endPositions = mutableMapOf<Int, Int>()
     val elsePositions = mutableMapOf<Int, Int>()
-    val openBlocks = mutableListOf(0)
+    val openBlocks = mutableListOf<Int>()
 
     private fun ensureCapacity(capacity: Int) {
         if (data.size < capacity) {
@@ -189,6 +189,11 @@ open class WasmWriter {
         return result
     }
 
-    fun toWasm() = Wasm(toByteArray(), endPositions.toMap(), elsePositions.toMap())
+    fun toWasm(): Wasm {
+        require(openBlocks.isEmpty()) {
+            "Unclosed blocks"
+        }
+        return Wasm(toByteArray(), endPositions.toMap(), elsePositions.toMap())
+    }
 
 }

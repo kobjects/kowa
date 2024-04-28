@@ -7,6 +7,7 @@ import org.kobjects.greenspun.core.type.Type
 import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.runtime.Interpreter
 import org.kobjects.greenspun.core.type.FuncType
+import org.kobjects.greenspun.runtime.Stack
 
 class FuncImpl(
     override val index: Int,
@@ -16,14 +17,10 @@ class FuncImpl(
 ) : FuncInterface {
 
 
-    override fun call(context: LocalRuntimeContext) {
-        val childContext = context.createChild(type.parameterTypes.size, locals.size)
-        Interpreter(body, childContext).run()
-
-        for (i in 0 until type.parameterTypes.size + locals.size) {
-            context.stack.stack.removeAt(childContext.basePointer)
-        }
-
+    override fun call(context: Stack) {
+        context.enterFrame(type.parameterTypes.size, locals.size)
+        Interpreter(body, context).run()
+        context.leaveFrame(type.parameterTypes.size, locals.size)
     }
 
     fun toString(writer: CodeWriter) {
@@ -56,7 +53,6 @@ class FuncImpl(
             local.toWasm(writer)
         }
         writer.writeBytes(body.code)
-        writer.writeOpcode(WasmOpcode.END)
     }
 
 

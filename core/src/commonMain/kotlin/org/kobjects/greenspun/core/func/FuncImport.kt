@@ -4,6 +4,7 @@ import org.kobjects.greenspun.binary.WasmWriter
 import org.kobjects.greenspun.core.module.Imported
 import org.kobjects.greenspun.core.expr.CodeWriter
 import org.kobjects.greenspun.core.type.FuncType
+import org.kobjects.greenspun.runtime.Stack
 
 class FuncImport(
     override val index: Int,
@@ -13,12 +14,12 @@ class FuncImport(
 ) : FuncInterface, Imported {
 
 
-    override fun call(context: LocalRuntimeContext) {
+    override fun call(context: Stack) {
         val params = Array<Any>(type.parameterTypes.size) {
-            context.stack.peekAny(type.parameterTypes.size - it - 1)
+            context.peekAny(type.parameterTypes.size - it - 1)
         }
         val result = context.instance.funcImports[index](context.instance, *params)
-        context.stack.replaceAny(type.parameterTypes.size, result)
+        context.replaceAny(type.parameterTypes.size, result)
     }
 
     override fun writeImport(writer: CodeWriter) {

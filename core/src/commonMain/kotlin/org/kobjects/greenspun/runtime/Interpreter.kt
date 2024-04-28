@@ -2,23 +2,19 @@ package org.kobjects.greenspun.runtime
 
 import org.kobjects.greenspun.binary.*
 import org.kobjects.greenspun.core.func.FuncInterface
-import org.kobjects.greenspun.core.func.LocalRuntimeContext
 import kotlin.math.*
 
 class Interpreter(
     val wasm: Wasm,
-    val localRuntimeContext: LocalRuntimeContext,
+    val stack: Stack
 ) {
 
-    val stack = localRuntimeContext.stack
     val blockStack = mutableListOf<Int>()
     var ip = 0
 
 
     fun run() {
-        blockStack.add(0)
-        while (ip < wasm.code.size) {
-            step()
+        while (step()) {
         }
     }
 
@@ -27,7 +23,7 @@ class Interpreter(
         return stack.popAny()
     }
 
-    fun step() {
+    fun step(): Boolean {
         val ip0 = ip
         val opcode = WasmOpcode.of(wasm.code[ip++].toInt())
 
@@ -66,7 +62,12 @@ class Interpreter(
             WasmOpcode.ELSE ->
                 ip = wasm.endPositions[blockStack.removeLast()]!!
 
-            WasmOpcode.END -> blockStack.removeLast()
+            WasmOpcode.END ->
+                if (blockStack.isEmpty()) {
+                    return false
+                } else {
+                    blockStack.removeLast()
+                }
             WasmOpcode.BR -> br(immediateU32())
             WasmOpcode.BR_IF -> {
                 val depth = immediateU32()
@@ -76,34 +77,33 @@ class Interpreter(
             }
 
             WasmOpcode.BR_TABLE -> throw UnsupportedOperationException()
-            WasmOpcode.RETURN -> ip = wasm.code.size
+            WasmOpcode.RETURN -> return false
             WasmOpcode.CALL -> {
-                localRuntimeContext.instance.module.funcs[immediateU32()].call(localRuntimeContext)
+                stack.instance.module.funcs[immediateU32()].call(stack)
             }
 
             WasmOpcode.CALL_INDIRECT -> {
                 val i = stack.popI32()
                 val typeIdx = immediateU32()
                 val tableIdx = immediateU32()
-                val table = localRuntimeContext.instance.tables[tableIdx]
+                val table = stack.instance.tables[tableIdx]
                 val f = table.elements[i] as FuncInterface
                 require(typeIdx == f.type.index) {
-                    "Indirect call type mismatch. Expected type is ${localRuntimeContext.instance.module.types[typeIdx]} index $typeIdx; actual: ${f.type} index ${f.type.index}"
+                    "Indirect call type mismatch. Expected type is ${stack.instance.module.types[typeIdx]} index $typeIdx; actual: ${f.type} index ${f.type.index}"
                 }
-                f.call(localRuntimeContext)
-                return
+                f.call(stack)
             }
 
             WasmOpcode.DROP -> stack.popAny()
             WasmOpcode.SELECT -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.SELECT_T -> throw UnsupportedOperationException(opcode.name)
 
-            WasmOpcode.LOCAL_GET -> stack.pushAny(localRuntimeContext.getLocal(immediateU32()))
-            WasmOpcode.LOCAL_SET -> localRuntimeContext.setLocal(immediateU32(), stack.popAny())
-            WasmOpcode.LOCAL_TEE -> localRuntimeContext.setLocal(immediateU32(), stack.peekAny())
+            WasmOpcode.LOCAL_GET -> stack.pushAny(stack.getLocal(immediateU32()))
+            WasmOpcode.LOCAL_SET -> stack.setLocal(immediateU32(), stack.popAny())
+            WasmOpcode.LOCAL_TEE -> stack.setLocal(immediateU32(), stack.peekAny())
 
-            WasmOpcode.GLOBAL_GET -> stack.pushAny(localRuntimeContext.instance.getGlobal(immediateU32()))
-            WasmOpcode.GLOBAL_SET -> localRuntimeContext.instance.setGlobal(immediateU32(), stack.popAny())
+            WasmOpcode.GLOBAL_GET -> stack.pushAny(stack.instance.getGlobal(immediateU32()))
+            WasmOpcode.GLOBAL_SET -> stack.instance.setGlobal(immediateU32(), stack.popAny())
 
             WasmOpcode.TABLE_GET -> throw UnsupportedOperationException(opcode.name)
             WasmOpcode.TABLE_SET -> throw UnsupportedOperationException(opcode.name)
@@ -111,152 +111,152 @@ class Interpreter(
             WasmOpcode.I32_LOAD -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI32(localRuntimeContext.instance.memory.bytes.loadI32(offset + stack.popI32()))
+                stack.pushI32(stack.instance.memory.bytes.loadI32(offset + stack.popI32()))
             }
 
             WasmOpcode.I64_LOAD -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI64(localRuntimeContext.instance.memory.bytes.loadI64(offset + stack.popI32()))
+                stack.pushI64(stack.instance.memory.bytes.loadI64(offset + stack.popI32()))
             }
 
             WasmOpcode.F32_LOAD -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushF32(localRuntimeContext.instance.memory.bytes.loadF32(offset + stack.popI32()))
+                stack.pushF32(stack.instance.memory.bytes.loadF32(offset + stack.popI32()))
             }
 
             WasmOpcode.F64_LOAD -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushF64(localRuntimeContext.instance.memory.bytes.loadF64(offset + stack.popI32()))
+                stack.pushF64(stack.instance.memory.bytes.loadF64(offset + stack.popI32()))
             }
 
             WasmOpcode.I32_LOAD_8_S -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI32(localRuntimeContext.instance.memory.bytes[offset + stack.popI32()].toInt())
+                stack.pushI32(stack.instance.memory.bytes[offset + stack.popI32()].toInt())
             }
 
             WasmOpcode.I32_LOAD_8_U -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushU32(localRuntimeContext.instance.memory.bytes[offset + stack.popI32()].toUByte().toUInt())
+                stack.pushU32(stack.instance.memory.bytes[offset + stack.popI32()].toUByte().toUInt())
             }
 
             WasmOpcode.I32_LOAD_16_S -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI32(localRuntimeContext.instance.memory.bytes.loadI16(offset + stack.popI32()).toInt())
+                stack.pushI32(stack.instance.memory.bytes.loadI16(offset + stack.popI32()).toInt())
             }
 
             WasmOpcode.I32_LOAD_16_U -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushU32(localRuntimeContext.instance.memory.bytes.loadU16(offset + stack.popI32()).toUInt())
+                stack.pushU32(stack.instance.memory.bytes.loadU16(offset + stack.popI32()).toUInt())
             }
 
             WasmOpcode.I64_LOAD_8_S -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI64(localRuntimeContext.instance.memory.bytes[offset + stack.popI32()].toLong())
+                stack.pushI64(stack.instance.memory.bytes[offset + stack.popI32()].toLong())
             }
 
             WasmOpcode.I64_LOAD_8_U -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushU64(localRuntimeContext.instance.memory.bytes[offset + stack.popI32()].toULong())
+                stack.pushU64(stack.instance.memory.bytes[offset + stack.popI32()].toULong())
             }
 
             WasmOpcode.I64_LOAD_16_S -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI64(localRuntimeContext.instance.memory.bytes.loadI16(offset + stack.popI32()).toLong())
+                stack.pushI64(stack.instance.memory.bytes.loadI16(offset + stack.popI32()).toLong())
             }
 
             WasmOpcode.I64_LOAD_16_U -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushU64(localRuntimeContext.instance.memory.bytes.loadU16(offset + stack.popI32()).toULong())
+                stack.pushU64(stack.instance.memory.bytes.loadU16(offset + stack.popI32()).toULong())
             }
 
             WasmOpcode.I64_LOAD_32_S -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushI64(localRuntimeContext.instance.memory.bytes.loadI32(offset + stack.popI32()).toLong())
+                stack.pushI64(stack.instance.memory.bytes.loadI32(offset + stack.popI32()).toLong())
             }
 
             WasmOpcode.I64_LOAD_32_U -> {
                 val align = immediateU32()
                 val offset = immediateU32()
-                stack.pushU64(localRuntimeContext.instance.memory.bytes.loadI32(offset + stack.popI32()).toULong())
+                stack.pushU64(stack.instance.memory.bytes.loadI32(offset + stack.popI32()).toULong())
             }
 
             WasmOpcode.I32_STORE -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI32()
-                localRuntimeContext.instance.memory.bytes.storeI32(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeI32(offset + stack.popI32(), value)
             }
 
             WasmOpcode.I64_STORE -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI64()
-                localRuntimeContext.instance.memory.bytes.storeI64(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeI64(offset + stack.popI32(), value)
             }
 
             WasmOpcode.F32_STORE -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popF32()
-                localRuntimeContext.instance.memory.bytes.storeF32(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeF32(offset + stack.popI32(), value)
             }
 
             WasmOpcode.F64_STORE -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popF64()
-                localRuntimeContext.instance.memory.bytes.storeF64(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeF64(offset + stack.popI32(), value)
             }
 
             WasmOpcode.I32_STORE_8 -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI32().toByte()
-                localRuntimeContext.instance.memory.bytes[offset + stack.popI32()] = value
+                stack.instance.memory.bytes[offset + stack.popI32()] = value
             }
 
             WasmOpcode.I32_STORE_16 -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI32().toShort()
-                localRuntimeContext.instance.memory.bytes.storeI16(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeI16(offset + stack.popI32(), value)
             }
 
             WasmOpcode.I64_STORE_8 -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI64().toByte()
-                localRuntimeContext.instance.memory.bytes[offset + stack.popI32()] = value
+                stack.instance.memory.bytes[offset + stack.popI32()] = value
             }
 
             WasmOpcode.I64_STORE_16 -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI64().toShort()
-                localRuntimeContext.instance.memory.bytes.storeI16(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeI16(offset + stack.popI32(), value)
             }
 
             WasmOpcode.I64_STORE_32 -> {
                 val align = immediateU32()
                 val offset = immediateU32()
                 val value = stack.popI64().toInt()
-                localRuntimeContext.instance.memory.bytes.storeI32(offset + stack.popI32(), value)
+                stack.instance.memory.bytes.storeI32(offset + stack.popI32(), value)
             }
 
-            WasmOpcode.MEMORY_SIZE -> stack.pushI32(localRuntimeContext.instance.memory.bytes.size / 65536)
-            WasmOpcode.MEMORY_GROW -> localRuntimeContext.instance.memory.growBy(stack.popI32())
+            WasmOpcode.MEMORY_SIZE -> stack.pushI32(stack.instance.memory.bytes.size / 65536)
+            WasmOpcode.MEMORY_GROW -> stack.instance.memory.growBy(stack.popI32())
 
             WasmOpcode.I32_CONST -> stack.pushI32(immediateI32())
             WasmOpcode.I64_CONST -> stack.pushI64(immediateI64())
@@ -408,6 +408,7 @@ class Interpreter(
             WasmOpcode.F32_REINTERPRET_I32 -> stack.pushF32(Float.fromBits(stack.popI32()))
             WasmOpcode.F64_REINTERPRET_I64 -> stack.pushF64(Double.fromBits(stack.popI64()))
         }
+        return true
     }
 
 

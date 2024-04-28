@@ -1,12 +1,40 @@
 package org.kobjects.greenspun.runtime
 
-class Stack {
+class Stack(val instance: Instance) {
 
     val stack = mutableListOf<Any>()
 
     val size: Int
         get() = stack.size
 
+
+    var basePointer = 0
+
+    fun enterFrame(paramCount: Int, localCount: Int) {
+        require(stack.size >= paramCount) {
+            "stack size (${stack.size}) must be greater than or equal to argument count ($paramCount)." }
+
+        val oldBasePointer = basePointer
+        basePointer = stack.size - paramCount
+        for (i in 0 until localCount) {
+            stack.add(Unit)
+        }
+        stack.add(oldBasePointer)
+    }
+
+    fun leaveFrame(paramCount: Int, localCount: Int) {
+        val oldBasePointer = stack[basePointer + paramCount + localCount] as Int
+        for (i in 0 until localCount + paramCount + 1) {
+            stack.removeAt(basePointer)
+        }
+        basePointer = oldBasePointer
+    }
+
+    fun getLocal(index: Int) = stack[basePointer + index]
+
+    fun setLocal(index: Int, value: Any) {
+        stack[basePointer + index] = value
+    }
 
     fun peekAny(offset: Int = 0) = stack[size - offset - 1]
 
