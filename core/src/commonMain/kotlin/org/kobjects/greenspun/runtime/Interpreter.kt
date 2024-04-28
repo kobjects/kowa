@@ -1,17 +1,19 @@
 package org.kobjects.greenspun.runtime
 
 import org.kobjects.greenspun.binary.*
+import org.kobjects.greenspun.core.func.FuncImpl
 import org.kobjects.greenspun.core.func.FuncInterface
 import kotlin.math.*
 
 class Interpreter(
-    val wasm: Wasm,
+    wasm: Wasm,
     val stack: Stack
 ) {
+    var wasm = wasm
+    val callStack = mutableListOf<InterpreterState>()
 
-    val blockStack = mutableListOf<Int>()
+    var blockStack = mutableListOf<Int>()
     var ip = 0
-
 
     fun run() {
         while (step()) {
@@ -77,7 +79,16 @@ class Interpreter(
             }
 
             WasmOpcode.BR_TABLE -> throw UnsupportedOperationException()
-            WasmOpcode.RETURN -> return false
+            WasmOpcode.RETURN -> {
+                if (callStack.isEmpty()) {
+                    return false
+                }
+                val state = callStack.removeLast()
+                ip = state.ip
+                wasm = state.wasm
+                blockStack = state.blockStack
+                stack.leaveFrame(state.paramCount, state.localCount)
+            }
             WasmOpcode.CALL -> call(stack.instance.module.funcs[immediateU32()])
 
             WasmOpcode.CALL_INDIRECT -> {
@@ -410,7 +421,15 @@ class Interpreter(
     }
 
     fun call(func: FuncInterface) {
-        func.call(stack)
+        if (func is FuncImpl) {
+            callStack.add(InterpreterState(wasm, ip, blockStack, func.type.parameterTypes.size,  func.locals.size))
+            wasm = func.body
+            ip = 0
+            blockStack = mutableListOf()
+            stack.enterFrame(func.type.parameterTypes.size, func.locals.size)
+        } else {
+            func.call(stack)
+        }
     }
 
 
@@ -487,4 +506,13 @@ class Interpreter(
             shift += 7
         }
     }
+
+    data class InterpreterState(
+        val wasm: Wasm,
+        val ip: Int,
+        val blockStack: MutableList<Int>,
+        val paramCount: Int,
+        val localCount: Int
+    )
+
 }
