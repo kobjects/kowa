@@ -29,7 +29,7 @@ class Instance(
     val globalImportCount = module.globals.filterIsInstance<GlobalImport>().size
     val globalValues = Array(module.globals.size - globalImportCount) {
         val global = module.globals[it + globalImportCount]
-        if (global is GlobalImpl) Interpreter(global.initializer, rootContext).run() else Unit
+        if (global is GlobalImpl) Interpreter(global.initializer, rootContext).run1() else Unit
     }
 
     /** func imports bound to this instance */
@@ -63,12 +63,12 @@ class Instance(
         }
 
         for (element in module.elements) {
-            element.funcs.copyInto(tables[element.table.index].elements, Interpreter(element.offset, rootContext).run() as Int)
+            element.funcs.copyInto(tables[element.table.index].elements, Interpreter(element.offset, rootContext).run1() as Int)
         }
 
         for (data in module.datas) {
             if (data.offset != null) {
-                data.data.copyInto(memory.bytes, Interpreter(data.offset, rootContext).run() as Int)
+                data.data.copyInto(memory.bytes, Interpreter(data.offset, rootContext).run1() as Int)
             }
         }
 
@@ -105,8 +105,30 @@ class Instance(
 
     inner class FuncExport(val func: FuncInterface)  {
 
-        operator fun invoke(vararg param: Any): Any {
-            return func.call(rootContext, *param)
+        operator fun invoke(vararg params: Any): Any {
+            require(rootContext.stack.stack.isEmpty()) {
+                "Root context stack is expected to be empty."
+            }
+            val type = func.type
+            require(params.size == type.parameterTypes.size) {
+                "Parameter count (${params.size} does not match expectation ${func.type.parameterTypes.size})"
+            }
+            for (param in params) {
+                rootContext.stack.pushAny(param)
+            }
+            func.call(rootContext)
+            require(rootContext.stack.size == func.type.returnType.size) {
+                "Return value count ${rootContext.stack.size} does not match expectation ${func.type.returnType.size}"
+            }
+            return when (func.type.returnType.size) {
+                0 -> Unit
+                1 -> rootContext.stack.popAny()
+                else -> {
+                    val result = Array<Any>(func.type.returnType.size) { rootContext.stack.stack[it] }
+                    rootContext.stack.stack.clear()
+                    result
+                }
+            }
         }
     }
 }

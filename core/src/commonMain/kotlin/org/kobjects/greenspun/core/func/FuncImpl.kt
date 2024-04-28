@@ -16,12 +16,14 @@ class FuncImpl(
 ) : FuncInterface {
 
 
-    override fun call(context: LocalRuntimeContext, vararg params: Any): Any {
-        val childContext = context.createChild(type.parameterTypes.size + locals.size)
-        for (i in 0 until params.size) {
-            childContext.setLocal(i, params[i])
+    override fun call(context: LocalRuntimeContext) {
+        val childContext = context.createChild(type.parameterTypes.size, locals.size)
+        Interpreter(body, childContext).run()
+
+        for (i in 0 until type.parameterTypes.size + locals.size) {
+            context.stack.stack.removeAt(childContext.basePointer)
         }
-        return Interpreter(body, childContext).run()
+
     }
 
     fun toString(writer: CodeWriter) {

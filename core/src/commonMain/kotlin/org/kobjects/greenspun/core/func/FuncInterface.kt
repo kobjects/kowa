@@ -9,7 +9,7 @@ interface FuncInterface : Exportable {
     val index: Int
     val type: FuncType
 
-    fun call(context: LocalRuntimeContext, vararg params: Any): Any
+    fun call(context: LocalRuntimeContext)
 
     override fun writeExportDescription(writer: WasmWriter) {
         writer.writeByte(0)

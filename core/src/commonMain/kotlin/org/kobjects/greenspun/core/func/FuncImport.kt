@@ -13,8 +13,13 @@ class FuncImport(
 ) : FuncInterface, Imported {
 
 
-    override fun call(context: LocalRuntimeContext, vararg params: Any) =
-        context.instance.funcImports[index](context.instance, *params)
+    override fun call(context: LocalRuntimeContext) {
+        val params = Array<Any>(type.parameterTypes.size) {
+            context.stack.peekAny(type.parameterTypes.size - it - 1)
+        }
+        val result = context.instance.funcImports[index](context.instance, *params)
+        context.stack.replaceAny(type.parameterTypes.size, result)
+    }
 
     override fun writeImport(writer: CodeWriter) {
         writer.newLine()

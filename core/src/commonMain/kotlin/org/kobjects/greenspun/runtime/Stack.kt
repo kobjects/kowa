@@ -20,7 +20,6 @@ class Stack {
     fun peekU32(offset: Int = 0) = peekI32(offset).toUInt()
     fun peekU64(offset: Int = 0) = peekI64(offset).toULong()
 
-
     fun replaceF32(count: Int, value: Float) {
         for (i in 0 until count) {
             stack.removeLast()
