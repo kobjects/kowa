@@ -78,9 +78,7 @@ class Interpreter(
 
             WasmOpcode.BR_TABLE -> throw UnsupportedOperationException()
             WasmOpcode.RETURN -> return false
-            WasmOpcode.CALL -> {
-                stack.instance.module.funcs[immediateU32()].call(stack)
-            }
+            WasmOpcode.CALL -> call(stack.instance.module.funcs[immediateU32()])
 
             WasmOpcode.CALL_INDIRECT -> {
                 val i = stack.popI32()
@@ -91,7 +89,7 @@ class Interpreter(
                 require(typeIdx == f.type.index) {
                     "Indirect call type mismatch. Expected type is ${stack.instance.module.types[typeIdx]} index $typeIdx; actual: ${f.type} index ${f.type.index}"
                 }
-                f.call(stack)
+                call(f)
             }
 
             WasmOpcode.DROP -> stack.popAny()
@@ -409,6 +407,10 @@ class Interpreter(
             WasmOpcode.F64_REINTERPRET_I64 -> stack.pushF64(Double.fromBits(stack.popI64()))
         }
         return true
+    }
+
+    fun call(func: FuncInterface) {
+        func.call(stack)
     }
 
 
