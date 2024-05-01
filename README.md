@@ -11,7 +11,7 @@ the Kotlin as the "macro language" -- at the price of an "unusual" syntax.
 
 ## "Hello World"
 
-To run our "Hello World" example, start with checking out
+To run our ["Hello World" example](https://github.com/kobjects/greenspun/blob/main/core/src/commonMain/kotlin/org/kobjects/greenspun/demo/HelloWorld.kt), start with checking out
 the project from github using the following command:
 
 ```sh
