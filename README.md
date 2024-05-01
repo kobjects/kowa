@@ -513,11 +513,13 @@ very likely still some serious bugs in Wasm binary code
 generation, it's probably best to check out the 
 full project anyway, simplifying fixes.
 
-## Plan
+## Plans
 
 - Port more Wasm tests
 - Find a nice clean way to test the generated binary code
-- Add Wasm 2.0 features (one by one)
+- Support various extensions (multiple return values is partially done except for block parameters and a proper "feature flag")
+- Perhaps support loading modules (would probably be useful to import trigonometric functions)
+- Extend WASI coverage
 
 ## Appendix
 
