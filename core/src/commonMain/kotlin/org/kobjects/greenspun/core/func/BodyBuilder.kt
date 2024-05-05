@@ -87,7 +87,7 @@ open class BodyBuilder(
         wasmWriter.writeOpcode(WasmOpcode.END)
     }
 
-    fun Block(returnType: Type, init: BodyBuilder.() -> Unit) =
+    fun Block(returnType: ValueType, init: BodyBuilder.() -> Unit) =
         BlockExpr(
             WasmOpcode.BLOCK,
             init,
@@ -98,7 +98,7 @@ open class BodyBuilder(
                 wasmWriter,
                 listOf(returnType)))
 
-    fun Loop(returnType: Type, init: BodyBuilder.() -> Unit) =
+    fun Loop(returnType: ValueType, init: BodyBuilder.() -> Unit) =
         BlockExpr(
             WasmOpcode.LOOP,
             init,
