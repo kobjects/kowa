@@ -187,3 +187,6 @@ full project anyway, simplifying fixes.
 - Perhaps support loading modules (would probably be useful to import trigonometric functions)
 - Extend WASI coverage
 
+## Further Reading
+
+Continue reading the [DSL description](doc/dsl_description.md).

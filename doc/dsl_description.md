@@ -1,3 +1,5 @@
+Back to [README.md](../README.md)
+
 # DSL Description
 
 ## Modules
@@ -337,3 +339,7 @@ val call7 = Func(I32) {
   Return(table(7, outI32))
 }
 ```
+
+## Further Reading
+
+Continue reading with [Instruction Name Mapping](instruction_name_mapping.md)
