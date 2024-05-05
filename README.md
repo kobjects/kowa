@@ -171,21 +171,26 @@ When disassembling this code (e.g. using [wasm2wat](https://webassembly.github.i
 
 Usage Examples can be found in the [test directory](https://github.com/kobjects/greenspun/tree/main/core/src/commonTest/kotlin/org/kobjects/greenspun) of the project.
 
+## Next steps
 
-## Known Issues 
+- Complete multiple return type extension support (block parameters are currently missing).
+- Look into orphan expression detection.
 
-- There are no releases yet that can be directly referenced from Maven / Gradle. Given that there are
-very likely still some serious bugs in Wasm binary code
-generation, it's probably best to check out the 
-full project anyway, simplifying fixes.
-
-## Plans
+## Further Plans
 
 - Port more Wasm tests
 - Find a nice clean way to test the generated binary code
-- Support various extensions (multiple return values is partially done except for block parameters and a proper "feature flag")
+- Support more extensions 
 - Perhaps support loading modules (would probably be useful to import trigonometric functions)
 - Extend WASI coverage
+
+
+## Known Issues
+
+- There are no releases yet that can be directly referenced from Maven / Gradle. Given that there are
+  very likely still some serious bugs in Wasm binary code
+  generation, it's probably best to check out the
+  full project anyway, simplifying fixes.
 
 ## Further Reading
 
