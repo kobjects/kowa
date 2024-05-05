@@ -9,6 +9,7 @@ import org.kobjects.greenspun.core.memory.MemoryView
 import org.kobjects.greenspun.core.module.ModuleBuilder
 import org.kobjects.greenspun.core.table.TableInterface
 import org.kobjects.greenspun.core.type.*
+import kotlin.math.exp
 
 open class BodyBuilder(
     val moduleBuilder: ModuleBuilder,
@@ -16,9 +17,9 @@ open class BodyBuilder(
     val parent: BodyBuilder?,
     val variables: MutableList<Type>,
     val wasmWriter: WasmWriter,
-    val expectedReturnType: List<Type> = emptyList()
+    val expectedReturnType: List<Type> = emptyList(),
+    val stackTypes: MutableList<Type> = mutableListOf()
 ) {
-    val stackTypes = mutableListOf<Type>()
     var unreachableCodePosition = -1
     val label: Label?
 
@@ -91,6 +92,7 @@ open class BodyBuilder(
         BlockExpr(
             WasmOpcode.BLOCK,
             init,
+            returnType,
             BodyBuilder(moduleBuilder,
                 BlockType.BLOCK,
                 this,
@@ -98,10 +100,49 @@ open class BodyBuilder(
                 wasmWriter,
                 listOf(returnType)))
 
+    fun Block(type: FuncType, init: BodyBuilder.() -> Unit, vararg args: Any): Expr {
+        val params = Array(args.size) { Expr.of(args[it]) }
+        val paramTypes = mutableListOf<Type>()
+        for (p in params) {
+            paramTypes.addAll(p.returnType)
+            p.toWasm(wasmWriter)
+        }
+        require(paramTypes == type.parameterTypes) {
+            "Actual parameter types $paramTypes don't match expected parameter types ${type.parameterTypes}"
+        }
+        val expr = BlockExpr(WasmOpcode.BLOCK, init, type,
+            BodyBuilder(moduleBuilder, BlockType.BLOCK, this, variables, wasmWriter, type.returnType, paramTypes))
+        if (type.returnType.isNotEmpty()) {
+            return expr
+        }
+        expr.toWasm(wasmWriter)
+        return InvalidExpr("Block does not return any value.")
+    }
+
+    fun Loop(type: FuncType, init: BodyBuilder.() -> Unit, vararg args: Any): Expr {
+        val params = Array(args.size) { Expr.of(args[it]) }
+        val paramTypes = mutableListOf<Type>()
+        for (p in params) {
+            paramTypes.addAll(p.returnType)
+            p.toWasm(wasmWriter)
+        }
+        require(paramTypes == type.parameterTypes) {
+            "Actual parameter types $paramTypes don't match expected parameter types ${type.parameterTypes}"
+        }
+        val expr = BlockExpr(WasmOpcode.BLOCK, init, type,
+            BodyBuilder(moduleBuilder, BlockType.BLOCK, this, variables, wasmWriter, type.returnType, paramTypes))
+        if (type.returnType.isNotEmpty()) {
+            return expr
+        }
+        expr.toWasm(wasmWriter)
+        return InvalidExpr("Block does not return any value.")
+    }
+
     fun Loop(returnType: ValueType, init: BodyBuilder.() -> Unit) =
         BlockExpr(
             WasmOpcode.LOOP,
             init,
+            returnType,
             BodyBuilder(moduleBuilder,
                 BlockType.LOOP,
                 this,
@@ -113,6 +154,7 @@ open class BodyBuilder(
     class BlockExpr(
         val opcode: WasmOpcode,
         val init: BodyBuilder.() -> Unit,
+        val type: Type,
         val builder: BodyBuilder
     ) : Expr() {
 
@@ -124,12 +166,12 @@ open class BodyBuilder(
         }
 
         override val returnType: List<Type>
-            get() = builder.expectedReturnType
+            get() = if (type is FuncType) type.returnType else listOf(type)
 
         override fun toWasm(writer: WasmWriter) {
             super.toWasm(writer)
             writer.writeOpcode(opcode)
-            returnType.first().toWasm(writer)
+            type.toWasm(writer)
             builder.init()
             builder.close()
             writer.writeOpcode(WasmOpcode.END)
