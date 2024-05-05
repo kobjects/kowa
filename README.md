@@ -189,4 +189,4 @@ full project anyway, simplifying fixes.
 
 ## Further Reading
 
-Continue reading the [DSL description](doc/dsl_description.md).
+Continue reading the with the [DSL description](doc/dsl_description.md).
