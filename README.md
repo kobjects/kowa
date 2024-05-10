@@ -1,4 +1,4 @@
-# A Kotlin DSL for WebAssembly
+# Kotlin WebAssembler
 
 ## Related documents
 
