@@ -1,19 +1,9 @@
 # KoWA: A Kotlin WebAssembler
 
-## Related documents
-
-- [DSL Description](doc/dsl_description.md)
-- [Instruction Name Mapping](doc/instruction_name_mapping.md)
-
-
-## But Why?
-
-The initial motivation for this project was just to see how far one can take Kotlin DSLs.
-
-That said, it might be useful for situations where one needs to generate Wasm code in a general Kotlin context. 
-
-In a way, this project constitutes a Wasm "macro assembler" with
-the Kotlin as the "macro language" -- at the price of an "unusual" syntax.
+This project basically constitutes a Wasm "macro assembler" 
+implemented as a Kotlin DSL. So at the price of an
+unusual WASM syntax, we get simple access to the full power of Kotlin
+for generating Wasm.
 
 ## "Hello World"
 
