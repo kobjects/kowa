@@ -1,4 +1,4 @@
-# KoWA: Kotlin WebAssembler
+# KoWA: A Kotlin WebAssembler
 
 ## Related documents
 
