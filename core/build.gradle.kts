@@ -55,7 +55,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.kobjects.greenspun"
+    namespace = "org.kobjects.kowa"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
