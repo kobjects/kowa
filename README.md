@@ -6,7 +6,7 @@ This project grew out of an attempt to look into ["how far" one can take
 Kotlin DSLs](https://github.com/stefanhaustein/greenspun). 
 
 It basically constitutes a Wasm "macro assembler" with
-the Kotlin as the "macro language" -- at the price of an "unusual" syntax.
+Kotlin as the "macro language" -- at the price of an "unusual" syntax.
 
 ## Documentation
 
