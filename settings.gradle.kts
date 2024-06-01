@@ -1,4 +1,4 @@
-rootProject.name = "greenspun"
+rootProject.name = "kowa"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

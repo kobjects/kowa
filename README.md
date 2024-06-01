@@ -2,8 +2,13 @@
 
 ## But Why?
 
-This project grew out of an attempt to look into ["how far" one can take
-Kotlin DSLs](https://github.com/stefanhaustein/greenspun). 
+The main purpose of this project is to simplify WASM binary code generation
+from Kotlin, i.e. using Kotlin for generating WASM or transforming code or
+other artifacts into wasm.
+
+While this project grew out of an attempt to look into ["how far" one can take
+Kotlin DSLs](https://github.com/stefanhaustein/greenspun), the DSL is just one aspect here that simplifies
+"manual" insertion of WASM fragments into the output.
 
 It basically constitutes a Wasm "macro assembler" with
 Kotlin as the "macro language" -- at the price of an "unusual" syntax.
