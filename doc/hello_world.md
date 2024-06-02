@@ -155,7 +155,7 @@ When disassembling this code (e.g. using [wasm2wat](https://webassembly.github.i
 ## More Examples
 
 
-- [FizzBuzz example source](https://github.com/kobjects/kowa/blob/main/core/src/commonMain/kotlin/org/kobjects/kowa/demo/FizzBuzz.kt)
+- [FizzBuzz example source](https://github.com/kobjects/kowa/blob/main/core/src/commonMain/kotlin/org/kobjects/kowa/demo/fizzbuzz/FizzBuzz.kt)
 - [test directory](https://github.com/kobjects/kowa/tree/main/core/src/commonTest/kotlin/org/kobjects/kowa)
 
 

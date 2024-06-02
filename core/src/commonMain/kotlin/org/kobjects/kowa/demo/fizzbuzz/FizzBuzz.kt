@@ -1,4 +1,4 @@
-package org.kobjects.kowa.demo
+package org.kobjects.kowa.demo.fizzbuzz
 
 
 import org.kobjects.kowa.runtime.ImportObject

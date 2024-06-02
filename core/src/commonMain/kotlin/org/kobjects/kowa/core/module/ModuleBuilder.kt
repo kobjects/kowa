@@ -9,12 +9,15 @@ import org.kobjects.kowa.core.global.GlobalImport
 import org.kobjects.kowa.core.memory.*
 import org.kobjects.kowa.core.table.*
 import org.kobjects.kowa.core.expr.Expr
+import org.kobjects.kowa.core.gc.StructImpl
 import org.kobjects.kowa.core.type.FuncType
 import org.kobjects.kowa.core.type.I32
 import org.kobjects.kowa.core.type.Type
 
-class ModuleBuilder {
-    val types = mutableListOf<FuncType>()
+class ModuleBuilder(
+    vararg extensions: Extension,
+) {
+    val types = mutableListOf<Type>()
     val funcs = mutableListOf<FuncInterface>()
     val datas = mutableListOf<DataImpl>()
     var start: Int? = null
@@ -25,7 +28,17 @@ class ModuleBuilder {
     var tables = mutableListOf<TableInterface>()
 
     private val activeDataAddress = mutableMapOf<MemoryInterface, Int>()
+    val extensions = extensions.toSet()
 
+    init {
+        for (extension in extensions) {
+            when (extension) {
+                Extension.MULTIVALUE,
+                Extension.GC_DEVELOPMENT -> {}
+                else -> throw IllegalArgumentException("Unsupported extension: $extension")
+            }
+        }
+    }
 
     fun Const(initializerOrValue: Any) = global(false, initializerOrValue)
 
@@ -213,7 +226,7 @@ class ModuleBuilder {
 
 
     internal fun getFuncType(returnType: List<Type>, paramTypes: List<Type>): FuncType {
-        for (candidate in types) {
+        for (candidate in types.filterIsInstance<FuncType>()) {
             if (candidate.matches(returnType, paramTypes)) {
                 return candidate
             }
@@ -223,5 +236,17 @@ class ModuleBuilder {
         return result
     }
 
+
+    inner class Struct() : StructImpl() {
+        val typeIndex = types.size
+
+        init {
+            require(extensions.contains(Extension.GC_DEVELOPMENT)) {
+                "Struct requires GC_DEVELOPMENT extension"
+            }
+
+            types.add(this)
+        }
+    }
 
 }

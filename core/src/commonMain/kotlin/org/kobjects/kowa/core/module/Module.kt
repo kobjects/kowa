@@ -19,9 +19,10 @@ import org.kobjects.kowa.core.table.TableImport
 import org.kobjects.kowa.core.table.TableInterface
 import org.kobjects.kowa.core.expr.CodeWriter
 import org.kobjects.kowa.core.type.FuncType
+import org.kobjects.kowa.core.type.Type
 
 class Module(
-    val types: List<FuncType>,
+    val types: List<Type>,
     val funcs: List<FuncInterface>,
     val tables: List<TableInterface>,
     val memory: MemoryInterface?,
